@@ -16,3 +16,6 @@ RUN apt-get update && apt-get install -y \
 
 # set working directory
 WORKDIR /var/www/html
+
+# install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

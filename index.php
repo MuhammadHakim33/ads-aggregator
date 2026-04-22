@@ -305,6 +305,11 @@ switch (ENVIRONMENT)
 
 	define('VIEWPATH', $view_folder.DIRECTORY_SEPARATOR);
 
+	// load .env package
+	require "vendor/autoload.php";
+	$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
+	$dotenv->load();
+
 /*
  * --------------------------------------------------------------------
  * LOAD THE BOOTSTRAP FILE

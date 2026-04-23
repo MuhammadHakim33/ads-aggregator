@@ -19,9 +19,13 @@ CREATE TABLE clients (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     company_name VARCHAR(255) NOT NULL,
     pic_name VARCHAR(255),
+    ae_id BIGINT NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     deleted_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (ae_id) REFERENCES accounts(id),
+    INDEX idx_company_name (company_name)
 ) ENGINE=InnoDB;
 
 -- -- =========================

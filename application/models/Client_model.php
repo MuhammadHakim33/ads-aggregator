@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Account_model extends CI_Model 
+class Client_model extends CI_Model 
 {
-    public $table = 'accounts';
+    public $table = 'clients';
 
     public function get_all()
     {
@@ -20,21 +20,12 @@ class Account_model extends CI_Model
 
     public function insert($data)
     {
-        if (isset($data['password'])) {
-            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-        }
         $this->db->insert($this->table, $data);
         return $this->db->insert_id();
     }
 
     public function update($id, $data)
     {
-        if (isset($data['password']) && !empty($data['password'])) {
-            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-        } else {
-            unset($data['password']);
-        }
-        
         $this->db->where('id', $id);
         $this->db->where('deleted_at', NULL);
         return $this->db->update($this->table, $data);
@@ -53,26 +44,6 @@ class Account_model extends CI_Model
     public function is_exist_by_id($id)
     {
         $this->db->where('id', $id);
-        $this->db->where('deleted_at', NULL);
-        return $this->db->get($this->table)->num_rows();
-    }
-
-    public function is_ae_exist_by_id($id)
-    {
-        $this->db->where('id', $id);
-        $this->db->where('role', 'ae');
-        $this->db->where('is_active', 1);
-        $this->db->where('deleted_at', NULL);
-        return $this->db->get($this->table)->num_rows();
-    }
-    
-    public function is_email_used($email, $id = null)
-    {
-        if ($id) {
-            $this->db->where('id !=', $id);
-        }
-
-        $this->db->where('email', $email);
         $this->db->where('deleted_at', NULL);
         return $this->db->get($this->table)->num_rows();
     }

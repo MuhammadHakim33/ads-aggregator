@@ -1,27 +1,24 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Account extends CI_Controller 
+class Client extends CI_Controller 
 {
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('Client_model');
         $this->load->model('Account_model');
     }
 
     public function index()
     {
-        $accounts = $this->Account_model->get_all();
-        
-        foreach ($accounts as &$acc) {
-            unset($acc->password);
-        }
+        $clients = $this->Client_model->get_all();
 
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode([
                 'status' => 'success',
-                'data' => $accounts
+                'data' => $clients
             ]));
     }
 
@@ -43,14 +40,13 @@ class Account extends CI_Controller
         }
 
         $data = array(
-            'name'     => $this->input->post('name'),
-            'email'    => $this->input->post('email'),
-            'password' => $this->input->post('password'),
-            'role'     => $this->input->post('role'),
+            'company_name'     => $this->input->post('company_name'),
+            'pic_name'    => $this->input->post('pic_name'),
+            'ae_id' => $this->input->post('ae_id'),
             'is_active'=> 1
         );
 
-        $insert_id = $this->Account_model->insert($data);
+        $insert_id = $this->Client_model->insert($data);
 
         if ($insert_id) {
             $this->output
@@ -58,14 +54,14 @@ class Account extends CI_Controller
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => 'success',
-                    'message' => 'Account created successfully',
+                    'message' => 'Client created successfully',
                     'data' => ['id' => $insert_id]
                 ]));
         } else {
             $this->output
                 ->set_status_header(500)
                 ->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'error', 'message' => 'Failed to create account']));
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Failed to create client']));
         }
     }
 
@@ -82,17 +78,17 @@ class Account extends CI_Controller
             return $this->output
                 ->set_status_header(400)
                 ->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'error', 'message' => 'Account ID is required']));
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Client ID is required']));
         }
 
-        if ($this->Account_model->is_exist_by_id($id) == 0) {
+        if ($this->Client_model->is_exist_by_id($id) == 0) {
             return $this->output
                 ->set_status_header(404)
                 ->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'error', 'message' => 'Account not found']));
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Client not found']));
         }
 
-        $this->form_validation->set_rules($this->_update_rules($id));
+        $this->form_validation->set_rules($this->_update_rules());
         if ($this->form_validation->run() === FALSE) {
             return $this->output
                 ->set_status_header(400)
@@ -102,17 +98,14 @@ class Account extends CI_Controller
 
         $data = array();
         
-        $name = $this->input->post('name');
-        if ($name !== null) $data['name'] = $name;
+        $company_name = $this->input->post('company_name');
+        if ($company_name !== null) $data['company_name'] = $company_name;
 
-        $email = $this->input->post('email');
-        if ($email !== null) $data['email'] = $email;
+        $pic_name = $this->input->post('pic_name');
+        if ($pic_name !== null) $data['pic_name'] = $pic_name;
 
-        $password = $this->input->post('password');
-        if ($password !== null && $password !== '') $data['password'] = $password;
-
-        $role = $this->input->post('role');
-        if ($role !== null) $data['role'] = $role;
+        $ae_id = $this->input->post('ae_id');
+        if ($ae_id !== null) $data['ae_id'] = $ae_id;
 
         $is_active = $this->input->post('is_active');
         if ($is_active !== null) $data['is_active'] = $is_active;
@@ -124,17 +117,17 @@ class Account extends CI_Controller
                 ->set_output(json_encode(['status' => 'error', 'message' => 'No data to update']));
         }
 
-        $updated = $this->Account_model->update($id, $data);
+        $updated = $this->Client_model->update($id, $data);
 
         if ($updated) {
             $this->output
                 ->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'success', 'message' => 'Account updated successfully']));
+                ->set_output(json_encode(['status' => 'success', 'message' => 'Client updated successfully']));
         } else {
             $this->output
                 ->set_status_header(500)
                 ->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'error', 'message' => 'Failed to update account']));
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Failed to update client']));
         }
     }
 
@@ -151,27 +144,27 @@ class Account extends CI_Controller
             return $this->output
                 ->set_status_header(400)
                 ->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'error', 'message' => 'Account ID is required']));
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Client ID is required']));
         }
 
-        if ($this->Account_model->is_exist_by_id($id) == 0) {
+        if ($this->Client_model->is_exist_by_id($id) == 0) {
             return $this->output
                 ->set_status_header(404)
                 ->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'error', 'message' => 'Account not found']));
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Client not found']));
         }
 
-        $deleted = $this->Account_model->delete($id);
+        $deleted = $this->Client_model->delete($id);
 
         if ($deleted) {
             $this->output
                 ->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'success', 'message' => 'Account deleted successfully']));
+                ->set_output(json_encode(['status' => 'success', 'message' => 'Client deleted successfully']));
         } else {
             $this->output
                 ->set_status_header(500)
                 ->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'error', 'message' => 'Failed to delete account']));
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Failed to delete client']));
         }
     }
 
@@ -179,50 +172,40 @@ class Account extends CI_Controller
     {
         return [
             [
-                'field' => 'name',
-                'label' => 'Name',
-                'rules' => 'trim|required|min_length[3]|max_length[50]'
+                'field' => 'company_name',
+                'label' => 'Company Name',
+                'rules' => 'trim|required|max_length[255]'
             ],
             [
-                'field' => 'email',
-                'label' => 'Email',
-                'rules' => 'trim|required|valid_email|is_unique[accounts.email]' 
+                'field' => 'pic_name',
+                'label' => 'PIC Name',
+                'rules' => 'trim|max_length[255]'
             ],
             [
-                'field' => 'password',
-                'label' => 'Password',
-                'rules' => 'trim|required|min_length[6]' 
-            ],
-            [
-                'field' => 'role',
-                'label' => 'Role',
-                'rules' => 'trim|in_list[ae,superadmin]'
+                'field' => 'ae_id',
+                'label' => 'AE ID',
+                'rules' => 'required|integer|callback_ae_id_check'
             ]
         ];
     }
 
-    private function _update_rules($id)
+    private function _update_rules()
     {
         return [
             [
-                'field' => 'name',
-                'label' => 'Name',
-                'rules' => 'trim|min_length[3]|max_length[50]'
+                'field' => 'company_name',
+                'label' => 'Company Name',
+                'rules' => 'trim|max_length[255]'
             ],
             [
-                'field' => 'email',
-                'label' => 'Email',
-                'rules' => 'trim|valid_email|callback_email_check['.$id.']' 
+                'field' => 'pic_name',
+                'label' => 'PIC Name',
+                'rules' => 'trim|max_length[255]'
             ],
             [
-                'field' => 'password',
-                'label' => 'Password',
-                'rules' => 'trim|min_length[6]' 
-            ],
-            [
-                'field' => 'role',
-                'label' => 'Role',
-                'rules' => 'trim|in_list[ae,superadmin]'
+                'field' => 'ae_id',
+                'label' => 'AE ID',
+                'rules' => 'trim|integer|callback_ae_id_check'
             ],
             [
                 'field' => 'is_active',
@@ -232,12 +215,16 @@ class Account extends CI_Controller
         ];
     }
 
-    public function email_check($email, $id)
+    public function ae_id_check($ae_id)
     {
-        if ($this->Account_model->is_email_used($email, $id) > 0) {
+        if ($ae_id === null || $ae_id === '') {
+            return TRUE;
+        }
+
+        if ($this->Account_model->is_ae_exist_by_id($ae_id) == 0) {
             $this->form_validation->set_message(
-                'email_check',
-                'Email has already been used'
+                'ae_id_check',
+                'AE ID does not exist'
             );
             return FALSE;
         }

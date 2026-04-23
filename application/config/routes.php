@@ -57,3 +57,8 @@ $route['account/create'] = 'account/create';
 $route['account/update/(:id)'] = 'account/update/$1';
 $route['account/delete/(:id)'] = 'account/delete/$1';
 $route['account'] = 'account/index';
+
+$route['client/create'] = 'client/create';
+$route['client/update/(:id)'] = 'client/update/$1';
+$route['client/delete/(:id)'] = 'client/delete/$1';
+$route['client'] = 'client/index';

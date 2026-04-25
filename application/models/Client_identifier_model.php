@@ -1,20 +1,19 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Client_model extends CI_Model 
+class Client_identifier_model extends CI_Model 
 {
-    public $table = 'clients';
+    public $table = 'client_identifiers';
 
-    public function get_all()
+    public function get_by_client_id($client_id)
     {
-        $this->db->where('deleted_at', NULL);
+        $this->db->where('client_id', $client_id);
         return $this->db->get($this->table)->result();
     }
 
     public function get_by_id($id)
     {
         $this->db->where('id', $id);
-        $this->db->where('deleted_at', NULL);
         return $this->db->get($this->table)->row();
     }
 
@@ -27,26 +26,33 @@ class Client_model extends CI_Model
     public function update($id, $data)
     {
         $this->db->where('id', $id);
-        $this->db->where('deleted_at', NULL);
         $this->db->update($this->table, $data);
         return $this->db->affected_rows();
     }
 
     public function delete($id)
     {
-        $data = array(
-            'is_active' => 0,
-            'deleted_at' => date('Y-m-d H:i:s')
-        );
         $this->db->where('id', $id);
-        $this->db->update($this->table, $data);
+        $this->db->delete($this->table);
         return $this->db->affected_rows();
     }
 
     public function is_exist_by_id($id)
     {
         $this->db->where('id', $id);
-        $this->db->where('deleted_at', NULL);
         return $this->db->get($this->table)->num_rows();
+    }
+
+    public function check_duplicate($client_id, $platform, $identifier, $exclude_id = null)
+    {
+        $this->db->where('client_id', $client_id);
+        $this->db->where('platform', $platform);
+        $this->db->where('identifier', $identifier);
+        
+        if ($exclude_id !== null) {
+            $this->db->where('id !=', $exclude_id);
+        }
+        
+        return $this->db->get($this->table)->num_rows() > 0;
     }
 }

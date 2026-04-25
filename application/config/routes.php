@@ -62,3 +62,15 @@ $route['client/create'] = 'client/create';
 $route['client/update/(:id)'] = 'client/update/$1';
 $route['client/delete/(:id)'] = 'client/delete/$1';
 $route['client'] = 'client/index';
+
+$route['config/filter-keyword/create']['POST'] = 'configuration/create_filter_keyword';
+$route['config/filter-keyword/update/(:num)']['PUT'] = 'configuration/update_filter_keyword/$1';
+$route['config/filter-keyword/delete/(:num)']['DELETE'] = 'configuration/delete_filter_keyword/$1';
+$route['config/filter-keyword']['GET'] = 'configuration/filter_keywords';
+$route['config/filter-keyword/(:any)']['GET'] = 'configuration/filter_keywords/$1';
+
+$route['client/identifier/create/(:num)']['POST'] = 'client/create_identifier/$1';
+$route['client/identifier/update/(:num)']['PUT'] = 'client/update_identifier/$1';
+$route['client/identifier/delete/(:num)']['DELETE'] = 'client/delete_identifier/$1';
+$route['client/identifier/(:num)']['GET'] = 'client/identifiers/$1';
+

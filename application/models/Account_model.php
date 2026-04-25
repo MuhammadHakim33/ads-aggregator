@@ -1,7 +1,7 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Account_model extends CI_Model 
+class Account_model extends CI_Model
 {
     public $table = 'accounts';
 
@@ -34,10 +34,11 @@ class Account_model extends CI_Model
         } else {
             unset($data['password']);
         }
-        
+
         $this->db->where('id', $id);
         $this->db->where('deleted_at', NULL);
-        return $this->db->update($this->table, $data);
+        $this->db->update($this->table, $data);
+        return $this->db->affected_rows();
     }
 
     public function delete($id)
@@ -47,7 +48,8 @@ class Account_model extends CI_Model
             'deleted_at' => date('Y-m-d H:i:s')
         );
         $this->db->where('id', $id);
-        return $this->db->update($this->table, $data);
+        $this->db->update($this->table, $data);
+        return $this->db->affected_rows();
     }
 
     public function is_exist_by_id($id)
@@ -65,8 +67,8 @@ class Account_model extends CI_Model
         $this->db->where('deleted_at', NULL);
         return $this->db->get($this->table)->num_rows();
     }
-    
-    public function is_email_used($email, $id = null)
+
+    public function is_email_used($email, $id)
     {
         if ($id) {
             $this->db->where('id !=', $id);

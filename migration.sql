@@ -2,7 +2,7 @@
 -- ACCOUNTS
 -- =========================
 CREATE TABLE accounts (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -16,10 +16,10 @@ CREATE TABLE accounts (
 -- CLIENTS
 -- =========================
 CREATE TABLE clients (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     company_name VARCHAR(255) NOT NULL,
     pic_name VARCHAR(255),
-    ae_id BIGINT NOT NULL,
+    ae_id INT NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     deleted_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -28,61 +28,77 @@ CREATE TABLE clients (
     INDEX idx_company_name (company_name)
 ) ENGINE=InnoDB;
 
--- -- =========================
--- -- AD CONTENTS
--- -- =========================
--- CREATE TABLE ad_contents (
---     id BIGINT AUTO_INCREMENT PRIMARY KEY,
---     platform VARCHAR(50) NOT NULL,
---     content_identifier VARCHAR(255) NOT NULL,
---     ad_type ENUM('article','banner','video','social') NOT NULL,
---     title VARCHAR(255),
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
---     UNIQUE KEY unique_content (platform, content_identifier)
--- ) ENGINE=InnoDB;
-
--- -- =========================
--- -- AD METRICS
--- -- =========================
--- CREATE TABLE ad_metrics (
---     id BIGINT AUTO_INCREMENT PRIMARY KEY,
---     -- client_id BIGINT NOT NULL,
---     ad_content_id BIGINT NOT NULL,
---     date DATE NOT NULL,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
---     -- FOREIGN KEY (client_id) REFERENCES clients(id),
---     FOREIGN KEY (ad_content_id) REFERENCES ad_contents(id),
-
---     -- UNIQUE KEY unique_metric (client_id, ad_content_id, date),
---     -- INDEX idx_client_date (client_id, date)
--- ) ENGINE=InnoDB;
-
--- -- =========================
--- -- AD METRIC VALUES (FLEXIBLE)
--- -- =========================
--- CREATE TABLE ad_metric_values (
---     id BIGINT AUTO_INCREMENT PRIMARY KEY,
---     ad_metrics_id BIGINT NOT NULL,
---     metric_name VARCHAR(100) NOT NULL,
---     metric_value DOUBLE NOT NULL,
-
---     FOREIGN KEY (ad_metrics_id) REFERENCES ad_metrics(id),
-
---     INDEX idx_metric (metric_name),
---     INDEX idx_metrics_id (ad_metrics_id)
--- ) ENGINE=InnoDB;
-
 -- =========================
--- PLATFORM CREDENTIALS
+-- FILTER KEYWORDS
 -- =========================
-CREATE TABLE platform_credentials (
+CREATE TABLE filter_keywords (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    platform_code ENUM('fb', 'ig', 'gam', 'ga4', 'yt') NOT NULL UNIQUE,
-    credential_data LONGTEXT NOT NULL COMMENT 'JSON format credential',
+    platform ENUM('meta', 'gam', 'ga4', 'yt') NOT NULL,
+    keyword VARCHAR(255) NOT NULL COMMENT 'Keyword umum: Content partnership with, #kilas, dll',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_platform (platform)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =========================
+-- CLIENT IDENTIFIERS
+-- =========================
+CREATE TABLE client_identifiers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    client_id INT NOT NULL,
+    platform ENUM('meta', 'gam', 'ga4', 'yt') NOT NULL,
+    identifier VARCHAR(255) NOT NULL COMMENT '@account_klien, /klien-path/, [KLIEN]%, dll',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+    INDEX idx_client_platform (client_id, platform)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =========================
+-- AD CONTENTS
+-- =========================
+CREATE TABLE ad_contents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    client_id INT NOT NULL,
+    platform VARCHAR(50) NOT NULL,
+    content_identifier VARCHAR(255) NOT NULL,
+    ad_type ENUM('article','banner','video','social') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY unique_content (client_id, platform, content_identifier),
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+    INDEX idx_client_platform (client_id, platform)
+) ENGINE=InnoDB;
+
+-- =========================
+-- AD METRICS
+-- =========================
+CREATE TABLE ad_metrics (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ad_content_id INT NOT NULL,
+    metric_name VARCHAR(100) NOT NULL,
+    metric_value DOUBLE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (ad_content_id) REFERENCES ad_contents(id),
+
+    INDEX idx_metric (metric_name),
+    INDEX idx_ad_content_id (ad_content_id),
+    UNIQUE KEY unique_metric (ad_content_id, metric_name)
+) ENGINE=InnoDB;
+
+-- -- =========================
+-- -- PLATFORM CREDENTIALS
+-- -- =========================
+-- CREATE TABLE platform_credentials (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     platform_code ENUM('fb', 'ig', 'gam', 'ga4', 'yt') NOT NULL UNIQUE,
+--     credential_data LONGTEXT NOT NULL COMMENT 'JSON format credential',
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    INDEX idx_platform_code (platform_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+--     INDEX idx_platform_code (platform_code)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

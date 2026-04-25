@@ -1,7 +1,7 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Account extends CI_Controller 
+class Account extends CI_Controller
 {
     public function __construct()
     {
@@ -12,7 +12,7 @@ class Account extends CI_Controller
     public function index()
     {
         $accounts = $this->Account_model->get_all();
-        
+
         foreach ($accounts as &$acc) {
             unset($acc->password);
         }
@@ -42,15 +42,13 @@ class Account extends CI_Controller
                 ->set_output(json_encode(['status' => 'error', 'message' => validation_errors()]));
         }
 
-        $data = array(
+        $insert_id = $this->Account_model->insert([
             'name'     => $this->input->post('name'),
             'email'    => $this->input->post('email'),
             'password' => $this->input->post('password'),
             'role'     => $this->input->post('role'),
-            'is_active'=> 1
-        );
-
-        $insert_id = $this->Account_model->insert($data);
+            'is_active' => TRUE
+        ]);
 
         if ($insert_id) {
             $this->output
@@ -69,7 +67,7 @@ class Account extends CI_Controller
         }
     }
 
-    public function update($id = null)
+    public function update($id)
     {
         if ($this->input->method() !== 'post') {
             return $this->output
@@ -100,8 +98,8 @@ class Account extends CI_Controller
                 ->set_output(json_encode(['status' => 'error', 'message' => validation_errors()]));
         }
 
-        $data = array();
-        
+        $data = [];
+
         $name = $this->input->post('name');
         if ($name !== null) $data['name'] = $name;
 
@@ -138,7 +136,7 @@ class Account extends CI_Controller
         }
     }
 
-    public function delete($id = null)
+    public function delete($id)
     {
         if ($this->input->method() !== 'delete') {
             return $this->output
@@ -146,7 +144,7 @@ class Account extends CI_Controller
                 ->set_content_type('application/json')
                 ->set_output(json_encode(['status' => 'error', 'message' => 'Method Not Allowed. Please use DELETE.']));
         }
-                
+
         if (!$id) {
             return $this->output
                 ->set_status_header(400)
@@ -186,12 +184,12 @@ class Account extends CI_Controller
             [
                 'field' => 'email',
                 'label' => 'Email',
-                'rules' => 'trim|required|valid_email|is_unique[accounts.email]' 
+                'rules' => 'trim|required|valid_email|is_unique[accounts.email]'
             ],
             [
                 'field' => 'password',
                 'label' => 'Password',
-                'rules' => 'trim|required|min_length[6]' 
+                'rules' => 'trim|required|min_length[6]'
             ],
             [
                 'field' => 'role',
@@ -212,12 +210,12 @@ class Account extends CI_Controller
             [
                 'field' => 'email',
                 'label' => 'Email',
-                'rules' => 'trim|valid_email|callback_email_check['.$id.']' 
+                'rules' => 'trim|valid_email|callback_email_check[' . $id . ']'
             ],
             [
                 'field' => 'password',
                 'label' => 'Password',
-                'rules' => 'trim|min_length[6]' 
+                'rules' => 'trim|min_length[6]'
             ],
             [
                 'field' => 'role',

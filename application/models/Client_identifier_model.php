@@ -55,4 +55,19 @@ class Client_identifier_model extends CI_Model
         
         return $this->db->get($this->table)->num_rows() > 0;
     }
+
+    public function find_client_by_identifier($platform, $identifier)
+    {
+        $clean = ltrim($identifier, '@');
+
+        $this->db->where('platform', $platform);
+        $this->db->where('is_active', 1);
+        $this->db->group_start();
+            $this->db->where('identifier', $clean);
+            $this->db->or_where('identifier', '@' . $clean);
+        $this->db->group_end();
+
+        $row = $this->db->get($this->table)->row();
+        return $row ? (int) $row->client_id : null;
+    }
 }

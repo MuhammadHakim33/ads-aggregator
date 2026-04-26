@@ -1,0 +1,215 @@
+<?php
+defined('BASEPATH') or exit('No direct script access allowed');
+
+class Cron extends CI_Controller 
+{
+    public function __construct()
+    {
+        parent::__construct();
+        if (!is_cli()) {
+            echo "Access denied. This controller can only be run via CLI.\n";
+            exit;
+        }
+
+        $this->load->library('meta_graph');
+        $this->load->model('Filter_keyword_model');
+        $this->load->model('Ad_content_model');
+        $this->load->model('Client_identifier_model');
+    }
+
+    /**
+     * sync Facebook posts & insights.
+     * usage: php index.php cron sync_facebook [since] [until]
+     */
+    public function sync_facebook($since = null, $until = null)
+    {
+        $since = $since ?? date('Y-m-d', strtotime('-30 days'));
+        $until = $until ?? date('Y-m-d');
+
+        echo "[Facebook] Sync {$since} to {$until}\n\n";
+
+        try {
+            $keywords  = $this->Filter_keyword_model->get_all('facebook');
+            $all_posts = $this->_fetch_with_keywords('get_facebook_posts', $since, $until, $keywords);
+
+            if (empty($all_posts)) {
+                echo "[Facebook] No posts found.\n";
+                return;
+            }
+
+            // prepare upsert contents — resolve client_id per post
+            $content_rows = [];
+            $skipped      = 0;
+            foreach ($all_posts as $post) {
+                $identifier = $this->_extract_identifier($post, $keywords);
+                $client_id  = $identifier
+                    ? $this->Client_identifier_model->find_client_by_identifier('facebook', $identifier)
+                    : null;
+
+                if (!$client_id) {
+                    echo "[Facebook] Skip post {$post['id']}: no client match for '{$identifier}'\n";
+                    $skipped++;
+                    continue;
+                }
+
+                $content_rows[] = [
+                    'client_id'          => $client_id,
+                    'platform'           => 'facebook',
+                    'content_identifier' => $post['id'],
+                    'ad_type'            => 'social',
+                ];
+            }
+
+            if ($skipped > 0) {
+                echo "[Facebook] Skipped {$skipped} post(s) — client not found.\n";
+            }
+
+            // upsert contents
+            $this->Ad_content_model->bulk_upsert_contents($content_rows);
+            echo "[Facebook] Contents upserted: " . count($content_rows) . "\n";
+
+            // get identifiers (all clients)
+            $saved       = $this->Ad_content_model->get_identifiers_by_platform('facebook');
+            $content_map = array_column($saved, 'id', 'content_identifier');
+
+            // fetch & upsert metrics
+            $insights    = $this->meta_graph->get_facebook_post_insights(array_keys($content_map));
+            $metric_rows = $this->_build_metric_rows($insights, $content_map);
+
+            // upsert metrics
+            $result = $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
+            echo "[Facebook] Metrics upserted: {$result['upserted']}\n";
+
+        } catch (\Exception $e) {
+            log_message('error', '[Cron::sync_facebook] ' . $e->getMessage());
+            echo "[Facebook] ERROR: " . $e->getMessage() . "\n";
+        }
+
+        echo "[Facebook] Done.\n";
+    }
+
+    /**
+     * sync Instagram media & insights.
+     * usage: php index.php cron sync_instagram [since] [until]
+     */
+    public function sync_instagram($since = null, $until = null)
+    {
+        $since = $since ?? date('Y-m-d', strtotime('-30 days'));
+        $until = $until ?? date('Y-m-d');
+
+        echo "[Instagram] Sync {$since} to {$until}\n";
+
+        try {
+            $keywords  = $this->Filter_keyword_model->get_all('instagram');
+            $all_posts = $this->_fetch_with_keywords('get_instagram_media', $since, $until, $keywords);
+
+            if (empty($all_posts)) {
+                echo "[Instagram] No posts found.\n";
+                return;
+            }
+
+            // prepare upsert contents — resolve client_id per post
+            $content_rows = [];
+            $skipped      = 0;
+            foreach ($all_posts as $post) {
+                $identifier = $this->_extract_identifier($post, $keywords);
+                $client_id  = $identifier
+                    ? $this->Client_identifier_model->find_client_by_identifier('instagram', $identifier)
+                    : null;
+
+                if (!$client_id) {
+                    echo "[Instagram] Skip post {$post['id']}: no client match for '{$identifier}'\n";
+                    $skipped++;
+                    continue;
+                }
+
+                $content_rows[] = [
+                    'client_id'          => $client_id,
+                    'platform'           => 'instagram',
+                    'content_identifier' => $post['id'],
+                    'ad_type'            => 'social',
+                ];
+            }
+
+            if ($skipped > 0) {
+                echo "[Instagram] Skipped {$skipped} post(s) — client not found.\n";
+            }
+
+            // upsert contents
+            $this->Ad_content_model->bulk_upsert_contents($content_rows);
+            echo "[Instagram] Contents upserted: " . count($content_rows) . "\n";
+
+            // get identifiers (all clients)
+            $saved       = $this->Ad_content_model->get_identifiers_by_platform('instagram');
+            $content_map = array_column($saved, 'id', 'content_identifier');
+
+            // fetch & upsert metrics
+            $insights    = $this->meta_graph->get_instagram_media_insights(array_keys($content_map));
+            $metric_rows = $this->_build_metric_rows($insights, $content_map);
+
+            // upsert metrics
+            $result = $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
+            echo "[Instagram] Metrics upserted: {$result['upserted']}\n";
+
+        } catch (\Exception $e) {
+            log_message('error', '[Cron::sync_instagram] ' . $e->getMessage());
+            echo "[Instagram] ERROR: " . $e->getMessage() . "\n";
+        }
+
+        echo "[Instagram] Done.\n";
+    }
+
+    private function _extract_identifier($post, $keywords)
+    {
+        $text = $post['caption'] ?? $post['message'] ?? '';
+
+        foreach ($keywords as $kw) {
+            $pattern = '/' . preg_quote($kw->keyword, '/') . '\s+([\w.]+)/iu';
+            if (preg_match($pattern, $text, $matches)) {
+                return $matches[1]; // e.g. "bankbri_id"
+            }
+        }
+
+        return null;
+    }
+
+    private function _fetch_with_keywords($method, $since, $until, $keywords)
+    {
+        if (empty($keywords)) {
+            return $this->meta_graph->$method($since, $until);
+        }
+
+        $all = [];
+        foreach ($keywords as $kw) {
+            $posts = $this->meta_graph->$method($since, $until, $kw->keyword);
+            $all   = array_merge($all, $posts);
+        }
+
+        return $all;
+    }
+
+    private function _build_metric_rows($insights, $content_map)
+    {
+        $rows = [];
+
+        foreach ($insights as $post_id => $metrics) {
+            if (!isset($content_map[$post_id])) continue;
+
+            $ad_content_id = $content_map[$post_id];
+
+            foreach ($metrics as $metric_name => $metric_value) {
+                if (is_array($metric_value) || is_object($metric_value)) {
+                    $metric_value = json_encode($metric_value);
+                }
+
+                $rows[] = [
+                    'ad_content_id' => $ad_content_id,
+                    'metric_name'   => $metric_name,
+                    'metric_value'  => $metric_value,
+                ];
+            }
+        }
+
+        return $rows;
+    }
+}

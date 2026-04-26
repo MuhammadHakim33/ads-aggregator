@@ -65,6 +65,7 @@ CREATE TABLE ad_contents (
     platform VARCHAR(50) NOT NULL,
     content_identifier VARCHAR(255) NOT NULL,
     ad_type ENUM('article','banner','video','social') NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE KEY unique_content (client_id, platform, content_identifier),

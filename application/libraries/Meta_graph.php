@@ -13,8 +13,6 @@ class Meta_graph
 
     public function __construct()
     {
-        $CI =& get_instance();
-
         $this->system_user_token = $_ENV['META_SYSTEM_USER_TOKEN'];
         $this->fb_page_id        = $_ENV['META_FB_PAGE_ID'];
         $this->ig_account_id     = $_ENV['META_IG_ACCOUNT_ID'];
@@ -44,9 +42,7 @@ class Meta_graph
         $curl_error = curl_error($ch);
         curl_close($ch);
 
-        if ($curl_error) {
-            throw new \RuntimeException("cURL error: $curl_error");
-        }
+        if ($curl_error) throw new \RuntimeException("cURL error: $curl_error");
 
         $data = json_decode($response, TRUE);
 

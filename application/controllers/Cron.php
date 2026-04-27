@@ -12,6 +12,7 @@ class Cron extends CI_Controller
         }
 
         $this->load->library('meta_graph');
+        $this->load->library('ga4');
         $this->load->model('Filter_keyword_model');
         $this->load->model('Ad_content_model');
         $this->load->model('Client_identifier_model');
@@ -157,6 +158,69 @@ class Cron extends CI_Controller
         }
 
         echo "[Instagram] Done.\n";
+    }
+
+    /**
+     * Sync GA4 articles & metrics.
+     * Usage: php index.php cron sync_ga4 <client_id> [url_pattern] [since] [until]
+     */
+    public function sync_ga4($url_pattern = '', $since = null, $until = null)
+    {
+        $since = $since ?? date('Y-m-d', strtotime('-30 days'));
+        $until = $until ?? date('Y-m-d');
+
+        echo "[GA4] Sync {$since} to {$until}\n";
+
+        try {
+            $data = $this->ga4->get_articles($since, $until, $url_pattern);
+
+            if (empty($data['ad_contents'])) {
+                echo "[GA4] No articles found.\n";
+                return;
+            }
+
+            // upsert contents
+            $content_rows = [];
+            foreach ($data['ad_contents'] as $item) {
+                $content_rows[] = [
+                    'client_id'          => 1,
+                    'platform'           => 'ga4',
+                    'content_identifier' => $item['page_path'],
+                    'ad_type'            => 'article',
+                ];
+            }
+            $this->Ad_content_model->bulk_upsert_contents($content_rows);
+            echo "[GA4] Contents upserted: " . count($content_rows) . "\n";
+
+            // get identifiers active contents
+            $saved       = $this->Ad_content_model->get_identifiers_active_contents(1, 'ga4');
+            $content_map = array_column($saved, 'id', 'content_identifier');
+
+            // build metric rows
+            $metric_rows = [];
+            foreach ($data['ad_metrics'] as $item) {
+                $ad_content_id = $content_map[$item['page_path']] ?? null;
+                if (!$ad_content_id) continue;
+
+                foreach ($item['metrics'] as $metric_name => $metric_value) {
+                    $metric_rows[] = [
+                        'ad_content_id' => $ad_content_id,
+                        'metric_name'   => $metric_name,
+                        'metric_value'  => $metric_value,
+                    ];
+                }
+            }
+
+            // upsert metrics
+            $result = $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
+            echo "[GA4] Metrics upserted: {$result['upserted']}\n";
+
+        } catch (\Exception $e) {
+            log_message('error', '[Cron::sync_ga4] ' . $e->getMessage());
+            echo "[GA4] ERROR: " . $e->getMessage() . "\n";
+        }
+
+        echo "[GA4] Done.\n";
     }
 
     private function _extract_identifier($post, $keywords)

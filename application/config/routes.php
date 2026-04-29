@@ -74,3 +74,7 @@ $route['client/identifier/update/(:num)']['PUT'] = 'client/update_identifier/$1'
 $route['client/identifier/delete/(:num)']['DELETE'] = 'client/delete_identifier/$1';
 $route['client/identifier/(:num)']['GET'] = 'client/identifiers/$1';
 
+$route['auth/login']['POST']  = 'auth/login';
+$route['auth/logout']['POST'] = 'auth/logout';
+
+

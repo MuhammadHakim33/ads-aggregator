@@ -13,6 +13,7 @@ class Cron extends CI_Controller
 
         $this->load->library('meta_graph');
         $this->load->library('ga4');
+        $this->load->library('youtube');
         $this->load->model('Filter_keyword_model');
         $this->load->model('Ad_content_model');
         $this->load->model('Client_identifier_model');
@@ -223,9 +224,114 @@ class Cron extends CI_Controller
         echo "[GA4] Done.\n";
     }
 
+    /**
+     * Sync YouTube videos & metrics.
+     * Usage: php index.php cron sync_youtube [since] [until]
+     */
+    public function sync_youtube($since = null, $until = null)
+    {
+        $since = $since ?? date('Y-m-d', strtotime('-30 days'));
+        $until = $until ?? date('Y-m-d');
+
+        echo "[YouTube] Sync {$since} to {$until}\n\n";
+
+        try {
+            $keywords = $this->Filter_keyword_model->get_all('yt');
+            
+            $published_after  = date('Y-m-d\T00:00:00\Z', strtotime($since));
+            $published_before = date('Y-m-d\T23:59:59\Z', strtotime($until));
+
+            $videos = $this->youtube->get_videos($published_after, $published_before);
+
+            // filter videos if keywords are provided
+            $all_posts = [];
+            if (empty($keywords)) {
+                $all_posts = $videos;
+            } else {
+                foreach ($videos as $video) {
+                    $description = $video['snippet']['description'] ?? '';
+                    foreach ($keywords as $kw) {
+                        if (stripos($description, $kw->keyword) !== FALSE) {
+                            $all_posts[] = $video;
+                            break; // matched one keyword, no need to check others for this video
+                        }
+                    }
+                }
+            }
+
+            if (empty($all_posts)) {
+                echo "[YouTube] No videos found.\n";
+                return;
+            }
+
+            // prepare upsert contents — resolve client_id per post
+            $content_rows = [];
+            $skipped      = 0;
+            foreach ($all_posts as $post) {
+                $identifier = $this->_extract_identifier($post, $keywords);
+                // $client_id  = $identifier
+                //     ? $this->Client_identifier_model->find_client_by_identifier('yt', $identifier)
+                //     : null;
+
+                // if (!$client_id) {
+                //     echo "[YouTube] Skip video {$post['id']}: no client match for '{$identifier}'\n";
+                //     $skipped++;
+                //     continue;
+                // }
+
+                $content_rows[] = [
+                    'client_id'          => 1,
+                    'platform'           => 'yt',
+                    'content_identifier' => $post['id'],
+                    'ad_type'            => 'video',
+                ];
+            }
+
+            if ($skipped > 0) {
+                echo "[YouTube] Skipped {$skipped} video(s) — client not found.\n";
+            }
+
+            // upsert contents
+            $this->Ad_content_model->bulk_upsert_contents($content_rows);
+            echo "[YouTube] Contents upserted: " . count($content_rows) . "\n";
+
+            // get identifiers (all clients)
+            $saved       = $this->Ad_content_model->get_identifiers_by_platform('yt');
+            $content_map = array_column($saved, 'id', 'content_identifier');
+
+            // build metric rows from statistics
+            $metric_rows = [];
+            foreach ($all_posts as $post) {
+                $video_id = $post['id'];
+                if (!isset($content_map[$video_id])) continue;
+
+                $ad_content_id = $content_map[$video_id];
+                $metrics = $post['statistics'] ?? [];
+
+                foreach ($metrics as $metric_name => $metric_value) {
+                    $metric_rows[] = [
+                        'ad_content_id' => $ad_content_id,
+                        'metric_name'   => $metric_name,
+                        'metric_value'  => $metric_value,
+                    ];
+                }
+            }
+
+            // upsert metrics
+            $result = $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
+            echo "[YouTube] Metrics upserted: {$result['upserted']}\n";
+
+        } catch (\Exception $e) {
+            log_message('error', '[Cron::sync_youtube] ' . $e->getMessage());
+            echo "[YouTube] ERROR: " . $e->getMessage() . "\n";
+        }
+
+        echo "[YouTube] Done.\n";
+    }
+
     private function _extract_identifier($post, $keywords)
     {
-        $text = $post['caption'] ?? $post['message'] ?? '';
+        $text = $post['caption'] ?? $post['message'] ?? $post['snippet']['description'] ?? '';
 
         foreach ($keywords as $kw) {
             $pattern = '/' . preg_quote($kw->keyword, '/') . '\s+([\w.]+)/iu';

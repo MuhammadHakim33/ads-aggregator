@@ -4,24 +4,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Ad_content_model extends CI_Model 
 {
     private $_table_contents = 'ad_contents';
-    private $_table_metrics  = 'ad_metrics';
+    private $_table_metrics = 'ad_metrics';
 
     public function bulk_upsert_contents($rows)
     {
-        if (empty($rows)) return ['created' => 0];
+        if (empty($rows)) {
+            return ['created' => 0];
+        }
 
         $placeholders = [];
 
         foreach ($rows as $row) {
-            $client_id          = (int)$row['client_id'];
-            $platform           = $this->db->escape($row['platform']);
+            $client_id = isset($row['client_id']) ? (int)$row['client_id'] : 'NULL';
+            $title = isset($row['title']) ? $this->db->escape($row['title']) : 'NULL';
+            $platform = $this->db->escape($row['platform']);
             $content_identifier = $this->db->escape($row['content_identifier']);
-            $ad_type            = $this->db->escape($row['ad_type']);
+            $ad_type = $this->db->escape($row['ad_type']);
 
-            $placeholders[] = "({$client_id}, {$platform}, {$content_identifier}, {$ad_type})";
+            $placeholders[] = "({$client_id}, {$title}, {$platform}, {$content_identifier}, {$ad_type})";
         }
 
-        $sql = "INSERT IGNORE INTO ". $this->_table_contents ." (client_id, platform, content_identifier, ad_type) VALUES " . implode(',', $placeholders);
+        $sql = "INSERT IGNORE INTO ". $this->_table_contents ." (client_id, title, platform, content_identifier, ad_type) VALUES " . implode(',', $placeholders);
 
         $this->db->query($sql);
 
@@ -30,7 +33,9 @@ class Ad_content_model extends CI_Model
 
     public function bulk_upsert_metrics($rows)
     {
-        if (empty($rows)) return ['upserted' => 0];
+        if (empty($rows)) {
+            return ['upserted' => 0];
+        }
 
         $placeholders = [];
 
@@ -56,24 +61,27 @@ class Ad_content_model extends CI_Model
         return ['upserted' => $this->db->affected_rows()];
     }
 
-    public function get_identifiers_active_contents($client_id, $platform)
-    {
-        return $this->db
-            ->select('id, content_identifier')
-            ->where('is_active', 1)
-            ->where('client_id', $client_id)
-            ->where('platform', $platform)
-            ->get($this->_table_contents)
-            ->result();
-    }
+    // public function get_identifiers_active_contents($client_id, $platform)
+    // {
+    //     return $this->db
+    //         ->select('id, content_identifier')
+    //         ->where('is_active', 1)
+    //         ->where('client_id', $client_id)
+    //         ->where('platform', $platform)
+    //         ->get($this->_table_contents)
+    //         ->result();
+    // }
 
-    public function get_identifiers_by_platform($platform)
+    public function get_identifiers_by_platform($platform, $since, $until)
     {
-        return $this->db
-            ->select('id, content_identifier')
-            ->where('is_active', 1)
-            ->where('platform', $platform)
-            ->get($this->_table_contents)
-            ->result();
+        $this->db->select('id, content_identifier');
+        $this->db->where('is_active', 1);
+        $this->db->where('platform', $platform);
+        
+        if ($since && $until) {
+            $this->db->where(" DATE(created_at) BETWEEN '{$since}' AND '{$until}' ");
+        }
+
+        return $this->db->get($this->_table_contents)->result();
     }
 }

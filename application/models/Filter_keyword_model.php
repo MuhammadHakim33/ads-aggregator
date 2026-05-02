@@ -5,12 +5,15 @@ class Filter_keyword_model extends CI_Model
 {
     public $table = 'filter_keywords';
 
-    public function get_all($platform = null)
+    public function get_all()
     {
-        if (!empty($platform)) {
-            $this->db->where('platform', $platform);
-        }
+        $this->db->where('is_active', 1);
+        return $this->db->get($this->table)->result();
+    }
 
+    public function get_by_type($type)
+    {
+        $this->db->where('type', $type);
         $this->db->where('is_active', 1);
         return $this->db->get($this->table)->result();
     }

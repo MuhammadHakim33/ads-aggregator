@@ -34,6 +34,7 @@ CREATE TABLE clients (
 CREATE TABLE filter_keywords (
     id INT AUTO_INCREMENT PRIMARY KEY,
     platform ENUM('meta', 'gam', 'ga4', 'yt') NOT NULL,
+    type ENUM('html', 'keyword', 'hostname') NOT NULL,
     keyword VARCHAR(255) NOT NULL COMMENT 'Keyword umum: Content partnership with, #kilas, dll',
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -41,27 +42,28 @@ CREATE TABLE filter_keywords (
     INDEX idx_platform (platform)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- =========================
--- CLIENT IDENTIFIERS
--- =========================
-CREATE TABLE client_identifiers (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    client_id INT NOT NULL,
-    platform ENUM('meta', 'gam', 'ga4', 'yt') NOT NULL,
-    identifier VARCHAR(255) NOT NULL COMMENT '@account_klien, /klien-path/, [KLIEN]%, dll',
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+-- -- =========================
+-- -- CLIENT IDENTIFIERS
+-- -- =========================
+-- CREATE TABLE client_identifiers (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     client_id INT NOT NULL,
+--     platform ENUM('meta', 'gam', 'ga4', 'yt') NOT NULL,
+--     identifier VARCHAR(255) NOT NULL COMMENT '@account_klien, /klien-path/, [KLIEN]%, dll',
+--     is_active BOOLEAN DEFAULT TRUE,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
-    INDEX idx_client_platform (client_id, platform)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+--     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+--     INDEX idx_client_platform (client_id, platform)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================
 -- AD CONTENTS
 -- =========================
 CREATE TABLE ad_contents (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    client_id INT NOT NULL,
+    title VARCHAR(255),
+    client_id INT,
     platform VARCHAR(50) NOT NULL,
     content_identifier VARCHAR(255) NOT NULL,
     ad_type ENUM('article','banner','video','social') NOT NULL,

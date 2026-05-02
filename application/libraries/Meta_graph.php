@@ -3,65 +3,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Meta_graph
 {
-    const GRAPH_VERSION = 'v25.0';
-    const BASE_URL      = 'https://graph.facebook.com/';
-
+    const BASE_URL = 'https://graph.facebook.com/v25.0/';
+    
     private $system_user_token;
-    private $fb_page_id;
     private $ig_account_id;
-    private $pat;
+    private $fb_page_id;
+    private $pat;   
+    protected $CI;
 
     public function __construct()
     {
+        $this->CI =& get_instance();
+        $this->CI->load->library('request');
+
         $this->system_user_token = $_ENV['META_SYSTEM_USER_TOKEN'];
-        $this->fb_page_id        = $_ENV['META_FB_PAGE_ID'];
-        $this->ig_account_id     = $_ENV['META_IG_ACCOUNT_ID'];
-    }
-
-    private function request($endpoint, $params = [], $method = 'GET')
-    {
-        $url = self::BASE_URL . self::GRAPH_VERSION . '/' . ltrim($endpoint, '/');
-
-        $ch = curl_init();
-
-        if ($method === 'GET') {
-            $url .= '?' . http_build_query($params);
-            curl_setopt($ch, CURLOPT_URL, $url);
-        } else {
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, TRUE);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-        }
-
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-
-        $response  = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
-
-        if ($curl_error) throw new \RuntimeException("cURL error: $curl_error");
-
-        $data = json_decode($response, TRUE);
-
-        if ($http_code !== 200 || isset($data['error'])) {
-            $message = $data['error']['message'] ?? "HTTP $http_code";
-            throw new \RuntimeException("Meta API error: $message");
-        }
-
-        return $data;
+        $this->ig_account_id = $_ENV['META_IG_ACCOUNT_ID'];
+        $this->fb_page_id = $_ENV['META_FB_PAGE_ID'];
     }
 
     private function get_page_access_token()
     {
-        if (!empty($this->pat)) return $this->pat;
+        // check if page access token is exists
+        if (!empty($this->pat)) {
+            return $this->pat;
+        }
 
-        $data = $this->request($this->fb_page_id, [
-            'fields'       => 'access_token',
+        $params = [
+            'fields' => 'access_token',
             'access_token' => $this->system_user_token,
-        ]);
+        ];
+        
+        // request page access token from meta graph api
+        $url = self::BASE_URL . $this->fb_page_id;
+        $data = $this->CI->request->get($url, $params);
 
         if (empty($data['access_token'])) {
             throw new \RuntimeException('Failed getting access token');
@@ -70,27 +44,38 @@ class Meta_graph
         return $this->pat = $data['access_token'];
     }
 
-    public function get_facebook_posts($since, $until, $keyword_filter = '')
+    public function get_facebook_posts($since, $until, $keyword_filters = [])
     {
-        $pat    = $this->get_page_access_token();
-        $result = [];
-
+        $pat = $this->get_page_access_token();
+        
         $params = [
-            'fields'       => 'id,message,created_time,permalink_url',
-            'since'        => $since,
-            'until'        => $until,
+            'fields' => 'id,message,created_time,permalink_url',
+            'since' => $since,
+            'until' => $until,
             'access_token' => $pat,
         ];
 
-        $response = $this->request($this->fb_page_id . '/feed', $params);
-        $posts    = $response['data'] ?? [];
+        // request facebook posts from meta graph api
+        $url = self::BASE_URL . $this->fb_page_id . '/feed';
+        $response = $this->CI->request->get($url, $params);
+        $posts = $response['data'] ?? [];
 
+        // if empty keyword filters, return all posts
+        if (empty($keyword_filters)) {
+            return $posts;
+        }
+
+        // filtering posts based on keyword
+        $result = [];
         foreach ($posts as $post) {
-            if (!empty($keyword_filter) && stripos($post['message'] ?? '', $keyword_filter) === FALSE) {
-                continue;
+            $message = $post['message'] ?? '';
+            foreach ($keyword_filters as $kw) {
+                // if post message contains keyword, add to result
+                if (stripos($message, $kw) !== FALSE) {
+                    $result[] = $post;
+                    break;
+                }
             }
-
-            $result[] = $post;
         }
 
         return $result;
@@ -98,26 +83,29 @@ class Meta_graph
 
     public function get_facebook_post_insights($ids)
     {
-        $pat    = $this->get_page_access_token();
-        $batch  = [];
-        $result = [];
-
+        $pat = $this->get_page_access_token();
+        $batch = [];
+        
+        // set batch request to get facebook posts insights
         foreach ($ids as $id) {
             $metrics = 'post_media_view,post_clicks,post_reactions_by_type_total';
             $batch[] = [
-                'method'       => 'GET',
+                'method' => 'GET',
                 'relative_url' => "{$id}/insights?metric={$metrics}",
             ];
         }
 
         $params = [
-            'access_token'    => $pat,
-            'batch'           => json_encode($batch),
+            'access_token' => $pat,
+            'batch' => json_encode($batch),
             'include_headers' => false
         ];        
-
-        $response = $this->request('', $params, 'POST');
-
+        
+        // request facebook posts insights from meta graph api
+        $response = $this->CI->request->post(self::BASE_URL, $params);
+        
+        // normalize facebook posts insights
+        $result = [];
         foreach ($response as $index => $item) {
             $id = $ids[$index];
 
@@ -134,26 +122,36 @@ class Meta_graph
         return $result;
     }
 
-    public function get_instagram_media($since, $until, $keyword_filter = '')
+    public function get_instagram_media($since, $until, $keyword_filters = [])
     {
-        $result = [];
-
         $params = [
             'fields'       => 'id,caption,timestamp,permalink',
             'since'        => $since,
             'until'        => $until,
             'access_token' => $this->system_user_token,
         ];
+        
+        // request instagram media from meta graph api
+        $url = self::BASE_URL . $this->ig_account_id . '/media';
+        $response = $this->CI->request->get($url, $params);
+        $posts = $response['data'] ?? [];
+        
+        // if empty keyword filters, return all posts
+        if (empty($keyword_filters)) {
+            return $posts;
+        }
 
-        $response = $this->request($this->ig_account_id . '/media', $params);
-        $posts    = $response['data'] ?? [];
-
+        // filtering posts based on keyword
+        $result = [];
         foreach ($posts as $post) {
-            if (!empty($keyword_filter) && stripos($post['caption'] ?? '', $keyword_filter) === FALSE) {
-                continue;
+            $caption = $post['caption'] ?? '';
+            foreach ($keyword_filters as $kw) {
+                // if post caption contains keyword, add to result
+                if (stripos($caption, $kw) !== FALSE) {
+                    $result[] = $post;
+                    break;
+                }
             }
-
-            $result[] = $post;
         }
 
         return $result;
@@ -161,9 +159,8 @@ class Meta_graph
 
     public function get_instagram_media_insights($ids)
     {
+        // set batch request to get instagram media insights
         $batch  = [];
-        $result = [];
-
         foreach ($ids as $id) {
             $metrics = 'reach,saved,shares,likes,comments,total_interactions';
             $batch[] = [
@@ -177,9 +174,12 @@ class Meta_graph
             'batch'           => json_encode($batch),
             'include_headers' => false
         ];        
-
-        $response = $this->request('', $params, 'POST');
-
+        
+        // request instagram media insights from meta graph api
+        $response = $this->CI->request->post(self::BASE_URL, $params);
+        
+        // normalize instagram media insights
+        $result = [];
         foreach ($response as $index => $item) {
             $id = $ids[$index];
 
@@ -205,11 +205,11 @@ class Meta_graph
 
             if (is_array($value)) {
                 $result[$name] = array_sum($value);
-            } 
-            else {
+            } else {
                 $result[$name] = $value;
             }
         }
+        
         return $result;
     }
 }

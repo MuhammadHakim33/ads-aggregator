@@ -1,0 +1,29 @@
+<aside class="collapse show collapse-horizontal col-sm-2 p-3 border-end bg-body-tertiary vh-100 sticky-top" id="sidebarCollapse">
+    <a href="<?= base_url('welcome') ?>" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+        <i class="bi bi-bar-chart-fill me-2 fs-4 text-primary"></i>
+        <span class="fs-6 fw-semibold">Kontan Ad Reporter</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="<?= base_url('welcome') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'dashboard' ? 'active text-white' : '' ?>">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="<?= base_url('account') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'account' ? 'active text-white' : '' ?>">
+                <i class="bi bi-people me-2"></i> Account
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'client' ? 'active text-white' : '' ?>">
+                <i class="bi bi-person-check me-2"></i> Client
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'api' ? 'active text-white' : '' ?>">
+                <i class="bi bi-server me-2"></i> API Credentials
+            </a>
+        </li>
+    </ul>
+</aside>

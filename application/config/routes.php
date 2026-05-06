@@ -54,7 +54,7 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 $route['account/create'] = 'account/create';
-$route['account/update/(:id)'] = 'account/update/$1';
+$route['account/edit/(:num)'] = 'account/edit/$1';
 $route['account/delete/(:id)'] = 'account/delete/$1';
 $route['account'] = 'account/index';
 
@@ -76,5 +76,7 @@ $route['client/identifier/(:num)']['GET'] = 'client/identifiers/$1';
 
 $route['auth/login']['POST']  = 'auth/login';
 $route['auth/logout']['POST'] = 'auth/logout';
+
+$route['login'] = 'auth/index';
 
 

@@ -25,5 +25,10 @@
                 <i class="bi bi-server me-2"></i> API Credentials
             </a>
         </li>
+        <li class="nav-item">
+            <a href="<?= base_url('config/filter-keyword') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'configuration' ? 'active text-white' : '' ?>">
+                <i class="bi bi-funnel me-2"></i> Filter Keyword
+            </a>
+        </li>
     </ul>
 </aside>

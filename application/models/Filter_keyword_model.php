@@ -11,6 +11,17 @@ class Filter_keyword_model extends CI_Model
         return $this->db->get($this->table)->result();
     }
 
+    public function get_all_admin()
+    {
+        return $this->db->get($this->table)->result();
+    }
+
+    public function get_by_id($id)
+    {
+        $this->db->where('id', $id);
+        return $this->db->get($this->table)->row();
+    }
+
     public function get_by_type($type)
     {
         $this->db->where('type', $type);

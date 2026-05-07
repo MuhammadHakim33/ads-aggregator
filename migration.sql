@@ -33,7 +33,7 @@ CREATE TABLE clients (
 -- =========================
 CREATE TABLE filter_keywords (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    platform ENUM('meta', 'gam', 'ga4', 'yt') NOT NULL,
+    platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
     type ENUM('html', 'keyword', 'hostname') NOT NULL,
     keyword VARCHAR(255) NOT NULL COMMENT 'Keyword umum: Content partnership with, #kilas, dll',
     is_active BOOLEAN DEFAULT TRUE,

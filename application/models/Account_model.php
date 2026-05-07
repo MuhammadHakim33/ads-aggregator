@@ -68,6 +68,14 @@ class Account_model extends CI_Model
         return $this->db->get($this->table)->num_rows();
     }
 
+    public function get_all_ae()
+    {
+        $this->db->where('role', 'ae');
+        $this->db->where('is_active', 1);
+        $this->db->where('deleted_at', NULL);
+        return $this->db->get($this->table)->result();
+    }
+
     public function is_email_used($email, $id)
     {
         if ($id) {

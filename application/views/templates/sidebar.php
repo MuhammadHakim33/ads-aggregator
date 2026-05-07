@@ -16,7 +16,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'client' ? 'active text-white' : '' ?>">
+            <a href="<?= base_url('client') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'client' ? 'active text-white' : '' ?>">
                 <i class="bi bi-person-check me-2"></i> Client
             </a>
         </li>

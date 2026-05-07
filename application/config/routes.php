@@ -55,12 +55,12 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['account/create'] = 'account/create';
 $route['account/edit/(:num)'] = 'account/edit/$1';
-$route['account/delete/(:id)'] = 'account/delete/$1';
+$route['account/delete/(:num)'] = 'account/delete/$1';
 $route['account'] = 'account/index';
 
 $route['client/create'] = 'client/create';
-$route['client/update/(:id)'] = 'client/update/$1';
-$route['client/delete/(:id)'] = 'client/delete/$1';
+$route['client/edit/(:num)'] = 'client/edit/$1';
+$route['client/delete/(:num)'] = 'client/delete/$1';
 $route['client'] = 'client/index';
 
 $route['config/filter-keyword/create']['POST'] = 'configuration/create_filter_keyword';

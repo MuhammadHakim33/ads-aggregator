@@ -21,6 +21,11 @@
             </a>
         </li>
         <li class="nav-item">
+            <a href="<?= base_url('ad-metrics') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'ad_metrics' ? 'active text-white' : '' ?>">
+                <i class="bi bi-bar-chart-line me-2"></i> Ad Metrics
+            </a>
+        </li>
+        <li class="nav-item">
             <a href="#" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'api' ? 'active text-white' : '' ?>">
                 <i class="bi bi-server me-2"></i> API Credentials
             </a>

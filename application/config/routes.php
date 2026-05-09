@@ -63,6 +63,9 @@ $route['client/edit/(:num)'] = 'client/edit/$1';
 $route['client/delete/(:num)'] = 'client/delete/$1';
 $route['client'] = 'client/index';
 
+$route['ad-metrics'] = 'ad_metrics/index';
+$route['ad-metrics/detail/(:num)'] = 'ad_metrics/detail/$1';
+
 $route['config/filter-keyword/create'] = 'configuration/filter_keyword/create';
 $route['config/filter-keyword/edit/(:num)'] = 'configuration/filter_keyword/edit/$1';
 $route['config/filter-keyword/delete/(:num)'] = 'configuration/filter_keyword/delete/$1';

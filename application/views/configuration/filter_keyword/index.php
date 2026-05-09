@@ -41,7 +41,7 @@
                                 <th scope="col">Type</th>
                                 <th scope="col">Keyword</th>
                                 <th scope="col">Status</th>
-                                <th scope="col" class="text-end">Actions</th>
+                                <th scope="col" class="text-end"></th>
                             </tr>
                         </thead>
                         <tbody>

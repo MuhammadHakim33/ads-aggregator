@@ -64,17 +64,13 @@ $route['client/delete/(:num)'] = 'client/delete/$1';
 $route['client'] = 'client/index';
 
 $route['ad-metrics'] = 'ad_metrics/index';
+$route['ad-metrics/mapping'] = 'ad_metrics/mapping';
 $route['ad-metrics/detail/(:num)'] = 'ad_metrics/detail/$1';
 
 $route['config/filter-keyword/create'] = 'configuration/filter_keyword/create';
 $route['config/filter-keyword/edit/(:num)'] = 'configuration/filter_keyword/edit/$1';
 $route['config/filter-keyword/delete/(:num)'] = 'configuration/filter_keyword/delete/$1';
 $route['config/filter-keyword'] = 'configuration/filter_keyword/index';
-
-// $route['client/identifier/create/(:num)']['POST'] = 'client/create_identifier/$1';
-// $route['client/identifier/update/(:num)']['PUT'] = 'client/update_identifier/$1';
-// $route['client/identifier/delete/(:num)']['DELETE'] = 'client/delete_identifier/$1';
-// $route['client/identifier/(:num)']['GET'] = 'client/identifiers/$1';
 
 $route['auth/login']['POST']  = 'auth/login';
 $route['auth/logout']['POST'] = 'auth/logout';

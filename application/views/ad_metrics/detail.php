@@ -36,56 +36,11 @@
                 </div>
             </div>
 
-            <!-- filter bar -->
-            <div class="card mb-4">
-                <div class="card-body py-2">
-                    <div class="row g-2 align-items-center">
-                        <div class="col-auto">
-                            <i class="bi bi-funnel text-muted me-1"></i>
-                            <span class="text-muted small fw-medium">Filter:</span>
-                        </div>
-                        <div class="col-auto">
-                            <select id="filterPlatform" class="form-select form-select-sm">
-                                <option value="">All Platform</option>
-                                <?php
-                                    $platforms = array_unique(array_column($ad_contents ?? [], 'platform'));
-                                    sort($platforms);
-                                    foreach ($platforms as $p):
-                                ?>
-                                <option value="<?= htmlspecialchars($p) ?>"><?= htmlspecialchars(ucfirst($p)) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <select id="filterAdType" class="form-select form-select-sm">
-                                <option value="">Semua Tipe</option>
-                                <option value="article">Article</option>
-                                <option value="banner">Banner</option>
-                                <option value="video">Video</option>
-                                <option value="social">Social</option>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <select id="filterStatus" class="form-select form-select-sm">
-                                <option value="">Semua Status</option>
-                                <option value="1">Aktif</option>
-                                <option value="0">Nonaktif</option>
-                            </select>
-                        </div>
-                        <div class="col-auto ms-auto">
-                            <button id="btnResetFilter" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-x-circle me-1"></i> Reset
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- ad contents table -->
             <?php if (empty($ad_contents)): ?>
                 <div class="text-center text-muted py-5">
                     <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                    Tidak ada data iklan untuk klien ini.
+                    No ads content for this client.
                 </div>
             <?php else: ?>
             <div class="card">
@@ -108,31 +63,8 @@
                                 $statusText = $ad->is_active ? 'Active' : 'Inactive';
                                 $collapseId = 'metrics-' . $ad->id;
                                 $metricCount = count($ad->metrics ?? []);
-
-                                // badge color per platform
-                                // $platformColors = [
-                                //     'facebook' => 'primary',
-                                //     'instagram' => 'danger',
-                                //     'youtube' => 'danger',
-                                //     'gam' => 'warning',
-                                //     'ga4' => 'info',
-                                //     'tiktok' => 'dark',
-                                // ];
-                                // $pColor = $platformColors[strtolower($ad->platform)] ?? 'secondary';
-
-                                // badge color per ad_type
-                                // $typeColors = [
-                                //     'article' => 'info',
-                                //     'banner' => 'warning',
-                                //     'video' => 'danger',
-                                //     'social' => 'primary',
-                                // ];
-                                // $tColor = $typeColors[$ad->ad_type] ?? 'secondary';
                             ?>
-                            <tr class="ad-row"
-                                data-platform="<?= htmlspecialchars($ad->platform) ?>"
-                                data-adtype="<?= htmlspecialchars($ad->ad_type) ?>"
-                                data-active="<?= $ad->is_active ? '1' : '0' ?>">
+                            <tr class="ad-row" data-active="<?= $ad->is_active ? '1' : '0' ?>">
                                 <td>
                                     <div class="fw-medium"><?= htmlspecialchars($ad->title ?? '-') ?></div>
                                     <small class="text-muted font-monospace"><?= htmlspecialchars($ad->content_identifier) ?></small>
@@ -159,12 +91,7 @@
                                 </td>
                                 <td class="text-center">
                                     <?php if ($metricCount > 0): ?>
-                                    <button class="btn btn-sm btn-outline-primary"
-                                            type="button"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target="#<?= $collapseId ?>"
-                                            aria-expanded="false"
-                                            aria-controls="<?= $collapseId ?>">
+                                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#<?= $collapseId ?>" aria-expanded="false" aria-controls="<?= $collapseId ?>">
                                         <i class="bi bi-chevron-down"></i>
                                     </button>
                                     <?php else: ?>
@@ -174,10 +101,7 @@
                             </tr>
                             <?php if ($metricCount > 0): ?>
                             <!-- metrics collapse row -->
-                            <tr class="ad-metrics-row bg-body-secondary"
-                                data-platform="<?= htmlspecialchars($ad->platform) ?>"
-                                data-adtype="<?= htmlspecialchars($ad->ad_type) ?>"
-                                data-active="<?= $ad->is_active ? '1' : '0' ?>">
+                            <tr class="ad-metrics-row bg-body-secondary" data-platform="<?= htmlspecialchars($ad->platform) ?>" data-adtype="<?= htmlspecialchars($ad->ad_type) ?>" data-active="<?= $ad->is_active ? '1' : '0' ?>">
                                 <td colspan="6" class="p-0 border-top-0">
                                     <div class="collapse" id="<?= $collapseId ?>">
                                         <div class="p-3">
@@ -216,7 +140,7 @@
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
                     <small class="text-muted" id="tableCount">
-                        Menampilkan <?= count($ad_contents) ?> konten iklan
+                        Show all <?= count($ad_contents) ?> contents
                     </small>
                 </div>
             </div>
@@ -229,11 +153,6 @@
 <script>
 (function () {
     const rows = document.querySelectorAll('.ad-row');
-    const metricsRows = document.querySelectorAll('.ad-metrics-row');
-    const filterPlatform = document.getElementById('filterPlatform');
-    const filterAdType = document.getElementById('filterAdType');
-    const filterStatus = document.getElementById('filterStatus');
-    const tableCount = document.getElementById('tableCount');
     const summaryTotal = document.getElementById('summary-total');
     const summaryActive = document.getElementById('summary-active');
     const summaryInactive = document.getElementById('summary-inactive');
@@ -248,51 +167,10 @@
                 else inactive++;
             }
         });
-        summaryTotal.textContent   = total;
-        summaryActive.textContent  = active;
-        summaryInactive.textContent= inactive;
-        if (tableCount) tableCount.textContent = `Menampilkan ${total} konten iklan`;
+        summaryTotal.textContent = total;
+        summaryActive.textContent = active;
+        summaryInactive.textContent = inactive;
     }
-
-    function applyFilter() {
-        const platform = filterPlatform.value;
-        const adType   = filterAdType.value;
-        const status   = filterStatus.value;
-
-        rows.forEach((row, idx) => {
-            const matchPlatform = !platform || row.dataset.platform === platform;
-            const matchType     = !adType   || row.dataset.adtype   === adType;
-            const matchStatus   = !status   || row.dataset.active    === status;
-            const show          = matchPlatform && matchType && matchStatus;
-
-            row.style.display = show ? '' : 'none';
-
-            // also hide the paired metrics collapse row
-            if (metricsRows[idx]) {
-                if (!show) {
-                    // close collapse if hidden
-                    const collapseEl = metricsRows[idx].querySelector('.collapse');
-                    if (collapseEl && collapseEl.classList.contains('show')) {
-                        bootstrap.Collapse.getInstance(collapseEl)?.hide();
-                    }
-                }
-                metricsRows[idx].style.display = show ? '' : 'none';
-            }
-        });
-
-        updateSummary();
-    }
-
-    filterPlatform.addEventListener('change', applyFilter);
-    filterAdType.addEventListener('change', applyFilter);
-    filterStatus.addEventListener('change', applyFilter);
-
-    document.getElementById('btnResetFilter').addEventListener('click', function () {
-        filterPlatform.value = '';
-        filterAdType.value   = '';
-        filterStatus.value   = '';
-        applyFilter();
-    });
 
     // rotate chevron icon on collapse toggle
     document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(btn => {

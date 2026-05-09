@@ -9,13 +9,17 @@
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
 
+
             <!-- page heading -->
-            <!-- <div class="d-flex justify-content-between align-items-center pb-2 mb-3">
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-3">
                 <div>
-                    <h5 class="mb-0 fw-semibold">Ad Metrics</h5>
-                    <small class="text-muted">Pilih klien untuk melihat metrik iklan</small>
+                    <!-- <h5 class="mb-0 fw-semibold">Ad Metrics</h5>
+                    <small class="text-muted">Pilih klien untuk melihat metrik iklan</small> -->
                 </div>
-            </div> -->
+                <a href="<?= base_url('ad-metrics/mapping') ?>" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-link-45deg me-1"></i> Ad Mapping
+                </a>
+            </div>
 
             <!-- flash alerts -->
             <?php if ($this->session->flashdata('success')): ?>

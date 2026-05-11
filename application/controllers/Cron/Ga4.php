@@ -114,8 +114,8 @@ class Ga4 extends CI_Controller
                 foreach ($item['metrics'] as $metric_name => $metric_value) {
                     $metric_rows[] = [
                         'ad_content_id' => $ad_content_id,
-                        'metric_name'   => $metric_name,
-                        'metric_value'  => $metric_value,
+                        'metric_name' => $metric_name,
+                        'metric_value' => $metric_value,
                     ];
                 }
             }

@@ -45,10 +45,10 @@ class Youtube extends CI_Controller
             $content_rows = [];
             foreach ($videos as $post) {
                 $content_rows[] = [
-                    'title'              => substr($post['title'] ?? '', 0, 200),
-                    'platform'           => 'yt',
+                    'title' => substr($post['title'] ?? '', 0, 200),
+                    'platform' => 'yt',
                     'content_identifier' => $post['video_id'],
-                    'ad_type'            => 'video',
+                    'ad_type' => 'video',
                 ];
             }
 
@@ -122,8 +122,8 @@ class Youtube extends CI_Controller
 
                 $rows[] = [
                     'ad_content_id' => $ad_content_id,
-                    'metric_name'   => $metric_name,
-                    'metric_value'  => $metric_value,
+                    'metric_name' => $metric_name,
+                    'metric_value' => $metric_value,
                 ];
             }
         }

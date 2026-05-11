@@ -45,10 +45,10 @@ class Instagram extends CI_Controller
             $content_rows = [];
             foreach ($posts as $post) {
                 $content_rows[] = [
-                    'title'              => substr($post['caption'] ?? '', 0, 200),
-                    'platform'           => 'instagram',
+                    'title' => substr($post['caption'] ?? '', 0, 200),
+                    'platform' => 'instagram',
                     'content_identifier' => $post['id'],
-                    'ad_type'            => 'social',
+                    'ad_type' => 'social',
                 ];
             }
 
@@ -122,8 +122,8 @@ class Instagram extends CI_Controller
 
                 $rows[] = [
                     'ad_content_id' => $ad_content_id,
-                    'metric_name'   => $metric_name,
-                    'metric_value'  => $metric_value,
+                    'metric_name' => $metric_name,
+                    'metric_value' => $metric_value,
                 ];
             }
         }

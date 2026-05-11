@@ -13,9 +13,9 @@ class Dashboard extends CI_Controller
         }
 
         // unauthorized if role is not superadmin
-        if ($this->session->userdata('role') !== 'superadmin') {
-            show_error('Unauthorized', 403);
-        }
+        // if ($this->session->userdata('role') !== 'superadmin') {
+        //     show_error('Unauthorized', 403);
+        // }
     }
 
     public function index()

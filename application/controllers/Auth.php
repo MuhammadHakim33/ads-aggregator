@@ -53,7 +53,7 @@ class Auth extends CI_Controller
             'logged_in' => TRUE
         ]);
 
-        redirect('welcome');
+        redirect('dashboard');
     }
 
     public function logout()

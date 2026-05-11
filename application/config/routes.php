@@ -49,7 +49,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'welcome';
+$route['default_controller'] = 'dashboard';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
@@ -78,8 +78,8 @@ $route['config/credentials'] = 'configuration/credentials/index';
 $route['config/cron-health/history/(:any)'] = 'configuration/cron_health/history/$1';
 $route['config/cron-health'] = 'configuration/cron_health/index';
 
-$route['auth/login']['POST']  = 'auth/login';
-$route['auth/logout']['POST'] = 'auth/logout';
+$route['auth/login']  = 'auth/login';
+$route['auth/logout'] = 'auth/logout';
 
 $route['login'] = 'auth/index';
 

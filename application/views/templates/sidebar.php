@@ -6,7 +6,7 @@
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
-            <a href="<?= base_url('welcome') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'dashboard' ? 'active text-white' : '' ?>">
+            <a href="<?= base_url('dashboard') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'dashboard' ? 'active text-white' : '' ?>">
                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
             </a>
         </li>

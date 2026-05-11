@@ -61,17 +61,6 @@ class Ad_content_model extends CI_Model
         return ['upserted' => $this->db->affected_rows()];
     }
 
-    // public function get_identifiers_active_contents($client_id, $platform)
-    // {
-    //     return $this->db
-    //         ->select('id, content_identifier')
-    //         ->where('is_active', 1)
-    //         ->where('client_id', $client_id)
-    //         ->where('platform', $platform)
-    //         ->get($this->_table_contents)
-    //         ->result();
-    // }
-
     public function get_identifiers_by_platform($platform, $since, $until)
     {
         $this->db->select('id, content_identifier');
@@ -83,5 +72,11 @@ class Ad_content_model extends CI_Model
         }
 
         return $this->db->get($this->_table_contents)->result();
+    }
+
+    public function count_active()
+    {
+        $this->db->where('is_active', 1);
+        return $this->db->count_all_results($this->_table_contents);
     }
 }

@@ -52,4 +52,11 @@ class Client_model extends CI_Model
         $this->db->where('deleted_at', NULL);
         return $this->db->get($this->table)->num_rows();
     }
+
+    public function count_active()
+    {
+        $this->db->where('is_active', 1);
+        $this->db->where('deleted_at', NULL);
+        return $this->db->count_all_results($this->table);
+    }
 }

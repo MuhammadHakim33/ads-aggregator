@@ -14,8 +14,9 @@ class Ad_metrics extends CI_Controller
             redirect('auth');
         }
 
+        // unauthorized if role is not superadmin
         if ($this->session->userdata('role') !== 'superadmin') {
-            redirect('welcome');
+            show_error('Unauthorized', 403);
         }
     }
 

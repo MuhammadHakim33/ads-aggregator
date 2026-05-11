@@ -46,10 +46,10 @@ class Auth extends CI_Controller
         }
 
         $this->session->set_userdata([
-            'id'        => $account->id,
-            'name'      => $account->name,
-            'email'     => $account->email,
-            'role'      => $account->role,
+            'id' => $account->id,
+            'name' => $account->name,
+            'email' => $account->email,
+            'role' => $account->role,
             'logged_in' => TRUE
         ]);
 

@@ -13,9 +13,9 @@ class Credentials extends CI_Controller
             redirect('auth');
         }
 
-        // superadmin only
+        // unauthorized if role is not superadmin
         if ($this->session->userdata('role') !== 'superadmin') {
-            redirect('welcome');
+            show_error('Unauthorized', 403);
         }
     }
 

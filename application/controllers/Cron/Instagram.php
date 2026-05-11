@@ -54,7 +54,6 @@ class Instagram extends CI_Controller
 
             // upsert contents
             $this->Ad_content_model->bulk_upsert_contents($content_rows);
-            echo "[Instagram] Contents upserted: " . count($content_rows) . "\n";
 
         } catch (\Exception $e) {
             log_message('error', '[Cron/Instagram::sync_media] ' . $e->getMessage());
@@ -97,8 +96,7 @@ class Instagram extends CI_Controller
             $metric_rows = $this->build_metric_rows($insights, $content_id_map);
 
             // upsert metrics
-            $result = $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
-            echo "[Instagram] Metrics upserted: {$result['upserted']}\n";
+            $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
 
         } catch (\Exception $e) {
             log_message('error', '[Cron/Instagram::sync_insights] ' . $e->getMessage());

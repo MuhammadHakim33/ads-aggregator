@@ -26,8 +26,8 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'api' ? 'active text-white' : '' ?>">
-                <i class="bi bi-server me-2"></i> API Credentials
+            <a href="<?= base_url('config/credentials') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'api' ? 'active text-white' : '' ?>">
+                <i class="bi bi-key me-2"></i> API Credentials
             </a>
         </li>
         <li class="nav-item">

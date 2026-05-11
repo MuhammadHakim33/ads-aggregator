@@ -70,7 +70,7 @@ CREATE TABLE ad_contents (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE KEY unique_content (client_id, platform, content_identifier),
+    UNIQUE KEY unique_content (content_identifier),
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
     INDEX idx_client_platform (client_id, platform)
 ) ENGINE=InnoDB;
@@ -93,15 +93,36 @@ CREATE TABLE ad_metrics (
     UNIQUE KEY unique_metric (ad_content_id, metric_name)
 ) ENGINE=InnoDB;
 
+-- =========================
+-- PLATFORM CREDENTIALS
+-- =========================
+CREATE TABLE platform_credentials (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    platform ENUM('meta', 'ga4', 'youtube') NOT NULL UNIQUE,
+    credential_data LONGTEXT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    last_tested_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_platform (platform)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- -- =========================
--- -- PLATFORM CREDENTIALS
+-- -- CRON HEALTH LOGS
 -- -- =========================
--- CREATE TABLE platform_credentials (
+-- CREATE TABLE cron_health_logs (
 --     id INT AUTO_INCREMENT PRIMARY KEY,
---     platform_code ENUM('fb', 'ig', 'gam', 'ga4', 'yt') NOT NULL UNIQUE,
---     credential_data LONGTEXT NOT NULL COMMENT 'JSON format credential',
+--     cron_name VARCHAR(100) NOT NULL,
+--     status ENUM('running', 'success', 'failed') NOT NULL,
+--     started_at TIMESTAMP NOT NULL,
+--     finished_at TIMESTAMP NULL,
+--     duration_seconds INT NULL,
+--     records_processed INT NULL DEFAULT 0,
+--     error_message TEXT NULL,
 --     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
---     INDEX idx_platform_code (platform_code)
+
+--     INDEX idx_cron_name (cron_name),
+--     INDEX idx_status (status),
+--     INDEX idx_started_at (started_at)
 -- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

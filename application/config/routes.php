@@ -72,6 +72,12 @@ $route['config/filter-keyword/edit/(:num)'] = 'configuration/filter_keyword/edit
 $route['config/filter-keyword/delete/(:num)'] = 'configuration/filter_keyword/delete/$1';
 $route['config/filter-keyword'] = 'configuration/filter_keyword/index';
 
+$route['config/credentials/save/(:any)'] = 'configuration/credentials/save/$1';
+$route['config/credentials'] = 'configuration/credentials/index';
+
+$route['config/cron-health/history/(:any)'] = 'configuration/cron_health/history/$1';
+$route['config/cron-health'] = 'configuration/cron_health/index';
+
 $route['auth/login']['POST']  = 'auth/login';
 $route['auth/logout']['POST'] = 'auth/logout';
 

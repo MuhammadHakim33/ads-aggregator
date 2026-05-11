@@ -25,7 +25,7 @@ class Ad_metrics_model extends CI_Model
 
     public function get_client_ad_metrics($client_id)
     {
-        // Get ad contents for the client
+        // get ad contents for the client
         $this->db->where('client_id', $client_id);
         $ad_contents = $this->db->get('ad_contents')->result();
 
@@ -33,27 +33,27 @@ class Ad_metrics_model extends CI_Model
             return [];
         }
 
-        // Get metrics for these ads
+        // get metrics for these ads
         $ad_ids = array_column($ad_contents, 'id');
         
         $this->db->where_in('ad_content_id', $ad_ids);
         $this->db->order_by('metric_name', 'ASC');
         $metrics = $this->db->get('ad_metrics')->result();
         
-        // Group metrics by ad_content_id
+        // group metrics by ad_content_id
         $metrics_by_ad = [];
         foreach ($metrics as $m) {
             $metrics_by_ad[$m->ad_content_id][] = $m;
         }
         
-        // Assign metrics back to ad_contents
+        // assign metrics back to ad_contents
         foreach ($ad_contents as &$ad) {
             $ad->metrics = isset($metrics_by_ad[$ad->id]) ? $metrics_by_ad[$ad->id] : [];
         }
 
         return $ad_contents;
     }
-    
+
     public function get_unmapped_contents()
     {
         $this->db->where('client_id IS NULL', NULL, FALSE);
@@ -64,7 +64,7 @@ class Ad_metrics_model extends CI_Model
 
     public function assign_client($ad_content_id, $client_id)
     {
-        $this->db->where('id', (int)$ad_content_id);
+        $this->db->where('id', $ad_content_id);
         $this->db->where('client_id IS NULL', NULL, FALSE);
         $this->db->update('ad_contents', ['client_id' => (int)$client_id]);
         return $this->db->affected_rows();

@@ -6,6 +6,13 @@
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
             <div class="row">
+                <!-- back button -->
+                <div class="mb-3">
+                    <a href="<?= base_url('config/filter-keyword') ?>" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+                <!-- form card -->
                 <div class="col-12 col-lg-7">
                     <!-- alert message -->
                     <?php if ($this->session->flashdata('errors')): ?>
@@ -17,9 +24,6 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">Keyword Information</h6>
-                            <a href="<?= base_url('config/filter-keyword') ?>" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-1"></i> Back
-                            </a>
                         </div>
                         <div class="card-body">
                             <form action="<?= base_url('config/filter-keyword/create') ?>" method="POST">
@@ -28,7 +32,7 @@
                                         Platform <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-select" id="platform" name="platform" required>
-                                        <option value="" disabled <?= empty(set_value('platform')) ? 'selected' : '' ?>>-- Select Platform --</option>
+                                        <option value="" disabled <?= empty(set_value('platform')) ? 'selected' : '' ?>>Select Platform</option>
                                         <option value="facebook" <?= set_select('platform', 'facebook') ?>>Facebook</option>
                                         <option value="instagram" <?= set_select('platform', 'instagram') ?>>Instagram</option>
                                         <option value="gam" <?= set_select('platform', 'gam') ?>>GAM</option>
@@ -42,7 +46,7 @@
                                         Type <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-select" id="type" name="type" required>
-                                        <option value="" disabled <?= empty(set_value('type')) ? 'selected' : '' ?>>-- Select Type --</option>
+                                        <option value="" disabled <?= empty(set_value('type')) ? 'selected' : '' ?>>Select Type</option>
                                         <option value="html" <?= set_select('type', 'html') ?>>HTML</option>
                                         <option value="keyword" <?= set_select('type', 'keyword') ?>>Keyword</option>
                                         <option value="hostname" <?= set_select('type', 'hostname') ?>>Hostname</option>

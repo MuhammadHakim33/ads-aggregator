@@ -9,15 +9,14 @@
         <?php $this->load->view('templates/topbar'); ?>
         <!-- content area -->
         <div class="container-fluid py-4">
-            <!-- action bar -->
-            <!-- <div class="d-flex justify-content-between align-items-center pb-2 mb-3">
-                <div class="mb-0"></div>
-                <a href="<?= base_url('account') ?>" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i> Back
-                </a>
-            </div> -->
-            <!-- form card -->
             <div class="row">
+                <!-- back button -->
+                <div class="mb-3">
+                    <a href="<?= base_url('account') ?>" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+                <!-- form card -->
                 <div class="col-12 col-lg-7">
                     <!-- alert message -->
                     <?php if ($this->session->flashdata('errors')): ?>
@@ -87,7 +86,7 @@
                                         Role <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-select" id="role" name="role" required>
-                                        <option value="" disabled selected>-- Select Role --</option>
+                                        <option value="" disabled selected>Select Role</option>
                                         <option value="ae" <?= set_select('role', 'ae') ?>>AE (Account Executive)</option>
                                         <option value="superadmin" <?= set_select('role', 'superadmin') ?>>Superadmin</option>
                                     </select>
@@ -96,7 +95,7 @@
                                 <div class="d-flex gap-2 justify-content-end">
                                     <a href="<?= base_url('account') ?>" class="btn btn-outline-secondary">Cancel</a>
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-person-plus me-1"></i> Create Account
+                                        <i class="bi bi-plus-lg me-1"></i> Create Account
                                     </button>
                                 </div>
                             </form>
@@ -104,12 +103,12 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 </div>
 
 <script>
+    // show/hide password
     document.getElementById('togglePassword').addEventListener('click', function () {
         const pwd = document.getElementById('password');
         const icon = document.getElementById('eyeIcon');

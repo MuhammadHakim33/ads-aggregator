@@ -12,6 +12,7 @@ class Facebook extends CI_Controller
 
         parent::__construct();
         // load required models and libraries
+        $this->load->model('Cron_health_model');
         $this->load->model('Filter_keyword_model');
         $this->load->model('Ad_content_model');
         $this->load->library('meta_graph');
@@ -28,6 +29,9 @@ class Facebook extends CI_Controller
 
         echo "[Facebook] Fetch Posts {$since} to {$until}\n\n";
 
+        $log_id  = $this->Cron_health_model->start('Cron/Facebook::fetch_posts');
+        $records = 0;
+
         try {
             // get keywords from database
             $keywords = $this->Filter_keyword_model->get_by_type('keyword');
@@ -38,6 +42,7 @@ class Facebook extends CI_Controller
 
             if (empty($posts)) {
                 echo "[Facebook] No posts found.\n";
+                $this->Cron_health_model->finish($log_id, 0);
                 return;
             }
 
@@ -54,9 +59,13 @@ class Facebook extends CI_Controller
 
             // upsert contents
             $this->Ad_content_model->bulk_upsert_contents($content_rows);
-            echo "[Facebook] Contents upserted: " . count($content_rows) . "\n";
+            $records = count($content_rows);
+            echo "[Facebook] Contents upserted: {$records}\n";
+
+            $this->Cron_health_model->finish($log_id, $records);
 
         } catch (\Exception $e) {
+            $this->Cron_health_model->finish($log_id, $records, $e->getMessage());
             log_message('error', '[Cron/Facebook::fetch_posts] ' . $e->getMessage());
             echo "[Facebook] ERROR: " . $e->getMessage() . "\n";
         }
@@ -75,12 +84,16 @@ class Facebook extends CI_Controller
 
         echo "[Facebook] Sync Insights {$since} to {$until}\n\n";
 
+        $log_id  = $this->Cron_health_model->start('Cron/Facebook::sync_insights');
+        $records = 0;
+
         try {
             // get content ids
             $content_ids = $this->Ad_content_model->get_identifiers_by_platform('facebook', $since, $until);
             
             if (empty($content_ids)) {
                 echo "[Facebook] No active content found in the given date range.\n";
+                $this->Cron_health_model->finish($log_id, 0);
                 return;
             }
 
@@ -91,6 +104,7 @@ class Facebook extends CI_Controller
             
             if (empty($insights)) {
                 echo "[Facebook] No insights returned from API.\n";
+                $this->Cron_health_model->finish($log_id, 0);
                 return;
             }
 
@@ -98,9 +112,13 @@ class Facebook extends CI_Controller
 
             // upsert metrics
             $result = $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
-            echo "[Facebook] Metrics upserted: {$result['upserted']}\n";
+            $records = $result['upserted'];
+            echo "[Facebook] Metrics upserted: {$records}\n";
+
+            $this->Cron_health_model->finish($log_id, $records);
 
         } catch (\Exception $e) {
+            $this->Cron_health_model->finish($log_id, $records, $e->getMessage());
             log_message('error', '[Cron/Facebook::sync_insights] ' . $e->getMessage());
             echo "[Facebook] ERROR: " . $e->getMessage() . "\n";
         }

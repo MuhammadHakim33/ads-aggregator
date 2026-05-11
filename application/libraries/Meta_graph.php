@@ -15,10 +15,13 @@ class Meta_graph
     {
         $this->CI =& get_instance();
         $this->CI->load->library('request');
+        $this->CI->load->model('Platform_credential_model');
 
-        $this->system_user_token = $_ENV['META_SYSTEM_USER_TOKEN'];
-        $this->ig_account_id = $_ENV['META_IG_ACCOUNT_ID'];
-        $this->fb_page_id = $_ENV['META_FB_PAGE_ID'];
+        // load credential from database
+        $cred = $this->CI->Platform_credential_model->get_by_platform('meta');
+        $this->system_user_token = $cred['system_user_token'];
+        $this->ig_account_id = $cred['ig_account_id'];
+        $this->fb_page_id = $cred['fb_page_id'];
     }
 
     private function get_page_access_token()

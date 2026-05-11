@@ -6,6 +6,13 @@
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
             <div class="row">
+                <!-- back button -->
+                <div class="mb-3">
+                    <a href="<?= base_url('client') ?>" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+                <!-- form card -->
                 <div class="col-12 col-lg-7">
                     <!-- alert message -->
                     <?php if ($this->session->flashdata('errors')): ?>
@@ -17,9 +24,6 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">Client Information</h6>
-                            <a href="<?= base_url('client') ?>" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-1"></i> Back
-                            </a>
                         </div>
                         <div class="card-body">
                             <form action="<?= base_url('client/edit/' . $client->id) ?>" method="POST">
@@ -51,7 +55,7 @@
                                         Account Executive <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-select" id="ae_id" name="ae_id" required>
-                                        <option value="" disabled>-- Select AE --</option>
+                                        <option value="" disabled>Select AE</option>
                                         <?php foreach ($ae_list as $ae): ?>
                                             <option value="<?= $ae->id ?>" <?= set_select('ae_id', $ae->id, (int)$client->ae_id === (int)$ae->id) ?>>
                                                 <?= htmlspecialchars($ae->name) ?>

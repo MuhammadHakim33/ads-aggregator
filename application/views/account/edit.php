@@ -9,10 +9,16 @@
         <?php $this->load->view('templates/topbar'); ?>
         <!-- content area -->
         <div class="container-fluid py-4">
-            <!-- form card -->
             <div class="row">
+                <!-- back button -->
+                <div class="mb-3">
+                    <a href="<?= base_url('account') ?>" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+                <!-- form card -->
                 <div class="col-12 col-lg-7">
-                    <!-- alert message (non-validation errors) -->
+                    <!-- alert message -->
                     <?php if ($this->session->flashdata('errors')): ?>
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <div><?= $this->session->flashdata('errors') ?></div>
@@ -22,9 +28,6 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">Account Information</h6>
-                            <a href="<?= base_url('account') ?>" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-1"></i> Back
-                            </a>
                         </div>
                         <div class="card-body">
                             <form action="<?= base_url('account/edit/' . $account->id) ?>" method="POST">
@@ -80,7 +83,7 @@
                                         Role <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-select" id="role" name="role" required>
-                                        <option value="" disabled>-- Select Role --</option>
+                                        <option value="" disabled>Select Role</option>
                                         <option value="ae" <?= set_select('role', 'ae', $account->role === 'ae') ?>>AE (Account Executive)</option>
                                         <option value="superadmin" <?= set_select('role', 'superadmin', $account->role === 'superadmin') ?>>Superadmin</option>
                                     </select>
@@ -107,12 +110,12 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 </div>
 
 <script>
+    // show/hide password
     document.getElementById('togglePassword').addEventListener('click', function () {
         const pwd = document.getElementById('password');
         const icon = document.getElementById('eyeIcon');

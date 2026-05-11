@@ -13,9 +13,12 @@ class Youtube_api
     {
         $this->CI =& get_instance();
         $this->CI->load->library('request');
+        $this->CI->load->model('Platform_credential_model');
 
-        $this->api_key = $_ENV['YOUTUBE_API_KEY'];
-        $this->channel_id = $_ENV['YOUTUBE_CHANNEL_ID'];
+        // load credential from database
+        $cred = $this->CI->Platform_credential_model->get_by_platform('youtube');
+        $this->api_key    = $cred['api_key'];
+        $this->channel_id = $cred['channel_id'];
     }
 
     public function get_videos($published_after, $published_before, $keyword_filters = [])

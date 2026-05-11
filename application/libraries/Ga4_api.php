@@ -24,12 +24,15 @@ class Ga4_api
     {
         $this->CI =& get_instance();
         $this->CI->load->library('request');
+        $this->CI->load->model('Platform_credential_model');
 
-        $this->property_id = $_ENV['GA4_PROPERTY_ID'];
-        $this->service_account = json_decode($_ENV['GA4_SERVICE_ACCOUNT_JSON'], TRUE);
+        // load credential from database
+        $cred = $this->CI->Platform_credential_model->get_by_platform('ga4');
+        $this->property_id = $cred['property_id'];
+        $this->service_account = $cred['service_account'];
 
         if (empty($this->service_account['private_key'])) {
-            throw new \RuntimeException('Set GA4_SERVICE_ACCOUNT_JSON environment variable');
+            throw new \RuntimeException('GA4 credential tidak lengkap: private_key tidak ditemukan.');
         }
     }
 

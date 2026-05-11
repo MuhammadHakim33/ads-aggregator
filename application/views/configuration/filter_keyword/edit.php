@@ -6,6 +6,13 @@
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
             <div class="row">
+                <!-- back button -->
+                <div class="mb-3">
+                    <a href="<?= base_url('config/filter-keyword') ?>" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+                <!-- form card -->
                 <div class="col-12 col-lg-7">
                     <!-- alert message -->
                     <?php if ($this->session->flashdata('errors')): ?>
@@ -17,9 +24,6 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">Edit Keyword Information</h6>
-                            <a href="<?= base_url('config/filter-keyword') ?>" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-1"></i> Back
-                            </a>
                         </div>
                         <div class="card-body">
                             <form action="<?= base_url('config/filter-keyword/edit/' . $keyword->id) ?>" method="POST">
@@ -72,7 +76,7 @@
                                 <div class="d-flex gap-2 justify-content-end">
                                     <a href="<?= base_url('config/filter-keyword') ?>" class="btn btn-outline-secondary">Cancel</a>
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save me-1"></i> Save Changes
+                                        <i class="bi bi-check-lg me-1"></i> Save Changes
                                     </button>
                                 </div>
                             </form>

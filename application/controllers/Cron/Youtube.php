@@ -54,7 +54,6 @@ class Youtube extends CI_Controller
 
             // upsert contents
             $this->Ad_content_model->bulk_upsert_contents($content_rows);
-            echo "[YouTube] Contents upserted: " . count($content_rows) . "\n";
 
         } catch (\Exception $e) {
             log_message('error', '[Cron/Youtube::fetch_videos] ' . $e->getMessage());
@@ -97,8 +96,7 @@ class Youtube extends CI_Controller
             $metric_rows = $this->build_metric_rows($insights, $content_id_map);
 
             // upsert metrics
-            $result = $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
-            echo "[YouTube] Metrics upserted: {$result['upserted']}\n";
+            $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
 
         } catch (\Exception $e) {
             log_message('error', '[Cron/Youtube::sync_insights] ' . $e->getMessage());

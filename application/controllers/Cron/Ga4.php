@@ -66,7 +66,6 @@ class Ga4 extends CI_Controller
 
             // upsert contents
             $this->Ad_content_model->bulk_upsert_contents($content_rows);
-            echo "[GA4] Contents upserted: " . count($content_rows) . "\n";
 
         } catch (\Exception $e) {
             log_message('error', '[Cron/Ga4::fetch_articles] ' . $e->getMessage());
@@ -122,8 +121,7 @@ class Ga4 extends CI_Controller
             }
 
             // upsert metrics
-            $result = $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
-            echo "[GA4] Metrics upserted: {$result['upserted']}\n";
+            $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
 
         } catch (\Exception $e) {
             log_message('error', '[Cron/Ga4::sync_insights] ' . $e->getMessage());

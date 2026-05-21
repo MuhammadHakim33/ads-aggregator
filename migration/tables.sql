@@ -19,7 +19,7 @@ CREATE TABLE clients (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_name VARCHAR(255) NOT NULL,
     pic_name VARCHAR(255),
-    ae_id INT NOT NULL,
+    ae_id INT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     deleted_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -41,21 +41,6 @@ CREATE TABLE filter_keywords (
     
     INDEX idx_platform (platform)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- -- =========================
--- -- CLIENT IDENTIFIERS
--- -- =========================
--- CREATE TABLE client_identifiers (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     client_id INT NOT NULL,
---     platform ENUM('meta', 'gam', 'ga4', 'yt') NOT NULL,
---     identifier VARCHAR(255) NOT NULL COMMENT '@account_klien, /klien-path/, [KLIEN]%, dll',
---     is_active BOOLEAN DEFAULT TRUE,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
---     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
---     INDEX idx_client_platform (client_id, platform)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================
 -- AD CONTENTS
@@ -107,22 +92,3 @@ CREATE TABLE platform_credentials (
 
     INDEX idx_platform (platform)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- -- =========================
--- -- CRON HEALTH LOGS
--- -- =========================
--- CREATE TABLE cron_health_logs (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     cron_name VARCHAR(100) NOT NULL,
---     status ENUM('running', 'success', 'failed') NOT NULL,
---     started_at TIMESTAMP NOT NULL,
---     finished_at TIMESTAMP NULL,
---     duration_seconds INT NULL,
---     records_processed INT NULL DEFAULT 0,
---     error_message TEXT NULL,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
---     INDEX idx_cron_name (cron_name),
---     INDEX idx_status (status),
---     INDEX idx_started_at (started_at)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -52,7 +52,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="ae_id" class="form-label fw-medium">
-                                        Account Executive <span class="text-danger">*</span>
+                                        Account Executive
                                     </label>
                                     <select class="form-select" id="ae_id" name="ae_id" required>
                                         <option value="" disabled>Select AE</option>

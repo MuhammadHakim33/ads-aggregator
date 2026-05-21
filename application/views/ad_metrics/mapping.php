@@ -39,41 +39,37 @@
                 </div>
             <?php endif; ?>
 
+            <!-- empty state -->
             <?php if (empty($unmapped)): ?>
-                <!-- empty state -->
                 <div class="card">
                     <div class="card-body text-center py-5">
                         <i class="bi bi-check-circle-fill text-success fs-1 d-block mb-3"></i>
-                        <h6 class="fw-semibold">All Ad Content has been mapped!</h6>
-                        <p class="text-muted mb-3">There is no ad content that needs to be connected to a client.</p>
-                        <a href="<?= base_url('ad-metrics') ?>" class="btn btn-primary btn-sm">
-                            <i class="bi bi-bar-chart-line me-1"></i> View Ad Metrics
-                        </a>
+                        <p class="text-muted mb-3">There is no ads that needs to be connected to a client.</p>
                     </div>
                 </div>
             <?php else: ?>
 
             <!-- toolbar -->
             <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="text-muted small ms-2">
+                    <span id="countRow">0</span> rows selected
+                </span>
                 <button type="button" id="btnSelectAll" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-check-square me-1"></i> Select All
                 </button>
                 <button type="button" id="btnDeselectAll" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-square me-1"></i> Cancel All
                 </button>
-                <span class="text-muted small ms-2">
-                    <span id="selectedCount">0</span> rows selected
-                </span>
+                <select id="bulkClientSelect" class="form-select form-select-sm d-inline-block w-auto">
+                    <option value="">Select Client</option>
+                    <?php foreach ($clients as $c): ?>
+                        <option value="<?= $c->id ?>"><?= htmlspecialchars($c->company_name) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="button" id="btnBulkApply" class="btn btn-sm btn-outline-primary ms-1">
+                    <i class="bi bi-arrow-down-square me-1"></i> Assign to Selected
+                </button>
                 <div class="ms-auto">
-                    <select id="bulkClientSelect" class="form-select form-select-sm d-inline-block w-auto">
-                        <option value="">Select Client</option>
-                        <?php foreach ($clients as $c): ?>
-                            <option value="<?= $c->id ?>"><?= htmlspecialchars($c->company_name) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <button type="button" id="btnBulkApply" class="btn btn-sm btn-outline-primary ms-1">
-                        <i class="bi bi-arrow-down-square me-1"></i> Assign to Selected
-                    </button>
                 </div>
             </div>
 
@@ -85,7 +81,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th scope="col" style="width:40px" class="text-center">
-                                        <input type="checkbox" id="checkAll" class="form-check-input">
+                                        <input type="checkbox" id="checkboxAll" class="form-check-input">
                                     </th>
                                     <th scope="col">Ads</th>
                                     <th scope="col">Platform</th>
@@ -98,7 +94,7 @@
                                 <?php foreach ($unmapped as $ad): ?>
                                 <tr class="mapping-row">
                                     <td class="text-center">
-                                        <input type="checkbox" name="selected_ids[]" value="<?= $ad->id ?>" class="form-check-input row-check">
+                                        <input type="checkbox" name="selected_ids[]" value="<?= $ad->id ?>" class="form-check-input checkboxRow">
                                     </td>
                                     <td>
                                         <div class="fw-medium"><?= htmlspecialchars($ad->title ?? '-') ?></div>
@@ -118,8 +114,7 @@
                                         <?= date('d M Y', strtotime($ad->created_at)) ?>
                                     </td>
                                     <td>
-                                        <select name="client_id[<?= $ad->id ?>]"
-                                                class="form-select form-select-sm client-select">
+                                        <select name="client_id[<?= $ad->id ?>]" class="form-select form-select-sm client-select">
                                             <option value="">Select Client</option>
                                             <?php foreach ($clients as $c): ?>
                                                 <option value="<?= $c->id ?>"><?= htmlspecialchars($c->company_name) ?></option>
@@ -133,7 +128,7 @@
                     </div>
                     <div class="card-footer d-flex justify-content-between align-items-center">
                         <small class="text-muted"><?= count($unmapped) ?> ad contents</small>
-                        <button type="submit" class="btn btn-primary btn-sm" id="btnSave">
+                        <button type="submit" class="btn btn-primary btn-sm" id="btnSave" disabled>
                             <i class="bi bi-floppy me-1"></i> Save Mapping
                         </button>
                     </div>
@@ -147,75 +142,86 @@
 </div>
 
 <script>
-(function () {
-    const checkAll = document.getElementById('checkAll');
-    const rowChecks = document.querySelectorAll('.row-check');
-    const selectedCount = document.getElementById('selectedCount');
+    const checkboxAll = document.getElementById('checkboxAll');
+    const checkboxRow = document.querySelectorAll('.checkboxRow');
+    const countRow = document.getElementById('countRow');
     const btnSelectAll = document.getElementById('btnSelectAll');
     const btnDeselect = document.getElementById('btnDeselectAll');
     const bulkSelect = document.getElementById('bulkClientSelect');
     const btnBulkApply = document.getElementById('btnBulkApply');
+    const btnSave = document.getElementById('btnSave');
 
-    function updateCount() {
-        const n = document.querySelectorAll('.row-check:checked').length;
-        selectedCount.textContent = n;
+    // count checked rows
+    function countCheckedRows() {
+        const n = document.querySelectorAll('.checkboxRow:checked').length;
+        countRow.textContent = n;
+        // if has 0 checked row, enable save btn, else disable save btn
+        if (n === 0) {
+            btnSave.disabled = true;
+        } else {
+            btnSave.disabled = false;
+        }
     }
 
-    // header checkbox check/uncheck all
-    if (checkAll) {
-        checkAll.addEventListener('change', function () {
-            rowChecks.forEach(c => { c.checked = this.checked; });
-            updateCount();
+    // check all checkbox
+    if (checkboxAll) {
+        checkboxAll.addEventListener('change', function () {
+            checkboxRow.forEach(c => { c.checked = this.checked; });
+            countCheckedRows();
         });
     }
 
-    rowChecks.forEach(c => c.addEventListener('change', function () {
-        updateCount();
-        if (!this.checked && checkAll) checkAll.checked = false;
-        if (document.querySelectorAll('.row-check:checked').length === rowChecks.length && checkAll) {
-            checkAll.checked = true;
-        }
+    checkboxRow.forEach(c => c.addEventListener('change', function () {
+        countCheckedRows();
+        // uncheck checkboxall if there are unchecked rows
+        if (!this.checked) checkboxAll.checked = false;
     }));
 
-    // select all/deselect all buttons
+    // btn select all
     if (btnSelectAll) {
         btnSelectAll.addEventListener('click', function () {
-            rowChecks.forEach(c => c.checked = true);
-            if (checkAll) checkAll.checked = true;
-            updateCount();
-        });
-    }
-    if (btnDeselect) {
-        btnDeselect.addEventListener('click', function () {
-            rowChecks.forEach(c => c.checked = false);
-            if (checkAll) checkAll.checked = false;
-            updateCount();
+            checkboxRow.forEach(c => c.checked = true);
+            if (checkboxAll) checkboxAll.checked = true;
+            countCheckedRows();
         });
     }
 
-    // bulk apply set selected client to all checked rows
+    // btn deselect all
+    if (btnDeselect) {
+        btnDeselect.addEventListener('click', function () {
+            checkboxRow.forEach(c => c.checked = false);
+            if (checkboxAll) checkboxAll.checked = false;
+            countCheckedRows();
+        });
+    }
+
+    // btn bulk apply to assign client for selected rows
     if (btnBulkApply) {
         btnBulkApply.addEventListener('click', function () {
             const clientId = bulkSelect.value;
+            // show alert if client id is not selected
             if (!clientId) {
-                alert('Pilih klien terlebih dahulu pada dropdown "Assign semua ke".');
+                alert("Please select client from dropdown.");
                 return;
             }
-            const checkedRows = document.querySelectorAll('.row-check:checked');
+
+            const checkedRows = document.querySelectorAll('.checkboxRow:checked');
+            // show alert if there are no checked rows
             if (checkedRows.length === 0) {
-                alert('Pilih minimal satu baris terlebih dahulu.');
+                alert("Please select at least one row.");
                 return;
             }
+
+            // assign client to selected rows
             checkedRows.forEach(function (check) {
                 const row = check.closest('tr');
-                const sel = row.querySelector('.client-select');
-                if (sel) sel.value = clientId;
+                const select = row.querySelector('.client-select');
+                if (select) select.value = clientId;
             });
         });
     }
 
-    updateCount();
-})();
+    countCheckedRows();
 </script>
 
 <?php $this->load->view('templates/footer'); ?>

@@ -52,19 +52,19 @@ class Client extends CI_Controller
                     'field' => 'pic_name',
                     'label' => 'PIC Name',
                     'rules' => 'trim|max_length[255]'
-                ],
-                [
-                    'field' => 'ae_id',
-                    'label' => 'AE',
-                    'rules' => 'required|integer|callback_ae_id_check'
                 ]
+                // [
+                //     'field' => 'ae_id',
+                //     'label' => 'AE',
+                //     'rules' => 'required|integer|callback_ae_id_check'
+                // ]
             ]);
 
             if ($this->form_validation->run() === TRUE) {
                 $insert_id = $this->Client_model->insert([
                     'company_name' => $this->input->post('company_name'),
                     'pic_name' => $this->input->post('pic_name'),
-                    'ae_id' => $this->input->post('ae_id'),
+                    'ae_id' => $this->input->post('ae_id') ?: null,
                     'is_active' => TRUE
                 ]);
 
@@ -117,11 +117,11 @@ class Client extends CI_Controller
                     'label' => 'PIC Name',
                     'rules' => 'trim|max_length[255]'
                 ],
-                [
-                    'field' => 'ae_id',
-                    'label' => 'AE',
-                    'rules' => 'required|integer|callback_ae_id_check'
-                ],
+                // [
+                //     'field' => 'ae_id',
+                //     'label' => 'AE',
+                //     'rules' => 'required|integer|callback_ae_id_check'
+                // ],
                 [
                     'field' => 'is_active',
                     'label' => 'Status',
@@ -133,7 +133,7 @@ class Client extends CI_Controller
                 $updated = $this->Client_model->update($id, [
                     'company_name' => $this->input->post('company_name'),
                     'pic_name'     => $this->input->post('pic_name'),
-                    'ae_id'        => $this->input->post('ae_id'),
+                    'ae_id'        => $this->input->post('ae_id') ?: null,
                     'is_active'    => $this->input->post('is_active'),
                 ]);
 

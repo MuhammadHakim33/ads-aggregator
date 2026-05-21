@@ -41,11 +41,11 @@ class Ad_metrics extends CI_Controller
     {
         $client_id = (int) $client_id;
         
-        // Get client from Client_model
+        // get client from Client_model
         $client = $this->Client_model->get_by_id($client_id);
         
         if (!$client) {
-            $this->session->set_flashdata('errors', 'Klien tidak ditemukan.');
+            $this->session->set_flashdata('errors', 'Client not found.');
             redirect('ad-metrics');
             return;
         }
@@ -71,42 +71,34 @@ class Ad_metrics extends CI_Controller
     {
         if ($this->input->method() === 'post') {
             $selected_ids = $this->input->post('selected_ids') ?? [];
-            $client_map   = $this->input->post('client_id') ?? [];
+            $client_map = $this->input->post('client_id') ?? [];
 
             $saved = 0;
-            $skipped = 0;
-
             foreach ($selected_ids as $ad_id) {
-                $ad_id     = (int) $ad_id;
-                $client_id = isset($client_map[$ad_id]) ? (int) $client_map[$ad_id] : 0;
-
-                if ($client_id <= 0) {
-                    $skipped++;
-                    continue;
-                }
+                $ad_id = (int) $ad_id;
+                $client_id = (int) $client_map[$ad_id];
 
                 $rows = $this->Ad_metrics_model->assign_client($ad_id, $client_id);
                 $saved += $rows;
             }
 
             if ($saved > 0) {
-                $this->session->set_flashdata('success', "{$saved} ad content berhasil di-mapping ke klien." . ($skipped > 0 ? " {$skipped} baris dilewati (klien tidak dipilih)." : ''));
+                $this->session->set_flashdata('success', "{$saved} ads successfully mapped to client.");
             } else {
-                $this->session->set_flashdata('errors', 'Tidak ada data yang berhasil disimpan. Pastikan klien dipilih untuk baris yang dicentang.');
+                $this->session->set_flashdata('errors', 'No ads was successfully saved. Please select a client for the checked rows.');
             }
 
             redirect('ad-metrics/mapping');
             return;
         }
 
-        // GET: load unmapped contents and all clients
         $this->load->model('Client_model');
 
         $data = [
-            'title'           => 'Ad Content Mapping',
-            'unmapped'        => $this->Ad_metrics_model->get_unmapped_contents(),
-            'clients'         => $this->Client_model->get_all(),
-            'active_menu'     => 'ad_metrics',
+            'title' => 'Ad Content Mapping',
+            'unmapped' => $this->Ad_metrics_model->get_unmapped_contents(),
+            'clients' => $this->Client_model->get_all(),
+            'active_menu' => 'ad_metrics',
             'current_account' => [
                 'name' => $this->session->userdata('name'),
                 'role' => $this->session->userdata('role'),

@@ -5,7 +5,7 @@ INSERT INTO filter_keywords (platform, type, keyword, is_active, created_at) VAL
 ('ga4', 'html', '<a href="https://grahajktskripsi.blogspot.com/search/label/Ekonomi" rel="tag">Ekonomi</a>', 1, NOW());
 
 INSERT INTO accounts (name, email, password, role, is_active, created_at) VALUES
-('admin', 'admin@gmail.com', 'admin', 'superadmin', 1, NOW());
+('admin', 'admin@gmail.com', '$2y$12$WLrG.3kIy2nQH8iMwexlyehoM7uiDI3zaoYMKx6hAI5xtRue30u32', 'superadmin', 1, NOW());
 
 INSERT INTO clients (company_name, pic_name, ae_id, is_active, created_at) VALUES
 ('PT Weenie Hut Juniors', 'Firdaus', NULL, 1, NOW()),

@@ -44,7 +44,7 @@ class Account extends CI_Controller
                 $insert_id = $this->Account_model->insert([
                     'name' => $this->input->post('name'),
                     'email' => $this->input->post('email'),
-                    'password' => $this->input->post('password'),
+                    'password' => password_hash($this->input->post('password'), PASSWORD_BCRYPT),
                     'role' => $this->input->post('role'),
                     'is_active' => TRUE
                 ]);
@@ -94,9 +94,9 @@ class Account extends CI_Controller
 
                 // only update if password is not empty
                 $password = $this->input->post('password');
-                if ($password !== null && $password !== '') {
-                    $data['password'] = $password;
-                }
+	            if ($password !== null && $password !== '') {
+	                $data['password'] = password_hash($password, PASSWORD_BCRYPT);
+	            }
 
                 // update account
                 $updated = $this->Account_model->update($id, $data);

@@ -6,7 +6,7 @@ class Ad_metrics extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('Ad_metrics_model');
+        $this->load->model('Ad_model');
         $this->load->model('Client_model');
         
         // Require login
@@ -22,7 +22,7 @@ class Ad_metrics extends CI_Controller
 
     public function index()
     {
-        $clients = $this->Ad_metrics_model->get_clients_summary();
+        $clients = $this->Ad_model->get_clients_summary();
 
         $data = [
             'title' => 'Ad Metrics',
@@ -51,7 +51,7 @@ class Ad_metrics extends CI_Controller
         }
 
         // Get ad contents and metrics from Ad_metrics_model
-        $ad_contents = $this->Ad_metrics_model->get_client_ad_metrics($client_id);
+        $ad_contents = $this->Ad_model->get_client_ad_metrics($client_id);
 
         $data = [
             'title' => 'Detail Metrik - ' . $client->company_name,
@@ -78,7 +78,7 @@ class Ad_metrics extends CI_Controller
                 $ad_id = (int) $ad_id;
                 $client_id = (int) $client_map[$ad_id];
 
-                $rows = $this->Ad_metrics_model->assign_client($ad_id, $client_id);
+                $rows = $this->Ad_model->assign_client($ad_id, $client_id);
                 $saved += $rows;
             }
 
@@ -96,7 +96,7 @@ class Ad_metrics extends CI_Controller
 
         $data = [
             'title' => 'Ad Content Mapping',
-            'unmapped' => $this->Ad_metrics_model->get_unmapped_contents(),
+            'unmapped' => $this->Ad_model->get_unmapped_contents(),
             'clients' => $this->Client_model->get_all(),
             'active_menu' => 'ad_metrics',
             'current_account' => [

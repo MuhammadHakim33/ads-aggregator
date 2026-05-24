@@ -13,7 +13,7 @@ class Ga4 extends CI_Controller
         parent::__construct();
         // load required models and libraries
         $this->load->model('Filter_keyword_model');
-        $this->load->model('Ad_content_model');
+        $this->load->model('Ad_model');
         $this->load->library('ga4_api');
     }
 
@@ -65,7 +65,7 @@ class Ga4 extends CI_Controller
             }
 
             // upsert contents
-            $this->Ad_content_model->bulk_upsert_contents($content_rows);
+            $this->Ad_model->bulk_upsert_contents($content_rows);
 
         } catch (\Exception $e) {
             log_message('error', '[Cron/Ga4::fetch_articles] ' . $e->getMessage());
@@ -88,7 +88,7 @@ class Ga4 extends CI_Controller
 
         try {
             // get identifiers contents
-            $saved = $this->Ad_content_model->get_identifiers_by_platform('ga4', $since, $until);
+            $saved = $this->Ad_model->get_identifiers_by_platform('ga4', $since, $until);
             $urls = array_column($saved, 'content_identifier');
             $content_map = array_column($saved, 'id', 'content_identifier');
 
@@ -121,7 +121,7 @@ class Ga4 extends CI_Controller
             }
 
             // upsert metrics
-            $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
+            $this->Ad_model->bulk_upsert_metrics($metric_rows);
 
         } catch (\Exception $e) {
             log_message('error', '[Cron/Ga4::sync_insights] ' . $e->getMessage());

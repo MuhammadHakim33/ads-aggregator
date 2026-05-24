@@ -21,7 +21,7 @@ class Dashboard extends CI_Controller
     public function index()
     {
         $this->load->model('Client_model');
-        $this->load->model('Ad_content_model');
+        $this->load->model('Ad_model');
 
         $data = [
             'title' => 'Dashboard',
@@ -31,7 +31,7 @@ class Dashboard extends CI_Controller
                 'role' => $this->session->userdata('role'),
             ],
             'total_active_clients' => $this->Client_model->count_active(),
-            'total_active_ads' => $this->Ad_content_model->count_active(),
+            'total_active_ads' => $this->Ad_model->count_active(),
         ];
 
         $this->load->view('dashboard', $data);

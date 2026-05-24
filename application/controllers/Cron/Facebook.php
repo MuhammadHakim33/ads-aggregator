@@ -13,7 +13,7 @@ class Facebook extends CI_Controller
         parent::__construct();
         // load required models and libraries
         $this->load->model('Filter_keyword_model');
-        $this->load->model('Ad_content_model');
+        $this->load->model('Ad_model');
         $this->load->library('meta_graph');
     }
 
@@ -53,7 +53,7 @@ class Facebook extends CI_Controller
             }
 
             // upsert contents
-            $this->Ad_content_model->bulk_upsert_contents($content_rows);
+            $this->Ad_model->bulk_upsert_contents($content_rows);
 
         } catch (\Exception $e) {
             log_message('error', '[Cron/Facebook::fetch_posts] ' . $e->getMessage());
@@ -76,7 +76,7 @@ class Facebook extends CI_Controller
 
         try {
             // get content ids
-            $content_ids = $this->Ad_content_model->get_identifiers_by_platform('facebook', $since, $until);
+            $content_ids = $this->Ad_model->get_identifiers_by_platform('facebook', $since, $until);
             
             if (empty($content_ids)) {
                 echo "[Facebook] No active content found in the given date range.\n";
@@ -96,7 +96,7 @@ class Facebook extends CI_Controller
             $metric_rows = $this->build_metric_rows($insights, $content_id_map);
 
             // upsert metrics
-            $this->Ad_content_model->bulk_upsert_metrics($metric_rows);
+            $this->Ad_model->bulk_upsert_metrics($metric_rows);
 
         } catch (\Exception $e) {
             log_message('error', '[Cron/Facebook::sync_insights] ' . $e->getMessage());

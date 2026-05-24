@@ -71,7 +71,7 @@ class Ad_model extends CI_Model
                 SUM(CASE WHEN a.is_active = 1 THEN 1 ELSE 0 END) as active_ads,
                 GROUP_CONCAT(DISTINCT a.platform SEPARATOR ',') as platforms
             FROM clients c
-            LEFT JOIN ad_contents a ON c.id = a.client_id
+            LEFT JOIN {$this->table_contents} a ON c.id = a.client_id
             WHERE c.deleted_at IS NULL
             GROUP BY c.id
             ORDER BY c.company_name ASC
@@ -144,5 +144,44 @@ class Ad_model extends CI_Model
         $this->db->where('client_id IS NULL', NULL, FALSE);
         $this->db->update($this->table_contents, ['client_id' => (int)$client_id]);
         return $this->db->affected_rows();
+    }
+
+    public function get_ad_with_metrics($ad_content_id)
+    {
+        $ad_content_id = (int) $ad_content_id;
+
+        // get the ad content joined with client info
+        $query = $this->db->query("
+            SELECT
+                a.id,
+                a.title,
+                a.platform,
+                a.ad_type,
+                a.content_identifier,
+                a.is_active,
+                a.created_at,
+                c.id          AS client_id,
+                c.company_name,
+                c.pic_name
+            FROM {$this->table_contents} a
+            LEFT JOIN clients c ON c.id = a.client_id
+            WHERE a.id = {$ad_content_id}
+            LIMIT 1
+        ");
+
+        $ad = $query->row();
+
+        if (!$ad) {
+            return null;
+        }
+
+        // get all metrics for this ad
+        $this->db->where('ad_content_id', $ad_content_id);
+        $this->db->order_by('metric_name', 'ASC');
+        $metrics = $this->db->get($this->table_metrics)->result();
+
+        $ad->metrics = $metrics;
+
+        return $ad;
     }
 }

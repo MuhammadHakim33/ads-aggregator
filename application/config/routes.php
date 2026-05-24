@@ -66,6 +66,8 @@ $route['client'] = 'client/index';
 $route['ad-metrics'] = 'ad_metrics/index';
 $route['ad-metrics/mapping'] = 'ad_metrics/mapping';
 $route['ad-metrics/detail/(:num)'] = 'ad_metrics/detail/$1';
+$route['ad-metrics/export_pdf/(:num)'] = 'ad_metrics/export_pdf/$1';
+$route['ad-metrics/export_excel/(:num)'] = 'ad_metrics/export_excel/$1';
 
 $route['config/filter-keyword/create'] = 'configuration/filter_keyword/create';
 $route['config/filter-keyword/edit/(:num)'] = 'configuration/filter_keyword/edit/$1';

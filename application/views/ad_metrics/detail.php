@@ -54,6 +54,7 @@
                                 <th scope="col" class="text-center">Metric Count</th>
                                 <th scope="col" class="text-center">Status</th>
                                 <th scope="col" class="text-center">Metric Detail</th>
+                                <th scope="col" class="text-center">Export</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -98,11 +99,42 @@
                                         <span class="text-muted small">No metric data.</span>
                                     <?php endif; ?>
                                 </td>
+                                <!-- export dropdown -->
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button
+                                            class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                            type="button"
+                                            id="exportDropdown-<?= $ad->id ?>"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
+                                            title="Export">
+                                            <i class="bi bi-download"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="exportDropdown-<?= $ad->id ?>">
+                                            <li>
+                                                <a class="dropdown-item"
+                                                   href="<?= base_url('ad-metrics/export_pdf/' . $ad->id) ?>"
+                                                   target="_blank">
+                                                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                                                    Export PDF
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item"
+                                                   href="<?= base_url('ad-metrics/export_excel/' . $ad->id) ?>">
+                                                    <i class="bi bi-file-earmark-spreadsheet text-success me-2"></i>
+                                                    Export Excel
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
                             </tr>
                             <?php if ($metricCount > 0): ?>
                             <!-- metrics collapse row -->
                             <tr class="ad-metrics-row bg-body-secondary" data-platform="<?= htmlspecialchars($ad->platform) ?>" data-adtype="<?= htmlspecialchars($ad->ad_type) ?>" data-active="<?= $ad->is_active ? '1' : '0' ?>">
-                                <td colspan="6" class="p-0 border-top-0">
+                                <td colspan="7" class="p-0 border-top-0">
                                     <div class="collapse" id="<?= $collapseId ?>">
                                         <div class="p-3">
                                             <table class="table table-sm table-bordered mb-0 bg-white rounded">

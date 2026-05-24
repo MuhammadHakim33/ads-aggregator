@@ -107,4 +107,52 @@ class Ad_metrics extends CI_Controller
 
         $this->load->view('ad_metrics/mapping', $data);
     }
+
+    public function export_pdf($ad_content_id = 0)
+    {
+        $ad_content_id = (int) $ad_content_id;
+
+        if ($ad_content_id <= 0) {
+            show_error('Invalid ad content ID.', 400);
+            return;
+        }
+
+        $ad = $this->Ad_model->get_ad_with_metrics($ad_content_id);
+
+        if (!$ad) {
+            show_error('Ad content not found.', 404);
+            return;
+        }
+
+        // render the html template to a string
+        $html = $this->load->view('templates/pdf', ['ad' => $ad], TRUE);
+
+        // load library and stream pdf
+        $this->load->library('Export_pdf');
+        $filename = 'ad_report_' . $ad_content_id . '_' . date('Ymd');
+        $this->export_pdf->generate($html, $filename);
+    }
+
+    public function export_excel($ad_content_id = 0)
+    {
+        $ad_content_id = (int) $ad_content_id;
+
+        if ($ad_content_id <= 0) {
+            show_error('Invalid ad content ID.', 400);
+            return;
+        }
+
+        $ad = $this->Ad_model->get_ad_with_metrics($ad_content_id);
+
+        if (!$ad) {
+            show_error('Ad content not found.', 404);
+            return;
+        }
+
+        // load library and stream excel file
+        $this->load->library('Export_excel');
+        $filename = 'ad_report_' . $ad_content_id . '_' . date('Ymd');
+        $this->export_excel->generate($ad, $filename);
+    }
 }
+

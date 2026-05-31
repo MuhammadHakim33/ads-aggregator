@@ -1,46 +1,29 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Client extends CI_Controller
+class Client extends MY_Controller
 {
     public function __construct()
     {
         parent::__construct();
         $this->load->model('Client_model');
         $this->load->model('Account_model');
-
-        // require login and superadmin role for all methods
-        if (!$this->session->userdata('logged_in')) {
-            redirect('auth');
-        }
-
-        // unauthorized if role is not superadmin
-        if ($this->session->userdata('role') !== 'superadmin') {
-            show_error('Unauthorized', 403);
-        }
     }
 
     public function index()
     {
         $data =  [
             'title' => 'Client',
-            'clients' => $this->Client_model->get_all(),
             'active_menu' => 'client',
-            'current_account' => [
-                'name' => $this->session->userdata('name'),
-                'role' => $this->session->userdata('role')
-            ]
+            'clients' => $this->Client_model->get_all()
         ];
 
-        $this->load->view('client/index', $data);
+        $this->render('client/index', $data);
     }
 
     public function create()
     {
         if ($this->input->method() === 'post') {
-            // Load form validation library
-            $this->load->library('form_validation');
-            // Set validation rules using callback method
             $this->form_validation->set_rules([
                 [
                     'field' => 'company_name',
@@ -52,11 +35,6 @@ class Client extends CI_Controller
                     'label' => 'PIC Name',
                     'rules' => 'trim|max_length[255]'
                 ]
-                // [
-                //     'field' => 'ae_id',
-                //     'label' => 'AE',
-                //     'rules' => 'required|integer|callback_ae_id_check'
-                // ]
             ]);
 
             if ($this->form_validation->run() === TRUE) {
@@ -79,15 +57,11 @@ class Client extends CI_Controller
 
         $data =  [
             'title' => 'Create Client',
-            'ae_list' => $this->Account_model->get_all_ae(),
             'active_menu' => 'client',
-            'current_account' => [
-                'name' => $this->session->userdata('name'),
-                'role' => $this->session->userdata('role')
-            ]
+            'ae_list' => $this->Account_model->get_all_ae()
         ];
 
-        $this->load->view('client/create', $data);
+        $this->render('client/create', $data);
     }
 
     public function edit($id)
@@ -101,10 +75,6 @@ class Client extends CI_Controller
         }
 
         if ($this->input->method() === 'post') {
-            // Load form validation library
-            $this->load->library('form_validation');
-
-            // Set validation rules
             $this->form_validation->set_rules([
                 [
                     'field' => 'company_name',
@@ -116,11 +86,6 @@ class Client extends CI_Controller
                     'label' => 'PIC Name',
                     'rules' => 'trim|max_length[255]'
                 ],
-                // [
-                //     'field' => 'ae_id',
-                //     'label' => 'AE',
-                //     'rules' => 'required|integer|callback_ae_id_check'
-                // ],
                 [
                     'field' => 'is_active',
                     'label' => 'Status',
@@ -149,15 +114,11 @@ class Client extends CI_Controller
         $data =  [
             'title' => 'Edit Client',
             'client' => $client,
-            'ae_list' => $this->Account_model->get_all_ae(),
             'active_menu' => 'client',
-            'current_account' => [
-                'name' => $this->session->userdata('name'),
-                'role' => $this->session->userdata('role')
-            ]
+            'ae_list' => $this->Account_model->get_all_ae()
         ];
 
-        $this->load->view('client/edit', $data);
+        $this->render('client/edit', $data);
     }
 
     public function delete($id)
@@ -183,19 +144,5 @@ class Client extends CI_Controller
         }
 
         redirect('client');
-    }
-
-    public function ae_id_check($ae_id)
-    {
-        if ($ae_id === null || $ae_id === '') {
-            return TRUE;
-        }
-
-        if ($this->Account_model->is_ae_exist_by_id($ae_id) == 0) {
-            $this->form_validation->set_message('ae_id_check', 'AE ID does not exist');
-            return FALSE;
-        }
-
-        return TRUE;
     }
 }

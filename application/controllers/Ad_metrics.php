@@ -1,75 +1,53 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Ad_metrics extends CI_Controller
+class Ad_metrics extends MY_Controller
 {
     public function __construct()
     {
         parent::__construct();
         $this->load->model('Ad_model');
         $this->load->model('Client_model');
-        
-        // Require login
-        if (!$this->session->userdata('logged_in')) {
-            redirect('auth');
-        }
-
-        // unauthorized if role is not superadmin
-        if ($this->session->userdata('role') !== 'superadmin') {
-            show_error('Unauthorized', 403);
-        }
     }
 
     public function index()
     {
-        $clients = $this->Ad_model->get_clients_summary();
-
         $data = [
             'title' => 'Ad Metrics',
-            'clients' => $clients,
             'active_menu' => 'ad_metrics',
-            'current_account' => [
-                'name' => $this->session->userdata('name'),
-                'role' => $this->session->userdata('role')
-            ]
+            'clients' => $this->Ad_model->get_clients_summary()
         ];
 
-        $this->load->view('ad_metrics/index', $data);
+        $this->render('ad_metrics/index', $data);
     }
 
-    public function detail($client_id)
+    public function detail($id)
     {
-        $client_id = (int) $client_id;
-        
-        // get client from Client_model
-        $client = $this->Client_model->get_by_id($client_id);
-        
+        // check client exist
+        $client = $this->Client_model->get_by_id($id);
         if (!$client) {
             $this->session->set_flashdata('errors', 'Client not found.');
             redirect('ad-metrics');
             return;
         }
 
-        // Get ad contents and metrics from Ad_metrics_model
-        $ad_contents = $this->Ad_model->get_client_ad_metrics($client_id);
+        // get ad contents and metrics
+        $ad_contents = $this->Ad_model->get_client_ad_metrics($id);
 
         $data = [
             'title' => 'Detail Metrik - ' . $client->company_name,
-            'client' => $client,
-            'ad_contents' => $ad_contents,
             'active_menu' => 'ad_metrics',
-            'current_account' => [
-                'name' => $this->session->userdata('name'),
-                'role' => $this->session->userdata('role')
-            ]
+            'ad_contents' => $ad_contents,
+            'client' => $client
         ];
 
-        $this->load->view('ad_metrics/detail', $data);
+        $this->render('ad_metrics/detail', $data);
     }
 
     public function mapping()
     {
         if ($this->input->method() === 'post') {
+
             $selected_ids = $this->input->post('selected_ids') ?? [];
             $client_map = $this->input->post('client_id') ?? [];
 
@@ -92,33 +70,20 @@ class Ad_metrics extends CI_Controller
             return;
         }
 
-        $this->load->model('Client_model');
-
         $data = [
             'title' => 'Ad Content Mapping',
-            'unmapped' => $this->Ad_model->get_unmapped_contents(),
-            'clients' => $this->Client_model->get_all(),
             'active_menu' => 'ad_metrics',
-            'current_account' => [
-                'name' => $this->session->userdata('name'),
-                'role' => $this->session->userdata('role'),
-            ],
+            'clients' => $this->Client_model->get_all(),
+            'unmapped' => $this->Ad_model->get_unmapped_contents()
         ];
 
-        $this->load->view('ad_metrics/mapping', $data);
+        $this->render('ad_metrics/mapping', $data);
     }
 
-    public function export_pdf($ad_content_id = 0)
+    public function export_pdf($id)
     {
-        $ad_content_id = (int) $ad_content_id;
-
-        if ($ad_content_id <= 0) {
-            show_error('Invalid ad content ID.', 400);
-            return;
-        }
-
-        $ad = $this->Ad_model->get_ad_with_metrics($ad_content_id);
-
+        // get ad
+        $ad = $this->Ad_model->get_ad_with_metrics($id);
         if (!$ad) {
             show_error('Ad content not found.', 404);
             return;
@@ -129,21 +94,14 @@ class Ad_metrics extends CI_Controller
 
         // load library and stream pdf
         $this->load->library('Export_pdf');
-        $filename = 'ad_report_' . $ad_content_id . '_' . date('Ymd');
+        $filename = 'ad_report_' . $id . '_' . date('Ymd');
         $this->export_pdf->generate($html, $filename);
     }
 
-    public function export_excel($ad_content_id = 0)
+    public function export_excel($id)
     {
-        $ad_content_id = (int) $ad_content_id;
-
-        if ($ad_content_id <= 0) {
-            show_error('Invalid ad content ID.', 400);
-            return;
-        }
-
-        $ad = $this->Ad_model->get_ad_with_metrics($ad_content_id);
-
+        // get ad
+        $ad = $this->Ad_model->get_ad_with_metrics($id);
         if (!$ad) {
             show_error('Ad content not found.', 404);
             return;
@@ -151,7 +109,7 @@ class Ad_metrics extends CI_Controller
 
         // load library and stream excel file
         $this->load->library('Export_excel');
-        $filename = 'ad_report_' . $ad_content_id . '_' . date('Ymd');
+        $filename = 'ad_report_' . $id . '_' . date('Ymd');
         $this->export_excel->generate($ad, $filename);
     }
 }

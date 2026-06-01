@@ -64,6 +64,8 @@ $route['client/delete/(:num)'] = 'client/delete/$1';
 $route['client'] = 'client/index';
 
 $route['ads'] = 'ads/index';
+$route['ads/connect'] = 'ads/connect';
+$route['ads/export/(:any)/(:num)'] = 'ads/export/$1/$2';
 $route['ads/(:num)'] = 'ads/index/$1';
 
 $route['config/filter-keyword/create'] = 'configuration/filter_keyword/create';

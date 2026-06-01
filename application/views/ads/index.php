@@ -12,7 +12,11 @@
             <!-- page heading -->
             <div class="d-flex justify-content-between align-items-center pb-2 mb-4">
                 <div></div>
-                <div><span class="badge bg-secondary p-2">Total: <?= count($ad_contents) ?> Ads</span></div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="<?= base_url('ads/connect') ?>" class="btn btn-primary btn-sm">
+                        <i class="bi bi-link-45deg"></i> Connect Ads
+                    </a>
+                </div>
             </div>
 
             <!-- flash alerts -->
@@ -44,9 +48,9 @@
                                 <th scope="col" style="width:25%">Ads</th>
                                 <th scope="col">Client</th>
                                 <th scope="col">Platform</th>
-                                <th scope="col">Type</th>
-                                <th scope="col" class="text-center">Metric Count</th>
+                                <th scope="col" class="text-center">Metric</th>
                                 <th scope="col" class="text-center">Status</th>
+                                <th scope="col" class="text-center">Link</th>
                                 <th scope="col" class="text-center">Detail</th>
                                 <th scope="col" class="text-center">Export</th>
                             </tr>
@@ -68,17 +72,12 @@
                                     <?php if (!empty($ad->company_name)): ?>
                                         <?= htmlspecialchars($ad->company_name) ?>
                                     <?php else: ?>
-                                        <span class="text-muted fst-italic">Unmapped</span>
+                                        <span class="text-muted fst-italic">unconnected</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <span class="badge text-bg-light">
                                         <?= htmlspecialchars(ucfirst($ad->platform)) ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge text-bg-light">
-                                        <?= htmlspecialchars(ucfirst($ad->ad_type)) ?>
                                     </span>
                                 </td>
                                 <td class="text-center">
@@ -90,6 +89,26 @@
                                 </td>
                                 <td class="text-center">
                                     <span class="badge text-bg-<?= $statusClass ?>"><?= $statusText ?></span>
+                                </td>
+                                <td class="text-center">
+                                    <?php
+                                        $post_url = '#';
+                                        $platform = strtolower($ad->platform);
+                                        if ($platform === 'facebook') {
+                                            $post_url = 'https://www.facebook.com/' . $ad->content_identifier;
+                                        } elseif ($platform === 'instagram') {
+                                            $post_url = 'https://www.instagram.com/p/' . $ad->content_identifier . '/';
+                                        } elseif ($platform === 'youtube') {
+                                            $post_url = 'https://www.youtube.com/watch?v=' . $ad->content_identifier;
+                                        }
+                                    ?>
+                                    <?php if ($post_url !== '#'): ?>
+                                        <a href="<?= $post_url ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Buka postingan asli">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-center">
                                     <?php if ($metricCount > 0): ?>

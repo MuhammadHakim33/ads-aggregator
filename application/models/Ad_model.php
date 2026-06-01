@@ -60,37 +60,6 @@ class Ad_model extends CI_Model
         return ['upserted' => $this->db->affected_rows()];
     }
 
-    public function get_client_ad_metrics($client_id)
-    {
-        // get ad contents for the client
-        $this->db->where('client_id', $client_id);
-        $ad_contents = $this->db->get($this->table_contents)->result();
-
-        if (empty($ad_contents)) {
-            return [];
-        }
-
-        // get metrics for these ads
-        $ad_ids = array_column($ad_contents, 'id');
-        
-        $this->db->where_in('ad_content_id', $ad_ids);
-        $this->db->order_by('metric_name', 'ASC');
-        $metrics = $this->db->get($this->table_metrics)->result();
-        
-        // group metrics by ad_content_id
-        $metrics_by_ad = [];
-        foreach ($metrics as $m) {
-            $metrics_by_ad[$m->ad_content_id][] = $m;
-        }
-        
-        // assign metrics back to ad_contents
-        foreach ($ad_contents as &$ad) {
-            $ad->metrics = isset($metrics_by_ad[$ad->id]) ? $metrics_by_ad[$ad->id] : [];
-        }
-
-        return $ad_contents;
-    }
-
     public function get_identifiers_by_platform($platform, $since, $until)
     {
         $this->db->select('id, content_identifier');
@@ -108,14 +77,6 @@ class Ad_model extends CI_Model
     {
         $this->db->where('is_active', 1);
         return $this->db->count_all_results($this->table_contents);
-    }
-
-    public function get_unmapped_contents()
-    {
-        $this->db->where('client_id IS NULL', NULL, FALSE);
-        $this->db->order_by('platform', 'ASC');
-        $this->db->order_by('created_at', 'DESC');
-        return $this->db->get($this->table_contents)->result();
     }
 
     public function get_ad_with_metrics($ad_content_id)
@@ -205,5 +166,13 @@ class Ad_model extends CI_Model
         }
 
         return $ad_contents;
+    }
+
+    public function get_unconnected_ads()
+    {
+        $this->db->where('client_id IS NULL', NULL, FALSE);
+        $this->db->order_by('platform', 'ASC');
+        $this->db->order_by('created_at', 'DESC');
+        return $this->db->get($this->table_contents)->result();
     }
 }

@@ -77,7 +77,7 @@
                                 </td>
                                 <td>
                                     <span class="badge text-bg-light">
-                                        <?= htmlspecialchars(ucfirst($ad->platform)) ?>
+                                        <?= htmlspecialchars($platform_labels[strtolower($ad->platform)] ?? ucfirst($ad->platform)) ?>
                                     </span>
                                 </td>
                                 <td class="text-center">

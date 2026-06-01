@@ -8,14 +8,21 @@ class Ads extends MY_Controller
         parent::__construct();
         $this->load->model('Ad_model');
         $this->load->model('Client_model');
+        $this->load->library('Platform_registry');
     }
 
     public function index()
     {
+        $platform_labels = [];
+        foreach ($this->platform_registry->configs() as $name => $conf) {
+            $platform_labels[$name] = $conf['label'] ?? ucfirst($name);
+        }
+
         $data = [
             'title' => 'Ads',
             'active_menu' => 'ads',
-            'ad_contents' => $this->Ad_model->get_all_ad_metrics()
+            'ad_contents' => $this->Ad_model->get_all_ad_metrics(),
+            'platform_labels' => $platform_labels
         ];
 
         $this->render('ads/index', $data);
@@ -46,11 +53,17 @@ class Ads extends MY_Controller
             return;
         }
 
+        $platform_labels = [];
+        foreach ($this->platform_registry->configs() as $name => $conf) {
+            $platform_labels[$name] = $conf['label'] ?? ucfirst($name);
+        }
+
         $data = [
             'title' => 'Connect Ads',
             'active_menu' => 'ads',
             'clients' => $this->Client_model->get_all(),
-            'unconnected' => $this->Ad_model->get_unconnected_ads()
+            'unconnected' => $this->Ad_model->get_unconnected_ads(),
+            'platform_labels' => $platform_labels
         ];
 
         $this->render('ads/connect', $data);
@@ -58,8 +71,6 @@ class Ads extends MY_Controller
 
     public function export($format, $id)
     {
-        $this->load->library('Export_registry');
-
         $ad = $this->Ad_model->get_ad_with_metrics($id);
         if (!$ad) {
             show_error('Ad content not found.', 404);

@@ -33,18 +33,6 @@ class Platform_registry
     {
         return $this->configs[$name] ?? null;
     }
-
-    public function api_groups()
-    {
-        $groups = [];
-        foreach ($this->configs as $name => $conf) {
-            $group = $conf['api_group'];
-            if (!isset($groups[$group])) {
-                $groups[$group] = $conf;
-            }
-        }
-        return $groups;
-    }
    
     public function names_as_list()
     {

@@ -72,7 +72,7 @@
                                             <small class="font-monospace text-muted"><?= htmlspecialchars($ad->content_identifier) ?></small>
                                         </td>
                                         <td>
-                                            <span class="badge text-bg-light"><?= htmlspecialchars(ucfirst($ad->platform)) ?></span>
+                                            <span class="badge text-bg-light"><?= htmlspecialchars($platform_labels[strtolower($ad->platform)] ?? ucfirst($ad->platform)) ?></span>
                                         </td>
                                         <td class="text-center">
                                             <?php

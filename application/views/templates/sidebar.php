@@ -21,6 +21,11 @@
             </a>
         </li>
         <li class="nav-item">
+            <a href="<?= base_url('ads') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'ads' ? 'active text-white' : '' ?>">
+                <i class="bi bi-collection-play me-2"></i> All Ads
+            </a>
+        </li>
+        <li class="nav-item">
             <a href="<?= base_url('ad-metrics') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'ad_metrics' ? 'active text-white' : '' ?>">
                 <i class="bi bi-bar-chart-line me-2"></i> Ad Metrics
             </a>

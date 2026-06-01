@@ -156,4 +156,54 @@ class Ad_model extends CI_Model
 
         return $ad;
     }
+
+    public function count_all_ads()
+    {
+        return $this->db->count_all_results($this->table_contents);
+    }
+
+    public function get_all_ad_metrics($limit = null, $offset = null)
+    {
+        $this->db->select('a.*, c.company_name');
+        $this->db->from($this->table_contents . ' a');
+        $this->db->join('clients c', 'c.id = a.client_id', 'left');
+        $this->db->order_by('a.created_at', 'DESC');
+        
+        if ($limit !== null) {
+            if ($offset !== null) {
+                $this->db->limit($limit, $offset);
+            } else {
+                $this->db->limit($limit);
+            }
+        }
+
+        $ad_contents = $this->db->get()->result();
+
+        if (empty($ad_contents)) {
+            return [];
+        }
+
+        $ad_ids = array_column($ad_contents, 'id');
+        
+        // Chunk metrics query just in case the limit is high
+        $metrics = [];
+        $chunks = array_chunk($ad_ids, 500);
+        foreach ($chunks as $chunk) {
+            $this->db->where_in('ad_content_id', $chunk);
+            $this->db->order_by('metric_name', 'ASC');
+            $res = $this->db->get($this->table_metrics)->result();
+            $metrics = array_merge($metrics, $res);
+        }
+        
+        $metrics_by_ad = [];
+        foreach ($metrics as $m) {
+            $metrics_by_ad[$m->ad_content_id][] = $m;
+        }
+        
+        foreach ($ad_contents as &$ad) {
+            $ad->metrics = isset($metrics_by_ad[$ad->id]) ? $metrics_by_ad[$ad->id] : [];
+        }
+
+        return $ad_contents;
+    }
 }

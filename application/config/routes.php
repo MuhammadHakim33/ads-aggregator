@@ -63,6 +63,9 @@ $route['client/edit/(:num)'] = 'client/edit/$1';
 $route['client/delete/(:num)'] = 'client/delete/$1';
 $route['client'] = 'client/index';
 
+$route['ads'] = 'ads/index';
+$route['ads/(:num)'] = 'ads/index/$1';
+
 $route['ad-metrics'] = 'ad_metrics/index';
 $route['ad-metrics/mapping'] = 'ad_metrics/mapping';
 $route['ad-metrics/detail/(:num)'] = 'ad_metrics/detail/$1';

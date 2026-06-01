@@ -17,6 +17,10 @@ class Platform_credential_model extends CI_Model
         $this->db->where('platform', $platform);
         $row = $this->db->get($this->table)->row();
 
+        if (!$row) {
+            return [];
+        }
+
         // decode credential data from json
         $decoded = json_decode($row->credential_data, TRUE);
         // check if json is valid

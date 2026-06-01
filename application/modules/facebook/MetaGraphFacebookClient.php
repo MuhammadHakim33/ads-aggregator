@@ -14,7 +14,7 @@ class MetaGraphFacebookClient extends MetaGraphBaseClient
         $page_id = $this->credentials['fb_page_id'] ?? '';
         
         // get page access token from meta graph api
-        $response = $this->make_request($page_id, ['fields' => 'access_token']);
+        $response = $this->make_request('get', $page_id, ['fields' => 'access_token']);
         
         if (empty($response['access_token'])) {
             throw new \RuntimeException('Failed getting page access token');
@@ -35,7 +35,7 @@ class MetaGraphFacebookClient extends MetaGraphBaseClient
         ];
         
         // passing $pat for overriding default system user token
-        $response = $this->make_request($page_id . '/feed', $params, $pat);
+        $response = $this->make_request('get', $page_id . '/feed', $params, $pat);
         $posts = $response['data'] ?? [];
 
         // filtering posts based on keyword
@@ -66,13 +66,14 @@ class MetaGraphFacebookClient extends MetaGraphBaseClient
         }
 
         // request facebook posts insights from meta graph api
-        $response = $this->make_request('', ['batch' => json_encode($batch)], $pat);
+        $response = $this->make_request('post', '', ['batch' => json_encode($batch)], $pat);
         
         // normalize facebook posts insights
-        foreach ($response as $res) {
+        foreach ($response as $index => $res) {
             if ($res['code'] === 200) {
+                $id = $ids[$index];
                 $body = json_decode($res['body'], TRUE);
-                $insights[] = $this->normalize_insights($body['data'] ?? []);
+                $insights[$id] = $this->normalize_insights($body['data'] ?? []);
                 continue;
             }
 

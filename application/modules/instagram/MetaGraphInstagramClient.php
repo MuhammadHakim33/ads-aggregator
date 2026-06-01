@@ -13,7 +13,7 @@ class MetaGraphInstagramClient extends MetaGraphBaseClient
         ];
         
         // request instagram media from meta graph api
-        $response = $this->make_request($ig_id . '/media', $params);
+        $response = $this->make_request('get', $ig_id . '/media', $params);
         $posts = $response['data'] ?? [];
 
         // filtering posts based on keyword
@@ -43,13 +43,14 @@ class MetaGraphInstagramClient extends MetaGraphBaseClient
         }
 
         // request instagram media insights from meta graph api
-        $response = $this->make_request('', ['batch' => json_encode($batch)]);
+        $response = $this->make_request('post', '', ['batch' => json_encode($batch)]);
         
         // normalize instagram media insights
-        foreach ($response as $res) {
+        foreach ($response as $index => $res) {
             if ($res['code'] === 200) {
+                $id = $ids[$index];
                 $body = json_decode($res['body'], TRUE);
-                $insights[] = $this->normalize_insights($body['data'] ?? []);
+                $insights[$id] = $this->normalize_insights($body['data'] ?? []);
                 continue;
             }
 

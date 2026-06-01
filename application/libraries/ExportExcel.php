@@ -1,6 +1,8 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+require_once APPPATH . 'core/Exporter.php';
+
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -8,13 +10,14 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 
-class Export_excel
+class ExportExcel implements Exporter
 {
-    public function generate($ad, $filename = 'export')
+    public function generate($ad, $filename)
     {
         // sanitize filename
         $filename = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $filename);
 
+        // instantiate spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Ad Metrics');
@@ -34,19 +37,19 @@ class Export_excel
             ['Generated',   date('d M Y H:i')],
         ];
 
+        // populate info rows
         $row = 1;
         foreach ($infoRows as $info) {
             $sheet->setCellValue('A' . $row, $info[0]);
             $sheet->setCellValue('B' . $row, $info[1]);
 
-            // style label column
+            // style info rows
             $sheet->getStyle('A' . $row)->applyFromArray([
                 'font' => ['bold' => true, 'color' => ['rgb' => '555555']],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F5F5F5']],
             ]);
             $row++;
         }
-
         $row++;
 
         // metrics table header
@@ -55,6 +58,7 @@ class Export_excel
         $sheet->setCellValue('B' . $row, 'Value');
         $sheet->setCellValue('C' . $row, 'Last Updated');
 
+        // style metrics header row
         $sheet->getStyle('A' . $row . ':C' . $row)->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => $headerFgColor]],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $headerBgColor]],
@@ -77,7 +81,7 @@ class Export_excel
 
                 // format value cell as number with thousand separator
                 $sheet->getStyle('B' . $row)->getNumberFormat()->setFormatCode('#,##0.##');
-
+                // style metric rows
                 $sheet->getStyle('A' . $row . ':C' . $row)->applyFromArray([
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
                     'borders' => [

@@ -9,7 +9,7 @@ class YoutubeApiClient
     public function __construct($credentials, $request)
     {
         // initialize youtube client for youtube data api
-        $this->credentials = json_decode($credentials->credential_data, true);
+        $this->credentials = $credentials;
         $this->request = $request;
     }
 
@@ -19,8 +19,8 @@ class YoutubeApiClient
             'part' => 'id',
             'channelId' => $this->credentials['channel_id'],
             'type' => 'video',
-            'publishedAfter' => $since,
-            'publishedBefore'=> $until,
+            'publishedAfter' => gmdate('Y-m-d\T00:00:00\Z', strtotime($since)),
+            'publishedBefore'=> gmdate('Y-m-d\T23:59:59\Z', strtotime($until)),
             'maxResults' => 50,
             'key' => $this->credentials['api_key'],
         ];

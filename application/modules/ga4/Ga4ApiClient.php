@@ -20,9 +20,9 @@ class Ga4ApiClient
 
     public function __construct($credentials, $request)
     {
-        $data = json_decode($credentials->credential_data, true);
-        $this->property_id = $data['property_id'];
-        $this->service_account = $data['service_account'];
+        $data = $credentials;
+        $this->property_id = $data['property_id'] ?? '';
+        $this->service_account = $data['service_account'] ?? '';
         $this->request = $request;
 
         if (empty($this->service_account['private_key'])) {

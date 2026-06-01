@@ -112,21 +112,13 @@
                                             <i class="bi bi-download"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="exportDropdown-<?= $ad->id ?>">
-                                            <li>
-                                                <a class="dropdown-item"
-                                                   href="<?= base_url('ad-metrics/export_pdf/' . $ad->id) ?>"
-                                                   target="_blank">
-                                                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
-                                                    Export PDF
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item"
-                                                   href="<?= base_url('ad-metrics/export_excel/' . $ad->id) ?>">
-                                                    <i class="bi bi-file-earmark-spreadsheet text-success me-2"></i>
-                                                    Export Excel
-                                                </a>
-                                            </li>
+                                            <?php foreach ($this->export_registry->enabled_keys() as $format): ?>
+                                                <li>
+                                                    <a class="dropdown-item" href="<?= base_url("ad-metrics/export/{$format}/{$ad->id}") ?>">
+                                                        Export <?= strtoupper($format) ?>
+                                                    </a>
+                                                </li>
+                                            <?php endforeach; ?>
                                         </ul>
                                     </div>
                                 </td>

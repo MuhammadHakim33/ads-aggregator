@@ -8,6 +8,7 @@ class Ad_metrics extends MY_Controller
         parent::__construct();
         $this->load->model('Ad_model');
         $this->load->model('Client_model');
+        $this->load->library('Export_registry');
     }
 
     public function index()
@@ -80,37 +81,68 @@ class Ad_metrics extends MY_Controller
         $this->render('ad_metrics/mapping', $data);
     }
 
-    public function export_pdf($id)
+    public function export($format, $id)
     {
-        // get ad
         $ad = $this->Ad_model->get_ad_with_metrics($id);
         if (!$ad) {
             show_error('Ad content not found.', 404);
             return;
         }
 
-        // render the html template to a string
-        $html = $this->load->view('templates/pdf', ['ad' => $ad], TRUE);
-
-        // load library and stream pdf
-        $this->load->library('Export_pdf');
-        $filename = 'ad_report_' . $id . '_' . date('Ymd');
-        $this->export_pdf->generate($html, $filename);
-    }
-
-    public function export_excel($id)
-    {
-        // get ad
-        $ad = $this->Ad_model->get_ad_with_metrics($id);
-        if (!$ad) {
-            show_error('Ad content not found.', 404);
+        // check if format is supported
+        if (!$this->export_registry->has($format)) {
+            show_error("Unknown export format: {$format}", 400);
             return;
         }
 
-        // load library and stream excel file
-        $this->load->library('Export_excel');
-        $filename = 'ad_report_' . $id . '_' . date('Ymd');
-        $this->export_excel->generate($ad, $filename);
+        // create exporter
+        $exporter = $this->make_exporter($format);
+        $filename = 'report_' . $id . '_' . date('Ymd');
+        $exporter->generate($ad, $filename);
     }
+
+    private function make_exporter($format)
+    {
+        // prepare conf
+        $conf = $this->export_registry->configs()[$format];
+        // include file
+        require_once $conf['class_path'];
+        // instantiate
+        $class = $conf['class'];
+        return new $class();
+    }
+
+    // public function export_pdf($id)
+    // {
+    //     // get ad
+    //     $ad = $this->Ad_model->get_ad_with_metrics($id);
+    //     if (!$ad) {
+    //         show_error('Ad content not found.', 404);
+    //         return;
+    //     }
+
+    //     // render the html template to a string
+    //     $html = $this->load->view('templates/pdf', ['ad' => $ad], TRUE);
+
+    //     // load library and stream pdf
+    //     $this->load->library('Export_pdf');
+    //     $filename = 'ad_report_' . $id . '_' . date('Ymd');
+    //     $this->export_pdf->generate($html, $filename);
+    // }
+
+    // public function export_excel($id)
+    // {
+    //     // get ad
+    //     $ad = $this->Ad_model->get_ad_with_metrics($id);
+    //     if (!$ad) {
+    //         show_error('Ad content not found.', 404);
+    //         return;
+    //     }
+
+    //     // load library and stream excel file
+    //     $this->load->library('Export_excel');
+    //     $filename = 'ad_report_' . $id . '_' . date('Ymd');
+    //     $this->export_excel->generate($ad, $filename);
+    // }
 }
 

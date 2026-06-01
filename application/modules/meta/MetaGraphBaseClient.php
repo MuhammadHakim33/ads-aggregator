@@ -9,7 +9,7 @@ abstract class MetaGraphBaseClient
 
     public function __construct($credentials, $request)
     {
-        $this->credentials = json_decode($credentials->credential_data, true);
+        $this->credentials = $credentials;
         $this->request = $request;
     }
 
@@ -18,7 +18,7 @@ abstract class MetaGraphBaseClient
         return $this->credentials['system_user_token'] ?? '';
     }
 
-    protected function make_request($endpoint, $params = [], $token_override = null)
+    protected function make_request($method = 'get', $endpoint, $params = [], $token_override = null)
     {
         // default using system user token
         $params['access_token'] = $token_override ?? $this->get_system_user_token();
@@ -26,7 +26,16 @@ abstract class MetaGraphBaseClient
         $url = $this->base_url . $this->api_version . '/' . $endpoint;
 
         // make request
-        $response = $this->request->get($url, $params);
+        switch ($method) {
+            case 'get':
+                $response = $this->request->get($url, $params);
+                break;
+            case 'post':
+                $response = $this->request->post($url, $params);
+                break;
+            default:
+                throw new \Exception("Invalid method: " . $method);
+        }
         
         if (isset($response['error'])) {
             throw new \Exception("Meta API Error: " . $response['error']['message']);

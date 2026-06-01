@@ -86,7 +86,7 @@ CREATE TABLE platform_credentials (
     platform ENUM('meta', 'ga4', 'youtube') NOT NULL UNIQUE,
     credential_data LONGTEXT NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
-    last_tested_at TIMESTAMP NULL,
+    -- last_tested_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 

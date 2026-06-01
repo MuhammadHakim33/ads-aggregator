@@ -1,43 +1,29 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Account extends CI_Controller
+class Account extends MY_Controller
 {
     public function __construct()
     {
         parent::__construct();
         $this->load->model('Account_model');
-
-        // require login
-        if (!$this->session->userdata('logged_in')) {
-            redirect('auth');
-        }
-
-        // unauthorized if role is not superadmin
-        if ($this->session->userdata('role') !== 'superadmin') {
-            show_error('Unauthorized', 403);
-        }
     }
 
     public function index()
     {
-        $data['accounts'] = $this->Account_model->get_all();
-        $data['current_account'] = [
-            'name' => $this->session->userdata('name'),
-            'role' => $this->session->userdata('role')
+        $data = [
+            'title' => 'Account',
+            'active_menu' => 'account',
+            'accounts' => $this->Account_model->get_all()
         ];
-        $data['title'] = 'Account';
-        $data['active_menu'] = 'account';
 
-        $this->load->view('account/index', $data);
+        $this->render('account/index', $data);
     }
 
     public function create()
     {
-        // check if method is post
         if ($this->input->method() === 'post') {
-            // validate form
-            $this->load->library('form_validation');
+
             $this->form_validation->set_rules($this->_create_rules());
 
             if ($this->form_validation->run() === TRUE) {
@@ -59,14 +45,12 @@ class Account extends CI_Controller
             }
         }
 
-        $data['title'] = 'Create Account';
-        $data['active_menu'] = 'account';
-        $data['current_account'] = [
-            'name' => $this->session->userdata('name'),
-            'role' => $this->session->userdata('role')
+        $data = [
+            'title' => 'Create Account',
+            'active_menu' => 'account'
         ];
 
-        $this->load->view('account/create', $data);
+        $this->render('account/create', $data);
     }
 
     public function edit($id)
@@ -76,12 +60,11 @@ class Account extends CI_Controller
         if (!$account) {
             $this->session->set_flashdata('errors', '<p>Account not found.</p>');
             redirect('account');
+            return;
         }
 
-        // check if method is post
         if ($this->input->method() === 'post') {
-            // validate form
-            $this->load->library('form_validation');
+
             $this->form_validation->set_rules($this->_update_rules($id));
 
             if ($this->form_validation->run() === TRUE) {
@@ -111,23 +94,21 @@ class Account extends CI_Controller
             }
         }
 
-        $data['account'] = $account;
-        $data['title'] = 'Edit Account';
-        $data['active_menu'] = 'account';
-        $data['current_account'] = [
-            'name' => $this->session->userdata('name'),
-            'role' => $this->session->userdata('role')
+        $data = [
+            'title' => 'Edit Account',
+            'active_menu' => 'account',
+            'account' => $account
         ];
 
-        $this->load->view('account/edit', $data);
+        $this->render('account/edit', $data);
     }
 
 
     public function delete($id)
     {
-        // check if method is post
         if ($this->input->method() !== 'post') {
             redirect('account');
+            return;
         }
 
         // check account exists

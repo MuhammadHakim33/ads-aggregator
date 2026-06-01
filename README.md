@@ -1,64 +1,42 @@
 # Ads Aggregator
 
 ## Initial Setup (Required)
-Create the `.env` configuration file from `.env.example` and update the database settings if needed.
+Create the `.env` configuration file from `.env.example`. Make sure your database settings are configured to connect to your local MySQL instance (port 3306):
 
-## Option 1: Running with Docker (Recommended)
-This is the most practical method because the server and database are automatically set up within the containers.
+```env
+DB_HOST=127.0.0.1
+DB_NAME=aggregator
+DB_USER=user
+DB_PASSWORD=pass
+DB_ROOT_PASSWORD=root
+```
 
-**Prerequisites:**
-- Make sure **Docker** and **Docker Compose** are installed on your computer.
+## Running the Application
 
-**Steps:**
-1. Navigate to the `docker` directory:
-   ```bash
-   cd docker
-   ```
-2. Run the containers:
-   ```bash
-   docker-compose up -d
-   ```
-3. Wait until the process is complete. The application can be accessed via browser at:
-   👉 **http://localhost:8080**
-4. To stop the application, run the following command (make sure you are still inside the `docker` directory):
-   ```bash
-   docker-compose down
-   ```
-
----
-
-## Option 2: Running Without Docker (Manual)
-Use this option if you want to run the application directly using your local environment (XAMPP/MAMP/Native).
+This project uses Docker to run the database (MySQL), while the application code runs natively using PHP and Nginx/Apache on your host machine (WSL/Linux).
 
 **Prerequisites:**
 - PHP (Version 7.x)
-- MySQL / MariaDB
 - Composer
+- Docker & Docker Compose
+- Nginx or Apache (to serve the app locally)
 
 **Steps:**
-1. **Install Dependencies:**
-   Run the following command in the project's root directory to download dependencies:
+
+1. **Install PHP Dependencies:**
+   Run the following command to install the required libraries:
    ```bash
    composer install
    ```
-2. **Setup Database:**
-   - Open MySQL and create a new database (e.g., named `ci3_db`).
-   - Import the table structure from the `migration/tables.sql` file into the database.
-   - Import the seed/dummy data from the `migration/dummy.sql` file to populate initial data.
-   - Make sure the settings in the `.env` file match your local database credentials:
-     ```env
-     DB_HOST=localhost
-     DB_NAME=ci3_db
-     DB_USER=root
-     DB_PASSWORD=
-     ```
-3. **Run the Application:**
-   You can use PHP's built-in web server by running this command in the root directory:
-   ```bash
-   php -S localhost:8080
-   ```
-4. The application can be accessed via browser at:
-   👉 **http://localhost:8080**
+
+2. **Database Migration & Seeding:**
+   (If you haven't already setup the database)
+   - Import the table structure from `migration/tables.sql` into the database.
+   - Import the dummy data from `migration/dummy.sql`.
+
+3. **Access the Application:**
+   Access the app through your local web server (e.g., Nginx) at the configured domain or port.
+   👉 **http://localhost:8080** (or your configured port)
 
 ---
 
@@ -67,28 +45,30 @@ This system requires cron jobs to periodically pull data from the APIs (Facebook
 - `fetch_posts`: Fetch the latest posts/content.
 - `sync_insights`: Fetch metrics (insights) data.
 
-**1. When using Docker:**
-Run this command in your terminal:
-```bash
-docker exec -it ads_aggregator_app php index.php Cron/Facebook fetch_posts
-docker exec -it ads_aggregator_app php index.php Cron/Facebook sync_insights
-```
-*(Replace `Facebook` with `Instagram`, `Ga4`, or `Youtube` as needed).*
-
-**2. When running without Docker (Manual):**
+**1. Manual Run:**
 Run this command in the project's root directory:
 ```bash
-php index.php Cron/Facebook fetch_posts
-php index.php Cron/Facebook sync_insights
+# To run for a specific platform (e.g., facebook, instagram, youtube, ga4):
+php index.php Cron/Platform fetch facebook
+php index.php Cron/Platform sync facebook
+
+# To run for ALL platforms at once:
+php index.php Cron/Platform fetch all
+php index.php Cron/Platform sync all
+
+# To specify a custom time frame (format: YYYY-MM-DD):
+# Usage: php index.php Cron/Platform [action] [platform] [since] [until]
+php index.php Cron/Platform fetch all 2023-01-01 2023-12-31
+php index.php Cron/Platform sync facebook 2023-10-01 2023-10-31
 ```
 
-**3. Setup Server Crontab (Scheduled Automatically):**
+**2. Setup Server Crontab (Scheduled Automatically):**
 To run the processes automatically in the background of a server (Linux), add the configuration to your crontab (`crontab -e`):
 ```bash
-# Fetch posts every hour
-0 * * * * cd /path/to/project/folder && php index.php Cron/Facebook fetch_posts >> /dev/null 2>&1
+# Fetch posts for all platforms every hour
+0 * * * * cd /path/to/project/folder && php index.php Cron/Platform fetch all >> /dev/null 2>&1
 
-# Fetch insights every midnight (00:00)
-0 0 * * * cd /path/to/project/folder && php index.php Cron/Facebook sync_insights >> /dev/null 2>&1
+# Fetch insights for all platforms every midnight (00:00)
+0 0 * * * cd /path/to/project/folder && php index.php Cron/Platform sync all >> /dev/null 2>&1
 ```
 *(Adjust `/path/to/project/folder` to the actual directory where your project is located).*

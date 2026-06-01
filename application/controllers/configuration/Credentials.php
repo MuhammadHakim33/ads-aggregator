@@ -1,27 +1,18 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Credentials extends CI_Controller
+class Credentials extends MY_Controller
 {
     public function __construct()
     {
         parent::__construct();
         $this->load->model('Platform_credential_model');
 
-        // require login
-        if (!$this->session->userdata('logged_in')) {
-            redirect('auth');
-        }
-
-        // unauthorized if role is not superadmin
-        if ($this->session->userdata('role') !== 'superadmin') {
-            show_error('Unauthorized', 403);
-        }
+        $this->require_superadmin();
     }
 
     public function index()
     {
-        // get credential
         $credential = $this->Platform_credential_model->get_all();
 
         // index by platform_code for easy access in view
@@ -33,14 +24,10 @@ class Credentials extends CI_Controller
         $data = [
             'title' => 'API Credentials',
             'active_menu' => 'api',
-            'current_account' => [
-                'name' => $this->session->userdata('name'),
-                'role' => $this->session->userdata('role'),
-            ],
             'credentials' => $credentials,
         ];
 
-        $this->load->view('configuration/credentials/index', $data);
+        $this->render('configuration/credentials/index', $data);
     }
 
     public function save($platform)

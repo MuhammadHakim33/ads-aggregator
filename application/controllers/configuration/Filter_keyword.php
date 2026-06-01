@@ -1,22 +1,14 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Filter_keyword extends CI_Controller
+class Filter_keyword extends MY_Controller
 {
     public function __construct()
     {
         parent::__construct();
         $this->load->model('Filter_keyword_model');
 
-        // require login
-        if (!$this->session->userdata('logged_in')) {
-            redirect('auth');
-        }
-
-        // unauthorized if role is not superadmin
-        if ($this->session->userdata('role') !== 'superadmin') {
-            show_error('Unauthorized', 403);
-        }
+        $this->require_superadmin();
     }
 
     public function index()
@@ -24,21 +16,15 @@ class Filter_keyword extends CI_Controller
         $data = [
             'title' => 'Filter Keywords',
             'active_menu' => 'configuration',
-            'current_account' => [
-                'name' => $this->session->userdata('name'),
-                'role' => $this->session->userdata('role')
-            ],
             'keywords' => $this->Filter_keyword_model->get_all_admin()
         ];
 
-        $this->load->view('configuration/filter_keyword/index', $data);
+        $this->render('configuration/filter_keyword/index', $data);
     }
 
     public function create()
     {
         if ($this->input->method() === 'post') {
-            // set validation rules
-            $this->load->library('form_validation');
             $this->form_validation->set_rules([
                 [
                     'field' => 'platform',
@@ -78,13 +64,9 @@ class Filter_keyword extends CI_Controller
         $data = [
             'title' => 'Create Filter Keyword',
             'active_menu' => 'configuration',
-            'current_account' => [
-                'name' => $this->session->userdata('name'),
-                'role' => $this->session->userdata('role')
-            ]
         ];
 
-        $this->load->view('configuration/filter_keyword/create', $data);
+        $this->render('configuration/filter_keyword/create', $data);
     }
 
     public function edit($id)
@@ -98,8 +80,6 @@ class Filter_keyword extends CI_Controller
         }
 
         if ($this->input->method() === 'post') {
-            // set validation rules
-            $this->load->library('form_validation');
             $this->form_validation->set_rules([
                 [
                     'field' => 'platform',
@@ -145,13 +125,9 @@ class Filter_keyword extends CI_Controller
             'title' => 'Edit Filter Keyword',
             'keyword' => $keyword,
             'active_menu' => 'configuration',
-            'current_account' => [
-                'name' => $this->session->userdata('name'),
-                'role' => $this->session->userdata('role')
-            ]
         ];
 
-        $this->load->view('configuration/filter_keyword/edit', $data);
+        $this->render('configuration/filter_keyword/edit', $data);
     }
 
     public function delete($id)

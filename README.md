@@ -18,8 +18,8 @@ This project uses Docker to run the database (MySQL), while the application code
 **Prerequisites:**
 - PHP (Version 7.x)
 - Composer
-- Docker & Docker Compose
-- Nginx or Apache (to serve the app locally)
+- Docker & Docker Compose (Optional)
+- Webserver
 
 **Steps:**
 
@@ -42,8 +42,8 @@ This project uses Docker to run the database (MySQL), while the application code
 
 ## Running Cron Jobs
 This system requires cron jobs to periodically pull data from the APIs (Facebook, Instagram, GA4, YouTube). There are two main functions for each platform:
-- `fetch_posts`: Fetch the latest posts/content.
-- `sync_insights`: Fetch metrics (insights) data.
+- `fetch`: Fetch the latest posts/content.
+- `sync`: Fetch metrics (insights) data.
 
 **1. Manual Run:**
 Run this command in the project's root directory:

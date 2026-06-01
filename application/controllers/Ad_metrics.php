@@ -16,7 +16,7 @@ class Ad_metrics extends MY_Controller
         $data = [
             'title' => 'Ad Metrics',
             'active_menu' => 'ad_metrics',
-            'clients' => $this->Ad_model->get_clients_summary()
+            'clients' => $this->Client_model->get_clients_summary()
         ];
 
         $this->render('ad_metrics/index', $data);
@@ -57,7 +57,7 @@ class Ad_metrics extends MY_Controller
                 $ad_id = (int) $ad_id;
                 $client_id = (int) $client_map[$ad_id];
 
-                $rows = $this->Ad_model->assign_client($ad_id, $client_id);
+                $rows = $this->Client_model->assign_client($ad_id, $client_id);
                 $saved += $rows;
             }
 

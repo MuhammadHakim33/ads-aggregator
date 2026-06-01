@@ -5,12 +5,14 @@ class YoutubeApiClient
     protected $base_url = 'https://www.googleapis.com/youtube/v3/';
     protected $credentials;
     protected $request;
+    protected $metrics = [];
 
-    public function __construct($credentials, $request)
+    public function __construct($credentials, $request, $metrics = [])
     {
         // initialize youtube client for youtube data api
         $this->credentials = $credentials;
         $this->request = $request;
+        $this->metrics = $metrics;
     }
 
     public function get_videos($since, $until, $keywords = [])
@@ -80,7 +82,19 @@ class YoutubeApiClient
         // extract video stats
         $result = [];
         foreach ($insights as $index => $value) {
-            $result[$ids[$index]] = $value['statistics'];
+            $stats = $value['statistics'] ?? [];
+            if (!empty($this->metrics)) {
+                $filtered = [];
+                foreach ($this->metrics as $m) {
+                    if (isset($stats[$m])) {
+                        $filtered[$m] = $stats[$m];
+                    }
+                }
+                $result[$ids[$index]] = $filtered;
+            } else {
+                unset($stats['favoriteCount']);
+                $result[$ids[$index]] = $stats;
+            }
         }
         
         return $result;

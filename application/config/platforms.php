@@ -14,6 +14,12 @@ $config['platforms'] = [
             'system_user_token' => 'System User Token',
             'fb_page_id' => 'Facebook Page ID',
         ],
+        'metrics' => [
+            'post_media_view',
+            'post_clicks',
+            'post_reactions_by_type_total',
+            'post_total_media_view_unique',
+        ],
     ],
     'instagram' => [
         'enabled' => true,
@@ -25,6 +31,20 @@ $config['platforms'] = [
         'driver_path' => APPPATH . 'modules/instagram/InstagramDriver.php',
         'credential_schema' => [
             'ig_account_id' => 'Instagram Account ID',
+        ],
+        'metrics' => [
+            'reach',
+            'saved',
+            'shares',
+            'likes',
+            'comments',
+            'total_interactions',
+            'profile_activity',
+        ],
+        'reels_metrics' => [
+            'ig_reels_avg_watch_time',
+            'ig_reels_video_view_total_time',
+            'reels_skip_rate',
         ],
     ],
     'youtube' => [
@@ -38,6 +58,11 @@ $config['platforms'] = [
         'credential_schema' => [
             'api_key' => 'API Key',
             'channel_id' => 'Channel ID',
+        ],
+        'metrics' => [
+            'viewCount',
+            'likeCount',
+            'commentCount',
         ],
     ],
     'ga4' => [
@@ -54,5 +79,14 @@ $config['platforms'] = [
         ],
         'supports_hostname_filter' => true,
         'supports_html_filter' => true,
+        'metrics' => [
+            'screenPageViews',
+            'activeUsers',
+            'averageSessionDuration',
+            'engagementRate',
+            'sessions',
+            'engagedSessions',
+            'newUsers',
+        ],
     ],
 ];

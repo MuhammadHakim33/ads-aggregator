@@ -18,12 +18,16 @@ class Ga4ApiClient
     protected $token_expires = 0;
     protected $request;
 
-    public function __construct($credentials, $request)
+    public function __construct($credentials, $request, $metrics = [])
     {
         $data = $credentials;
         $this->property_id = $data['property_id'] ?? '';
         $this->service_account = $data['service_account'] ?? '';
         $this->request = $request;
+
+        if (!empty($metrics)) {
+            $this->metric_keys = $metrics;
+        }
 
         if (empty($this->service_account['private_key'])) {
             throw new \RuntimeException('GA4 credential is not complete, private_key not found.');

@@ -9,9 +9,15 @@ class InstagramDriver extends Platform_driver
     public function __construct()
     {
         parent::__construct();
+        $this->CI->config->load('platforms');
+
         $cred = $this->CI->Platform_credential_model->get_by_platform('meta');
+        $platform_config = $this->CI->config->item('platforms')['instagram'] ?? [];
+        $metrics = $platform_config['metrics'] ?? [];
+        $reels_metrics = $platform_config['reels_metrics'] ?? [];
+        
         // initialize instagram client for meta graph api
-        $this->client = new MetaGraphInstagramClient($cred, $this->CI->request);
+        $this->client = new MetaGraphInstagramClient($cred, $this->CI->request, $metrics, $reels_metrics);
     }
 
     public function name()

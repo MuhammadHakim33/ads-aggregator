@@ -9,9 +9,14 @@ class FacebookDriver extends Platform_driver
     public function __construct()
     {
         parent::__construct();
+        $this->CI->config->load('platforms');
+        
         $credential = $this->CI->Platform_credential_model->get_by_platform('meta');
+        $platform_config = $this->CI->config->item('platforms')['facebook'] ?? [];
+        $metrics = $platform_config['metrics'] ?? [];
+        
         // initialize facebook client for meta graph api
-        $this->client = new MetaGraphFacebookClient($credential, $this->CI->request);
+        $this->client = new MetaGraphFacebookClient($credential, $this->CI->request, $metrics);
     }
 
     public function name()

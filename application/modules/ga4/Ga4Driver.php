@@ -9,9 +9,14 @@ class Ga4Driver extends Platform_driver
     public function __construct()
     {
         parent::__construct();
+        $this->CI->config->load('platforms');
+
         $credentials = $this->CI->Platform_credential_model->get_by_platform('ga4');
+        $platform_config = $this->CI->config->item('platforms')['ga4'] ?? [];
+        $metrics = $platform_config['metrics'] ?? [];
+        
         // initialize GA4 api client
-        $this->client = new Ga4ApiClient($credentials, $this->CI->request);
+        $this->client = new Ga4ApiClient($credentials, $this->CI->request, $metrics);
     }
 
     public function name() 
@@ -56,7 +61,7 @@ class Ga4Driver extends Platform_driver
         $since = $since ?? date('Y-m-d', strtotime('-30 days'));
         $until = $until ?? date('Y-m-d');
         
-        $result = $this->client->sync_articles_insight($since, $until, $identifiers);
+        $result = $this->client->get_articles_insight($since, $until, $identifiers);
         $ad_metrics = $result['ad_metrics'] ?? [];
         
         $formatted = [];

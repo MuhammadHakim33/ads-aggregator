@@ -54,7 +54,7 @@ class MetaGraphFacebookClient extends MetaGraphBaseClient
     public function get_post_insights($ids)
     {
         $insights = [];
-        $metrics = 'post_media_view,post_clicks,post_reactions_by_type_total';
+        $metrics = !empty($this->metrics) ? implode(',', $this->metrics) : 'post_media_view,post_clicks,post_reactions_by_type_total';
         $pat = $this->get_page_access_token();
         
         $batch = [];

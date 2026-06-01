@@ -9,9 +9,14 @@ class YoutubeDriver extends Platform_driver
     public function __construct()
     {
         parent::__construct();
+        $this->CI->config->load('platforms');
+        
         $cred = $this->CI->Platform_credential_model->get_by_platform('youtube');
+        $platform_config = $this->CI->config->item('platforms')['youtube'] ?? [];
+        $metrics = $platform_config['metrics'] ?? [];
+        
         // initialize youtube api client
-        $this->client = new YoutubeApiClient($cred, $this->CI->request);
+        $this->client = new YoutubeApiClient($cred, $this->CI->request, $metrics);
     }
 
     public function name() 

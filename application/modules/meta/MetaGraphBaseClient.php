@@ -6,11 +6,13 @@ abstract class MetaGraphBaseClient
     protected $request;
     protected $api_version = 'v25.0';
     protected $base_url = 'https://graph.facebook.com/';
+    protected $metrics = [];
 
-    public function __construct($credentials, $request)
+    public function __construct($credentials, $request, $metrics = [])
     {
         $this->credentials = $credentials;
         $this->request = $request;
+        $this->metrics = $metrics;
     }
 
     protected function get_system_user_token()

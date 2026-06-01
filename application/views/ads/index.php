@@ -115,7 +115,7 @@
                                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="exportDropdown-<?= $ad->id ?>">
                                             <li>
                                                 <a class="dropdown-item"
-                                                   href="<?= base_url('ad-metrics/export/pdf/' . $ad->id) ?>"
+                                                   href="<?= base_url('ads/export/pdf/' . $ad->id) ?>"
                                                    target="_blank">
                                                     <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
                                                     Export PDF
@@ -123,7 +123,7 @@
                                             </li>
                                             <li>
                                                 <a class="dropdown-item"
-                                                   href="<?= base_url('ad-metrics/export/excel/' . $ad->id) ?>">
+                                                   href="<?= base_url('ads/export/excel/' . $ad->id) ?>">
                                                     <i class="bi bi-file-earmark-spreadsheet text-success me-2"></i>
                                                     Export Excel
                                                 </a>

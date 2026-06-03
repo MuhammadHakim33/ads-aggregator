@@ -1,94 +1,150 @@
 -- =========================
+-- MASTER TABEL
+-- =========================
+CREATE TABLE roles (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  role_name VARCHAR(50) UNIQUE NOT NULL COMMENT 'superadmin, ae, manajemen, client'
+);
+
+CREATE TABLE platforms (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  platform_name VARCHAR(50) UNIQUE NOT NULL COMMENT 'facebook, instagram, gam, ga4, youtube, meta'
+);
+
+CREATE TABLE keyword_types (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  type_name VARCHAR(50) UNIQUE NOT NULL COMMENT 'html, keyword, hostname'
+);
+
+
+
+
+-- =========================
 -- ACCOUNTS
 -- =========================
 CREATE TABLE accounts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role ENUM('superadmin','ae') NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    deleted_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role_id INT NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  deleted_at TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (role_id) REFERENCES roles(id)
+);
 
 -- =========================
 -- CLIENTS
 -- =========================
 CREATE TABLE clients (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    company_name VARCHAR(255) NOT NULL,
-    pic_name VARCHAR(255),
-    ae_id INT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    deleted_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (ae_id) REFERENCES accounts(id),
-    INDEX idx_company_name (company_name)
-) ENGINE=InnoDB;
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  company_name VARCHAR(255) NOT NULL,
+  pic_name VARCHAR(255),
+  ae_id INT NULL,
+  account_id INT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  deleted_at TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (ae_id) REFERENCES accounts(id),
+  FOREIGN KEY (account_id) REFERENCES accounts(id)
+);
+
+-- =========================
+-- CONTRACTS
+-- =========================
+CREATE TABLE contracts (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  client_id INT NOT NULL,
+  contract_number VARCHAR(100) UNIQUE NOT NULL,
+  value DECIMAL(15,2) NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  terminated_at TIMESTAMP NULL,
+  termination_reason TEXT NULL,
+  document_path VARCHAR(500) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (client_id) REFERENCES clients(id)
+);
 
 -- =========================
 -- FILTER KEYWORDS
 -- =========================
 CREATE TABLE filter_keywords (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
-    type ENUM('html', 'keyword', 'hostname') NOT NULL,
-    keyword VARCHAR(255) NOT NULL COMMENT 'Keyword umum: Content partnership with, #kilas, dll',
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    INDEX idx_platform (platform)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  platform_id INT NOT NULL,
+  type_id INT NOT NULL,
+  keyword VARCHAR(255) NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (platform_id) REFERENCES platforms(id),
+  FOREIGN KEY (type_id) REFERENCES keyword_types(id)
+);
 
 -- =========================
 -- AD CONTENTS
 -- =========================
 CREATE TABLE ad_contents (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255),
-    client_id INT,
-    platform VARCHAR(50) NOT NULL,
-    content_identifier VARCHAR(255) NOT NULL,
-    ad_type ENUM('article','banner','video','social') NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  title VARCHAR(255),
+  contract_id INT NULL,
+  platform_id INT NOT NULL,
+  content_identifier VARCHAR(255) UNIQUE NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE KEY unique_content (content_identifier),
-    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
-    INDEX idx_client_platform (client_id, platform)
-) ENGINE=InnoDB;
+  FOREIGN KEY (contract_id) REFERENCES contracts(id),
+  FOREIGN KEY (platform_id) REFERENCES platforms(id)
+);
 
 -- =========================
 -- AD METRICS
 -- =========================
 CREATE TABLE ad_metrics (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    ad_content_id INT NOT NULL,
-    metric_name VARCHAR(100) NOT NULL,
-    metric_value DOUBLE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  ad_content_id INT NOT NULL,
+  metric_name VARCHAR(100) NOT NULL,
+  metric_value DOUBLE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (ad_content_id) REFERENCES ad_contents(id),
+  UNIQUE KEY unique_metric (ad_content_id, metric_name),
+  FOREIGN KEY (ad_content_id) REFERENCES ad_contents(id)
+);
 
-    INDEX idx_metric (metric_name),
-    INDEX idx_ad_content_id (ad_content_id),
-    UNIQUE KEY unique_metric (ad_content_id, metric_name)
-) ENGINE=InnoDB;
+-- =========================
+-- COMPLAINTS
+-- =========================
+CREATE TABLE complaints (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  contract_id INT NOT NULL,
+  ad_content_id INT NOT NULL,
+  subject VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  status ENUM('waiting', 'resolved', 'closed', 'in_progress') NOT NULL DEFAULT 'waiting',
+  resolution_note TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (contract_id) REFERENCES contracts(id),
+  FOREIGN KEY (ad_content_id) REFERENCES ad_contents(id)
+);
 
 -- =========================
 -- PLATFORM CREDENTIALS
 -- =========================
 CREATE TABLE platform_credentials (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    platform ENUM('meta', 'ga4', 'youtube') NOT NULL UNIQUE,
-    credential_data LONGTEXT NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    -- last_tested_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    INDEX idx_platform (platform)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  platform_id INT UNIQUE NOT NULL,
+  credential_data LONGTEXT NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (platform_id) REFERENCES platforms(id)
+);

@@ -84,6 +84,8 @@
                                                     $post_url = 'https://www.instagram.com/p/' . $ad->content_identifier . '/';
                                                 } elseif ($platform === 'youtube') {
                                                     $post_url = 'https://www.youtube.com/watch?v=' . $ad->content_identifier;
+                                                } elseif ($platform === 'ga4') {
+                                                    $post_url = 'https://' . $ad->content_identifier;
                                                 }
                                             ?>
                                             <?php if ($post_url !== '#'): ?>

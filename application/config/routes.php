@@ -68,18 +68,20 @@ $route['ads/connect'] = 'ads/connect';
 $route['ads/export/(:any)/(:num)'] = 'ads/export/$1/$2';
 $route['ads/(:num)'] = 'ads/index/$1';
 
-$route['config/filter-keyword/create'] = 'configuration/filter_keyword/create';
-$route['config/filter-keyword/edit/(:num)'] = 'configuration/filter_keyword/edit/$1';
-$route['config/filter-keyword/delete/(:num)'] = 'configuration/filter_keyword/delete/$1';
-$route['config/filter-keyword'] = 'configuration/filter_keyword/index';
+$route['config/filter-keyword/create'] = 'Config/filter_keyword/create';
+$route['config/filter-keyword/edit/(:num)'] = 'Config/filter_keyword/edit/$1';
+$route['config/filter-keyword/delete/(:num)'] = 'Config/filter_keyword/delete/$1';
+$route['config/filter-keyword'] = 'Config/filter_keyword/index';
 
-$route['config/credentials/save/(:any)'] = 'configuration/credentials/save/$1';
-$route['config/credentials'] = 'configuration/credentials/index';
+$route['config/credentials/save/(:any)'] = 'Config/credentials/save/$1';
+$route['config/credentials'] = 'Config/credentials/index';
 
-$route['config/cron-health/history/(:any)'] = 'configuration/cron_health/history/$1';
-$route['config/cron-health'] = 'configuration/cron_health/index';
+$route['config/role/create'] = 'Config/role/create';
+$route['config/role/edit/(:num)'] = 'Config/role/edit/$1';
+$route['config/role/delete/(:num)'] = 'Config/role/delete/$1';
+$route['config/role'] = 'Config/role/index';
 
-$route['auth/login']  = 'auth/login';
+$route['auth/login'] = 'auth/login';
 $route['auth/logout'] = 'auth/logout';
 
 $route['login'] = 'auth/index';

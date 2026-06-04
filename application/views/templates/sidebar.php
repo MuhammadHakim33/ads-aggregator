@@ -35,5 +35,10 @@
                 <i class="bi bi-funnel me-2"></i> Filter Keyword
             </a>
         </li>
+        <li class="nav-item">
+            <a href="<?= base_url('config/role') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'role' ? 'active text-white' : '' ?>">
+                <i class="bi bi-shield-lock me-2"></i> Roles
+            </a>
+        </li>
     </ul>
 </aside>

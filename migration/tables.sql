@@ -3,17 +3,17 @@
 -- =========================
 CREATE TABLE roles (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  role_name VARCHAR(50) UNIQUE NOT NULL COMMENT 'superadmin, ae, manajemen, client'
+  name VARCHAR(50) UNIQUE NOT NULL COMMENT 'superadmin, ae, manajemen, client'
 );
 
 CREATE TABLE platforms (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  platform_name VARCHAR(50) UNIQUE NOT NULL COMMENT 'facebook, instagram, gam, ga4, youtube, meta'
+  name VARCHAR(50) UNIQUE NOT NULL COMMENT 'facebook, instagram, gam, ga4, youtube, meta'
 );
 
 CREATE TABLE keyword_types (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  type_name VARCHAR(50) UNIQUE NOT NULL COMMENT 'html, keyword, hostname'
+  name VARCHAR(50) UNIQUE NOT NULL COMMENT 'html, keyword, hostname'
 );
 
 

@@ -89,7 +89,9 @@ class Ga4ApiClient
                 ['name' => 'pagePath'],
                 ['name' => 'pageTitle'],
             ],
-            'metrics' => array_map(fn($k) => ['name' => $k], $this->metric_keys),
+            'metrics' => array_map(function ($k) {
+                return ['name' => $k];
+            }, $this->metric_keys),
             'limit' => 10000,
         ];
 
@@ -110,7 +112,7 @@ class Ga4ApiClient
         // filter rows based on hostname match or html element scraping
         $filtered_rows = [];
         foreach ($rows as $row) {
-            $hostname  = strtolower($row['dimensionValues'][0]['value'] ?? '');
+            $hostname = strtolower($row['dimensionValues'][0]['value'] ?? '');
             $page_path = $row['dimensionValues'][1]['value'] ?? '';
 
             // filter 1: hostname match
@@ -155,7 +157,9 @@ class Ga4ApiClient
                 ['name' => 'pagePath'],
                 ['name' => 'pageTitle'],
             ],
-            'metrics' => array_map(fn($k) => ['name' => $k], $this->metric_keys),
+            'metrics' => array_map(function ($k) {
+                return ['name' => $k];
+            }, $this->metric_keys),
             'dimensionFilter' => [
                 'filter' => [
                     'fieldName' => 'pagePath',
@@ -189,7 +193,8 @@ class Ga4ApiClient
             $page_title = $row['dimensionValues'][2]['value'] ?? '';
 
             // skip if page_path is empty or (not set) or /
-            if (empty($page_path) || $page_path === '(not set)' || $page_path === '/' || $page_path === '') continue;
+            if (empty($page_path) || $page_path === '(not set)' || $page_path === '/' || $page_path === '')
+                continue;
 
             $full_url = $hostname . $page_path;
 
@@ -208,7 +213,7 @@ class Ga4ApiClient
 
         return [
             'ad_contents' => $ad_contents,
-            'ad_metrics'  => $ad_metrics,
+            'ad_metrics' => $ad_metrics,
         ];
     }
 
@@ -241,7 +246,7 @@ class Ga4ApiClient
                 return true;
             }
         }
-        
+
         return false;
     }
 }

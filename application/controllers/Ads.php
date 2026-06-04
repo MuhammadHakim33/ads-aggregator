@@ -9,6 +9,7 @@ class Ads extends MY_Controller
         $this->load->model('Ad_model');
         $this->load->model('Client_model');
         $this->load->library('Platform_registry');
+        $this->load->library('Export_registry');
     }
 
     public function index()

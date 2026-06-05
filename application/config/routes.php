@@ -81,6 +81,11 @@ $route['config/role/edit/(:num)'] = 'Config/role/edit/$1';
 $route['config/role/delete/(:num)'] = 'Config/role/delete/$1';
 $route['config/role'] = 'Config/role/index';
 
+$route['config/platform/create'] = 'Config/Platform/create';
+$route['config/platform/edit/(:num)'] = 'Config/Platform/edit/$1';
+$route['config/platform/delete/(:num)'] = 'Config/Platform/delete/$1';
+$route['config/platform'] = 'Config/Platform/index';
+
 $route['auth/login'] = 'auth/login';
 $route['auth/logout'] = 'auth/logout';
 

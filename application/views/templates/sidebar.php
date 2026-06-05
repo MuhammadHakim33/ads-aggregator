@@ -40,5 +40,10 @@
                 <i class="bi bi-shield-lock me-2"></i> Roles
             </a>
         </li>
+        <li class="nav-item">
+            <a href="<?= base_url('config/platform') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'platform' ? 'active text-white' : '' ?>">
+                <i class="bi bi-hdd-network me-2"></i> Platforms
+            </a>
+        </li>
     </ul>
 </aside>

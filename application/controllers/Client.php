@@ -12,7 +12,7 @@ class Client extends MY_Controller
 
     public function index()
     {
-        $data =  [
+        $data = [
             'title' => 'Client',
             'active_menu' => 'client',
             'clients' => $this->Client_model->get_all()
@@ -33,7 +33,12 @@ class Client extends MY_Controller
                 [
                     'field' => 'pic_name',
                     'label' => 'PIC Name',
-                    'rules' => 'trim|max_length[255]'
+                    'rules' => 'trim|required|max_length[255]'
+                ],
+                [
+                    'field' => 'ae_id',
+                    'label' => 'Account Executive',
+                    'rules' => 'trim|callback_ae_check'
                 ]
             ]);
 
@@ -55,7 +60,7 @@ class Client extends MY_Controller
             }
         }
 
-        $data =  [
+        $data = [
             'title' => 'Create Client',
             'active_menu' => 'client',
             'ae_list' => $this->Account_model->get_all_ae()
@@ -84,7 +89,12 @@ class Client extends MY_Controller
                 [
                     'field' => 'pic_name',
                     'label' => 'PIC Name',
-                    'rules' => 'trim|max_length[255]'
+                    'rules' => 'trim|required|max_length[255]'
+                ],
+                [
+                    'field' => 'ae_id',
+                    'label' => 'Account Executive',
+                    'rules' => 'trim|callback_ae_check'
                 ],
                 [
                     'field' => 'is_active',
@@ -96,9 +106,9 @@ class Client extends MY_Controller
             if ($this->form_validation->run() === TRUE) {
                 $updated = $this->Client_model->update($id, [
                     'company_name' => $this->input->post('company_name'),
-                    'pic_name'     => $this->input->post('pic_name'),
-                    'ae_id'        => $this->input->post('ae_id') ?: null,
-                    'is_active'    => $this->input->post('is_active'),
+                    'pic_name' => $this->input->post('pic_name'),
+                    'ae_id' => $this->input->post('ae_id') ?: null,
+                    'is_active' => $this->input->post('is_active'),
                 ]);
 
                 if ($updated) {
@@ -111,7 +121,7 @@ class Client extends MY_Controller
             }
         }
 
-        $data =  [
+        $data = [
             'title' => 'Edit Client',
             'client' => $client,
             'active_menu' => 'client',
@@ -144,5 +154,21 @@ class Client extends MY_Controller
         }
 
         redirect('client');
+    }
+
+    public function ae_check($ae_id)
+    {
+        if (empty($ae_id)) {
+            return TRUE;
+        }
+
+        if ($this->Account_model->is_ae_exist_by_id($ae_id) == 0) {
+            $this->form_validation->set_message([
+                'ae_check' => 'The selected Account Executive does not exist or is inactive'
+            ]);
+            return FALSE;
+        }
+
+        return TRUE;
     }
 }

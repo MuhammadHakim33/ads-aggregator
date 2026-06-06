@@ -31,34 +31,27 @@
                                     <label for="company_name" class="form-label fw-medium">
                                         Company Name <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text"
-                                        class="form-control"
-                                        id="company_name"
-                                        name="company_name"
-                                        value="<?= set_value('company_name', $client->company_name) ?>"
-                                        placeholder="e.g. PT. Maju Bersama"
-                                        required>
+                                    <input type="text" class="form-control" id="company_name" name="company_name"
+                                        value="<?= set_value('company_name', $client->company_name) ?>">
                                     <?= form_error('company_name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="pic_name" class="form-label fw-medium">PIC Name</label>
-                                    <input type="text"
-                                        class="form-control"
-                                        id="pic_name"
-                                        name="pic_name"
-                                        value="<?= set_value('pic_name', $client->pic_name) ?>"
-                                        placeholder="e.g. Budi Santoso">
+                                    <label for="pic_name" class="form-label fw-medium">
+                                        PIC Name <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="pic_name" name="pic_name"
+                                        value="<?= set_value('pic_name', $client->pic_name) ?>">
                                     <?= form_error('pic_name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <div class="mb-3">
                                     <label for="ae_id" class="form-label fw-medium">
                                         Account Executive
                                     </label>
-                                    <select class="form-select" id="ae_id" name="ae_id" required>
+                                    <select class="form-select" id="ae_id" name="ae_id">
                                         <option value="" disabled>Select AE</option>
                                         <?php foreach ($ae_list as $ae): ?>
-                                            <option value="<?= $ae->id ?>" <?= set_select('ae_id', $ae->id, (int)$client->ae_id === (int)$ae->id) ?>>
-                                                <?= htmlspecialchars($ae->name) ?>
+                                            <option value="<?= $ae->id ?>" <?= set_select('ae_id', $ae->id, (int) $client->ae_id === (int) $ae->id) ?>>
+                                                <?= ucwords($ae->name) ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -67,8 +60,10 @@
                                 <div class="mb-4">
                                     <label for="is_active" class="form-label fw-medium">Status</label>
                                     <select class="form-select" id="is_active" name="is_active">
-                                        <option value="1" <?= set_select('is_active', '1', (bool)$client->is_active) ?>>Active</option>
-                                        <option value="0" <?= set_select('is_active', '0', !(bool)$client->is_active) ?>>Inactive</option>
+                                        <option value="1" <?= set_select('is_active', '1', (bool) $client->is_active) ?>>
+                                            Active</option>
+                                        <option value="0" <?= set_select('is_active', '0', !(bool) $client->is_active) ?>>
+                                            Inactive</option>
                                     </select>
                                     <?= form_error('is_active', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>

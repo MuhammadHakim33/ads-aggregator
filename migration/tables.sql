@@ -29,7 +29,6 @@ CREATE TABLE accounts (
   password VARCHAR(255) NOT NULL,
   role_id INT NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
-  deleted_at TIMESTAMP NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (role_id) REFERENCES roles(id)

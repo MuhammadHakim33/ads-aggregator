@@ -46,12 +46,8 @@ class Account_model extends CI_Model
 
     public function delete($id)
     {
-        $data = array(
-            'is_active' => 0,
-            'deleted_at' => date('Y-m-d H:i:s')
-        );
         $this->db->where('id', $id);
-        $this->db->update($this->table, $data);
+        $this->db->delete($this->table);
         return $this->db->affected_rows();
     }
 
@@ -62,22 +58,26 @@ class Account_model extends CI_Model
     //     return $this->db->get($this->table)->num_rows();
     // }
 
-    // public function is_ae_exist_by_id($id)
-    // {
-    //     $this->db->where('id', $id);
-    //     $this->db->where('role', 'ae');
-    //     $this->db->where('is_active', 1);
-    //     $this->db->where('deleted_at', NULL);
-    //     return $this->db->get($this->table)->num_rows();
-    // }
+    public function is_ae_exist_by_id($id)
+    {
+        $this->db->select("{$this->table}.id");
+        $this->db->join("{$this->table_roles}", "{$this->table_roles}.id = {$this->table}.role_id");
+        $this->db->where("{$this->table}.id", $id);
+        $this->db->where("{$this->table_roles}.name", 'ae');
+        $this->db->where("{$this->table}.is_active", 1);
+        $this->db->where("{$this->table}.deleted_at", NULL);
+        return $this->db->get($this->table)->num_rows();
+    }
 
-    // public function get_all_ae()
-    // {
-    //     $this->db->where('role', 'ae');
-    //     $this->db->where('is_active', 1);
-    //     $this->db->where('deleted_at', NULL);
-    //     return $this->db->get($this->table)->result();
-    // }
+    public function get_all_ae()
+    {
+        $this->db->select("{$this->table}.*");
+        $this->db->join("{$this->table_roles}", "{$this->table_roles}.id = {$this->table}.role_id");
+        $this->db->where("{$this->table_roles}.name", 'ae');
+        $this->db->where("{$this->table}.is_active", 1);
+        $this->db->where("{$this->table}.deleted_at", NULL);
+        return $this->db->get($this->table)->result();
+    }
 
     public function is_email_used($email, $id)
     {

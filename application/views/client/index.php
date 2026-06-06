@@ -43,36 +43,34 @@
                         </thead>
                         <tbody>
                             <?php foreach ($clients as $client): ?>
-                            <?php $status_class = $client->is_active ? 'success' : 'secondary'; ?>
-                            <tr>
-                                <td class="fw-medium"><?= htmlspecialchars($client->company_name) ?></td>
-                                <td><?= htmlspecialchars($client->pic_name ?? '-') ?></td>
-                                <td><?= htmlspecialchars($client->ae_name ?? '') ?></td>
-                                <td>
-                                    <span class="badge text-bg-<?= $status_class ?>">
-                                        <?= $client->is_active ? 'Active' : 'Inactive' ?>
-                                    </span>
-                                </td>
-                                <td class="text-end">
-                                    <a href="<?= base_url('client/edit/' . $client->id) ?>" class="btn btn-sm btn-outline-secondary" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <button type="button"
-                                        class="btn btn-sm btn-outline-danger ms-1"
-                                        title="Delete"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal"
-                                        data-id="<?= $client->id ?>"
-                                        data-name="<?= htmlspecialchars($client->company_name) ?>">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                                <?php $status_class = $client->is_active ? 'success' : 'secondary'; ?>
+                                <tr>
+                                    <td class="fw-medium"><?= ucwords($client->company_name) ?></td>
+                                    <td><?= ucwords($client->pic_name ?? '-') ?></td>
+                                    <td><?= ucwords($client->ae_name ?? '') ?></td>
+                                    <td>
+                                        <span class="badge text-bg-<?= $status_class ?>">
+                                            <?= $client->is_active ? 'Active' : 'Inactive' ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="<?= base_url('client/edit/' . $client->id) ?>"
+                                            class="btn btn-sm btn-outline-secondary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Delete"
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                            data-id="<?= $client->id ?>" data-name="<?= ucwords($client->company_name) ?>"
+                                            data-pic-name="<?= ucwords($client->pic_name) ?>">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
                             <?php endforeach; ?>
                             <?php if (empty($clients)): ?>
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">No clients found.</td>
-                            </tr>
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">No clients found.</td>
+                                </tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -98,7 +96,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete <strong id="deleteClientName"></strong>?
+                Are you sure you want to delete <strong id="deleteClientName"></strong> <strong
+                    id="deletePicName"></strong>?
                 This action cannot be undone.
             </div>
             <div class="modal-footer border-0">
@@ -115,8 +114,9 @@
 
 <script>
     document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
-        const btn  = event.relatedTarget;
+        const btn = event.relatedTarget;
         document.getElementById('deleteClientName').textContent = btn.getAttribute('data-name');
+        document.getElementById('deletePicName').textContent = btn.getAttribute('data-pic-name');
         document.getElementById('deleteForm').action = '<?= base_url('client/delete/') ?>' + btn.getAttribute('data-id');
     });
 </script>

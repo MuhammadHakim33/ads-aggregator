@@ -29,6 +29,25 @@ class Filter_keyword_model extends CI_Model
         return $this->db->get($this->table)->result();
     }
 
+    public function get_by_platform($platform)
+    {
+        $this->db->where('platform', $platform);
+        $this->db->where('is_active', 1);
+        return $this->db->get($this->table)->result();
+    }
+
+    public function get_by_platform_admin($platform)
+    {
+        $this->db->where('platform', $platform);
+        return $this->db->get($this->table)->result();
+    }
+
+    public function get_by_platforms_admin(array $platforms)
+    {
+        $this->db->where_in('platform', $platforms);
+        return $this->db->get($this->table)->result();
+    }
+
     public function insert($data)
     {
         $this->db->insert($this->table, $data);

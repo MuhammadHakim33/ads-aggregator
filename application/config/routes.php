@@ -68,13 +68,15 @@ $route['ads/connect'] = 'ads/connect';
 $route['ads/export/(:any)/(:num)'] = 'ads/export/$1/$2';
 $route['ads/(:num)'] = 'ads/index/$1';
 
-$route['config/filter-keyword/create'] = 'Config/filter_keyword/create';
-$route['config/filter-keyword/edit/(:num)'] = 'Config/filter_keyword/edit/$1';
-$route['config/filter-keyword/delete/(:num)'] = 'Config/filter_keyword/delete/$1';
-$route['config/filter-keyword'] = 'Config/filter_keyword/index';
+$route['config/platforms/meta'] = 'Config/Platforms/meta';
+$route['config/platforms/ga4'] = 'Config/Platforms/ga4';
+$route['config/platforms/youtube'] = 'Config/Platforms/youtube';
 
-$route['config/credentials/save/(:any)'] = 'Config/credentials/save/$1';
-$route['config/credentials'] = 'Config/credentials/index';
+$route['config/platforms/save-credential/(:any)'] = 'Config/Platforms/save_credential/$1';
+
+$route['config/platforms/(:any)/keyword/create'] = 'Config/Platforms/create_keyword/$1';
+$route['config/platforms/(:any)/keyword/edit/(:num)'] = 'Config/Platforms/edit_keyword/$1/$2';
+$route['config/platforms/(:any)/keyword/delete/(:num)'] = 'Config/Platforms/delete_keyword/$1/$2';
 
 $route['config/role/create'] = 'Config/role/create';
 $route['config/role/edit/(:num)'] = 'Config/role/edit/$1';

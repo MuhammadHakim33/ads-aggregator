@@ -34,29 +34,19 @@
                                 <!-- Name -->
                                 <div class="mb-3">
                                     <label for="name" class="form-label fw-medium">
-                                        Full Name <span class="text-danger">*</span>
+                                        Name <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text"
-                                        class="form-control"
-                                        id="name"
-                                        name="name"
-                                        value="<?= set_value('name', $account->name) ?>"
-                                        placeholder="e.g. John Doe"
-                                        required>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                        value="<?= set_value('name', $account->name) ?>">
                                     <?= form_error('name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <!-- Email -->
                                 <div class="mb-3">
                                     <label for="email" class="form-label fw-medium">
-                                        Email Address <span class="text-danger">*</span>
+                                        Email <span class="text-danger">*</span>
                                     </label>
-                                    <input type="email"
-                                        class="form-control"
-                                        id="email"
-                                        name="email"
-                                        value="<?= set_value('email', $account->email) ?>"
-                                        placeholder="e.g. john@example.com"
-                                        required>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                        value="<?= set_value('email', $account->email) ?>">
                                     <?= form_error('email', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <!-- Password -->
@@ -65,36 +55,37 @@
                                         Password
                                     </label>
                                     <div class="input-group">
-                                        <input type="password"
-                                            class="form-control"
-                                            id="password"
-                                            name="password"
-                                            placeholder="Kosongkan jika tidak ingin mengubah">
+                                        <input type="password" class="form-control" id="password" name="password">
                                         <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                             <i class="bi bi-eye" id="eyeIcon"></i>
                                         </button>
                                     </div>
-                                    <div class="form-text">Kosongkan jika tidak ingin mengubah password.</div>
+                                    <div class="form-text">Leave empty if you don't want to change the password.</div>
                                     <?= form_error('password', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <!-- Role -->
                                 <div class="mb-3">
-                                    <label for="role" class="form-label fw-medium">
+                                    <label for="role_id" class="form-label fw-medium">
                                         Role <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" id="role" name="role" required>
+                                    <select class="form-select" id="role_id" name="role_id">
                                         <option value="" disabled>Select Role</option>
-                                        <option value="ae" <?= set_select('role', 'ae', $account->role === 'ae') ?>>AE (Account Executive)</option>
-                                        <option value="superadmin" <?= set_select('role', 'superadmin', $account->role === 'superadmin') ?>>Superadmin</option>
+                                        <?php foreach ($roles as $role): ?>
+                                            <option value="<?= $role->id ?>" <?= set_select('role_id', $role->id, (int) $account->role_id === (int) $role->id) ?>>
+                                                <?= ucwords($role->name) ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     </select>
-                                    <?= form_error('role', '<div class="form-text text-danger">', '</div>'); ?>
+                                    <?= form_error('role_id', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <!-- Status -->
                                 <div class="mb-4">
                                     <label for="is_active" class="form-label fw-medium">Status</label>
                                     <select class="form-select" id="is_active" name="is_active">
-                                        <option value="1" <?= set_select('is_active', '1', (bool)$account->is_active) ?>>Aktif</option>
-                                        <option value="0" <?= set_select('is_active', '0', !(bool)$account->is_active) ?>>Nonaktif</option>
+                                        <option value="1" <?= set_select('is_active', '1', (bool) $account->is_active) ?>>
+                                            Active</option>
+                                        <option value="0" <?= set_select('is_active', '0', !(bool) $account->is_active) ?>>
+                                            Inactive</option>
                                     </select>
                                     <?= form_error('is_active', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>

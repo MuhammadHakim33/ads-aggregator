@@ -35,6 +35,9 @@
                 <i class="bi bi-funnel me-2"></i> Filter Keyword
             </a>
         </li>
+        <li class="nav-item mt-3 mb-1 px-3">
+            <span class="text-uppercase text-secondary fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Master Data</span>
+        </li>
         <li class="nav-item">
             <a href="<?= base_url('config/role') ?>" class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'role' ? 'active text-white' : '' ?>">
                 <i class="bi bi-shield-lock me-2"></i> Roles

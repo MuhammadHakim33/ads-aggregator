@@ -7,6 +7,7 @@ class Account extends MY_Controller
     {
         parent::__construct();
         $this->load->model('Account_model');
+        $this->load->model('Role_model');
     }
 
     public function index()
@@ -14,7 +15,7 @@ class Account extends MY_Controller
         $data = [
             'title' => 'Account',
             'active_menu' => 'account',
-            'accounts' => $this->Account_model->get_all()
+            'accounts' => $this->Account_model->get_all_with_roles()
         ];
 
         $this->render('account/index', $data);
@@ -29,9 +30,9 @@ class Account extends MY_Controller
             if ($this->form_validation->run() === TRUE) {
                 $insert_id = $this->Account_model->insert([
                     'name' => $this->input->post('name'),
-                    'email' => $this->input->post('email'),
+                    'email' => strtolower($this->input->post('email')),
                     'password' => password_hash($this->input->post('password'), PASSWORD_BCRYPT),
-                    'role' => $this->input->post('role'),
+                    'role_id' => $this->input->post('role_id'),
                     'is_active' => TRUE
                 ]);
 
@@ -47,7 +48,8 @@ class Account extends MY_Controller
 
         $data = [
             'title' => 'Create Account',
-            'active_menu' => 'account'
+            'active_menu' => 'account',
+            'roles' => $this->Role_model->get_all()
         ];
 
         $this->render('account/create', $data);
@@ -70,16 +72,16 @@ class Account extends MY_Controller
             if ($this->form_validation->run() === TRUE) {
                 $data = [
                     'name' => $this->input->post('name'),
-                    'email' => $this->input->post('email'),
-                    'role' => $this->input->post('role'),
+                    'email' => strtolower($this->input->post('email')),
+                    'role_id' => $this->input->post('role_id'),
                     'is_active' => $this->input->post('is_active'),
                 ];
 
                 // only update if password is not empty
                 $password = $this->input->post('password');
-	            if ($password !== null && $password !== '') {
-	                $data['password'] = password_hash($password, PASSWORD_BCRYPT);
-	            }
+                if ($password !== null && $password !== '') {
+                    $data['password'] = password_hash($password, PASSWORD_BCRYPT);
+                }
 
                 // update account
                 $updated = $this->Account_model->update($id, $data);
@@ -97,7 +99,8 @@ class Account extends MY_Controller
         $data = [
             'title' => 'Edit Account',
             'active_menu' => 'account',
-            'account' => $account
+            'account' => $account,
+            'roles' => $this->Role_model->get_all()
         ];
 
         $this->render('account/edit', $data);
@@ -120,7 +123,7 @@ class Account extends MY_Controller
         }
 
         // prevent superadmin from deleting their own account
-        if ((int)$id === (int)$this->session->userdata('id')) {
+        if ((int) $id === (int) $this->session->userdata('id')) {
             $this->session->set_flashdata('errors', '<p>You cannot delete your own account.</p>');
             redirect('account');
             return;
@@ -156,9 +159,9 @@ class Account extends MY_Controller
                 'rules' => 'trim|required|min_length[6]'
             ],
             [
-                'field' => 'role',
+                'field' => 'role_id',
                 'label' => 'Role',
-                'rules' => 'trim|in_list[ae,superadmin]'
+                'rules' => 'trim|required|callback_role_check'
             ]
         ];
     }
@@ -182,9 +185,9 @@ class Account extends MY_Controller
                 'rules' => 'trim|min_length[6]'
             ],
             [
-                'field' => 'role',
+                'field' => 'role_id',
                 'label' => 'Role',
-                'rules' => 'trim|in_list[ae,superadmin]'
+                'rules' => 'trim|required|callback_role_check'
             ],
             [
                 'field' => 'is_active',
@@ -197,10 +200,21 @@ class Account extends MY_Controller
     public function email_check($email, $id)
     {
         if ($this->Account_model->is_email_used($email, $id) > 0) {
-            $this->form_validation->set_message(
-                'email_check',
-                'Email has already been used'
-            );
+            $this->form_validation->set_message([
+                'email_check' => 'Email has already been used'
+            ]);
+            return FALSE;
+        }
+
+        return TRUE;
+    }
+
+    public function role_check($role_id)
+    {
+        if ($this->Role_model->is_exist_by_id($role_id) == 0) {
+            $this->form_validation->set_message([
+                'role_check' => 'The selected Role does not exist'
+            ]);
             return FALSE;
         }
 

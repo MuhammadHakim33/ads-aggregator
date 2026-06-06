@@ -34,29 +34,19 @@
                                 <!-- Name -->
                                 <div class="mb-3">
                                     <label for="name" class="form-label fw-medium">
-                                        Full Name <span class="text-danger">*</span>
+                                        Name <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text"
-                                        class="form-control"
-                                        id="name"
-                                        name="name"
-                                        value="<?= set_value('name') ?>"
-                                        placeholder="e.g. John Doe"
-                                        required>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                        value="<?= set_value('name') ?>">
                                     <?= form_error('name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <!-- Email -->
                                 <div class="mb-3">
                                     <label for="email" class="form-label fw-medium">
-                                        Email Address <span class="text-danger">*</span>
+                                        Email <span class="text-danger">*</span>
                                     </label>
-                                    <input type="email"
-                                        class="form-control"
-                                        id="email"
-                                        name="email"
-                                        value="<?= set_value('email') ?>"
-                                        placeholder="e.g. john@example.com"
-                                        required>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                        value="<?= set_value('email') ?>">
                                     <?= form_error('email', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <!-- Password -->
@@ -65,12 +55,7 @@
                                         Password <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
-                                        <input type="password"
-                                            class="form-control"
-                                            id="password"
-                                            name="password"
-                                            placeholder="Min. 6 characters"
-                                            required>
+                                        <input type="password" class="form-control" id="password" name="password">
                                         <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                             <i class="bi bi-eye" id="eyeIcon"></i>
                                         </button>
@@ -82,15 +67,18 @@
                                 </div>
                                 <!-- Role -->
                                 <div class="mb-4">
-                                    <label for="role" class="form-label fw-medium">
+                                    <label for="role_id" class="form-label fw-medium">
                                         Role <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" id="role" name="role" required>
+                                    <select class="form-select" id="role_id" name="role_id">
                                         <option value="" disabled selected>Select Role</option>
-                                        <option value="ae" <?= set_select('role', 'ae') ?>>AE (Account Executive)</option>
-                                        <option value="superadmin" <?= set_select('role', 'superadmin') ?>>Superadmin</option>
+                                        <?php foreach ($roles as $role): ?>
+                                            <option value="<?= $role->id ?>" <?= set_select('role_id', $role->id) ?>>
+                                                <?= ucwords($role->name) ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     </select>
-                                    <?= form_error('role', '<div class="form-text text-danger">', '</div>'); ?>
+                                    <?= form_error('role_id', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <div class="d-flex gap-2 justify-content-end">
                                     <a href="<?= base_url('account') ?>" class="btn btn-outline-secondary">Cancel</a>

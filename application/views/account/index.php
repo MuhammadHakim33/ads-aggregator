@@ -46,46 +46,42 @@
                         </thead>
                         <tbody>
                             <?php foreach ($accounts as $account): ?>
-                            <?php
-                                // role badge
-                                $role_class = $account->role === 'ae' ? 'primary' : 'secondary';
+                                <?php
                                 // status badge
                                 $status_class = $account->is_active ? 'success' : 'secondary';
-                            ?>
-                            <tr>
-                                <td class="fw-medium"><?= htmlspecialchars($account->name) ?></td>
-                                <td><?= htmlspecialchars($account->email) ?></td>
-                                <td>
-                                    <span class="badge text-bg-<?= $role_class ?>">
-                                        <?= strtoupper($account->role) ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge text-bg-<?= $status_class ?>">
-                                        <?= $account->is_active ? 'Aktif' : 'Nonaktif' ?>
-                                    </span>
-                                </td>
-                                <td class="text-end">
-                                    <a href="<?= base_url('account/edit/' . $account->id) ?>" class="btn btn-sm btn-outline-secondary" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <?php if ((int)$account->id !== (int)$this->session->userdata('id')): ?>
-                                    <button type="button"
-                                        class="btn btn-sm btn-outline-danger ms-1"
-                                        title="Delete"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal"
-                                        data-id="<?= $account->id ?>"
-                                        data-name="<?= htmlspecialchars($account->name) ?>">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                    <?php else: ?>
-                                    <button type="button" class="btn btn-sm btn-outline-danger ms-1" disabled title="Cannot delete own account">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
+                                ?>
+                                <tr>
+                                    <td class="fw-medium"><?= ucwords($account->name) ?></td>
+                                    <td><?= $account->email ?></td>
+                                    <td>
+                                        <span class="badge text-bg-secondary">
+                                            <?= ucwords($account->role_name) ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-<?= $status_class ?>">
+                                            <?= $account->is_active ? 'Active' : 'Inactive' ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="<?= base_url('account/edit/' . $account->id) ?>"
+                                            class="btn btn-sm btn-outline-secondary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <?php if ((int) $account->id !== (int) $this->session->userdata('id')): ?>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Delete"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                data-id="<?= $account->id ?>" data-name="<?= $account->name ?>">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-1" disabled
+                                                title="Cannot delete own account">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
@@ -93,15 +89,17 @@
                 <!-- pagination -->
                 <div class="card-footer d-flex justify-content-between align-items-center">
                     <small class="text-muted">Showing <?= count($accounts) ?> account</small>
-                    <nav>
+                    <!-- <nav>
                         <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a></li>
+                            <li class="page-item disabled"><a class="page-link" href="#"><i
+                                        class="bi bi-chevron-left"></i></a></li>
                             <li class="page-item active"><a class="page-link" href="#">1</a></li>
                             <li class="page-item"><a class="page-link" href="#">2</a></li>
                             <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a></li>
+                            <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>
+                            </li>
                         </ul>
-                    </nav>
+                    </nav> -->
                 </div>
             </div>
 

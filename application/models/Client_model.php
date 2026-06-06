@@ -10,7 +10,7 @@ class Client_model extends CI_Model
     {
         $this->db->select('clients.*, accounts.name as ae_name');
         $this->db->from($this->table);
-        $this->db->join('accounts', 'accounts.id = clients.ae_id AND accounts.deleted_at IS NULL', 'left');
+        $this->db->join('accounts', 'accounts.id = clients.ae_id', 'left');
         $this->db->where('clients.deleted_at', NULL);
         return $this->db->get()->result();
     }

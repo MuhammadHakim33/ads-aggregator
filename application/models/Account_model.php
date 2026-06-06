@@ -21,6 +21,16 @@ class Account_model extends CI_Model
         return $this->db->get($this->table)->row();
     }
 
+    public function get_by_email($email)
+    {
+        $this->db->select("{$this->table}.*, {$this->table_roles}.name AS role_name");
+        $this->db->join("{$this->table_roles}", "{$this->table_roles}.id = {$this->table}.role_id");
+        $this->db->where('email', $email);
+        $this->db->where('is_active', 1);
+        $this->db->where('deleted_at', NULL);
+        return $this->db->get($this->table)->row();
+    }
+
     public function insert($data)
     {
         if (isset($data['password'])) {

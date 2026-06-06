@@ -6,7 +6,7 @@ class Auth extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('Auth_model');
+        $this->load->model('Account_model');
         $this->load->library('session');
     }
 
@@ -25,7 +25,7 @@ class Auth extends CI_Controller
     {
         // set validation rules
         $this->form_validation->set_rules([
-            ['field' => 'email',    'label' => 'Email',    'rules' => 'required|valid_email'],
+            ['field' => 'email', 'label' => 'Email', 'rules' => 'required|valid_email'],
             ['field' => 'password', 'label' => 'Password', 'rules' => 'required'],
         ]);
 
@@ -36,7 +36,7 @@ class Auth extends CI_Controller
             return;
         }
 
-        $account = $this->Auth_model->find_by_email($this->input->post('email'));
+        $account = $this->Account_model->get_by_email($this->input->post('email'));
 
         // check if account exists
         if (!$account || !password_verify($this->input->post('password'), $account->password)) {
@@ -49,7 +49,7 @@ class Auth extends CI_Controller
             'id' => $account->id,
             'name' => $account->name,
             'email' => $account->email,
-            'role' => $account->role,
+            'role' => $account->role_name,
             'logged_in' => TRUE
         ]);
 

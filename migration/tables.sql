@@ -6,16 +6,6 @@ CREATE TABLE roles (
   name VARCHAR(50) UNIQUE NOT NULL COMMENT 'superadmin, ae, manajemen, client'
 );
 
-CREATE TABLE platforms (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(50) UNIQUE NOT NULL COMMENT 'facebook, instagram, gam, ga4, youtube, meta'
-);
-
-CREATE TABLE keyword_types (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(50) UNIQUE NOT NULL COMMENT 'html, keyword, hostname'
-);
-
 
 
 
@@ -75,14 +65,11 @@ CREATE TABLE contracts (
 -- =========================
 CREATE TABLE filter_keywords (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  platform_id INT NOT NULL,
-  type_id INT NOT NULL,
+  platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
+  type ENUM('html', 'keyword', 'hostname') NOT NULL,
   keyword VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (platform_id) REFERENCES platforms(id),
-  FOREIGN KEY (type_id) REFERENCES keyword_types(id)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =========================
@@ -92,13 +79,12 @@ CREATE TABLE ad_contents (
   id INT PRIMARY KEY AUTO_INCREMENT,
   title VARCHAR(255),
   contract_id INT NULL,
-  platform_id INT NOT NULL,
+  platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
   content_identifier VARCHAR(255) UNIQUE NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-  FOREIGN KEY (contract_id) REFERENCES contracts(id),
-  FOREIGN KEY (platform_id) REFERENCES platforms(id)
+  FOREIGN KEY (contract_id) REFERENCES contracts(id)
 );
 
 -- =========================
@@ -139,11 +125,9 @@ CREATE TABLE complaints (
 -- =========================
 CREATE TABLE platform_credentials (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  platform_id INT UNIQUE NOT NULL,
+  platform ENUM('meta', 'gam', 'ga4', 'youtube') UNIQUE NOT NULL,
   credential_data LONGTEXT NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (platform_id) REFERENCES platforms(id)
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

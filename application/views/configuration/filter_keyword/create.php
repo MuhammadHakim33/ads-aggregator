@@ -32,9 +32,12 @@
                                         Platform <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-select" id="platform" name="platform" required>
-                                        <option value="" disabled <?= empty(set_value('platform')) ? 'selected' : '' ?>>Select Platform</option>
-                                        <option value="facebook" <?= set_select('platform', 'facebook') ?>>Facebook</option>
-                                        <option value="instagram" <?= set_select('platform', 'instagram') ?>>Instagram</option>
+                                        <option value="" disabled <?= empty(set_value('platform')) ? 'selected' : '' ?>>
+                                            Select Platform</option>
+                                        <option value="facebook" <?= set_select('platform', 'facebook') ?>>Facebook
+                                        </option>
+                                        <option value="instagram" <?= set_select('platform', 'instagram') ?>>Instagram
+                                        </option>
                                         <option value="gam" <?= set_select('platform', 'gam') ?>>GAM</option>
                                         <option value="ga4" <?= set_select('platform', 'ga4') ?>>GA4</option>
                                         <option value="youtube" <?= set_select('platform', 'youtube') ?>>YouTube</option>
@@ -46,7 +49,8 @@
                                         Type <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-select" id="type" name="type" required>
-                                        <option value="" disabled <?= empty(set_value('type')) ? 'selected' : '' ?>>Select Type</option>
+                                        <option value="" disabled <?= empty(set_value('type')) ? 'selected' : '' ?>>
+                                            Select Type</option>
                                         <option value="html" <?= set_select('type', 'html') ?>>HTML</option>
                                         <option value="keyword" <?= set_select('type', 'keyword') ?>>Keyword</option>
                                         <option value="hostname" <?= set_select('type', 'hostname') ?>>Hostname</option>
@@ -57,18 +61,15 @@
                                     <label for="keyword" class="form-label fw-medium">
                                         Keyword <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text"
-                                        class="form-control"
-                                        id="keyword"
-                                        name="keyword"
-                                        value="<?= set_value('keyword') ?>"
-                                        placeholder="e.g. Content partnership"
+                                    <input type="text" class="form-control" id="keyword" name="keyword"
+                                        value="<?= set_value('keyword') ?>" placeholder="e.g. Content partnership"
                                         required minlength="2" maxlength="255">
                                     <?= form_error('keyword', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="d-flex gap-2 justify-content-end">
-                                    <a href="<?= base_url('config/filter-keyword') ?>" class="btn btn-outline-secondary">Cancel</a>
+                                    <a href="<?= base_url('config/filter-keyword') ?>"
+                                        class="btn btn-outline-secondary">Cancel</a>
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-plus-lg me-1"></i> Create Keyword
                                     </button>

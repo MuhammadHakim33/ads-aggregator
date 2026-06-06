@@ -45,7 +45,7 @@ class Filter_keyword extends MY_Controller
 
             if ($this->form_validation->run() === TRUE) {
                 $insert_id = $this->Filter_keyword_model->insert([
-                    'platform'  => $this->input->post('platform'),
+                    'platform' => $this->input->post('platform'),
                     'type' => $this->input->post('type'),
                     'keyword' => $this->input->post('keyword'),
                     'is_active' => TRUE
@@ -105,9 +105,9 @@ class Filter_keyword extends MY_Controller
 
             if ($this->form_validation->run() === TRUE) {
                 $updated = $this->Filter_keyword_model->update($id, [
-                    'platform'  => $this->input->post('platform'),
-                    'type'      => $this->input->post('type'),
-                    'keyword'   => $this->input->post('keyword'),
+                    'platform' => $this->input->post('platform'),
+                    'type' => $this->input->post('type'),
+                    'keyword' => $this->input->post('keyword'),
                     'is_active' => $this->input->post('is_active')
                 ]);
 

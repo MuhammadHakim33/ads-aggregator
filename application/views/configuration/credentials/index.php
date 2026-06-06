@@ -24,7 +24,7 @@
 
             <!-- META -->
             <?php
-                $meta = $credentials['meta'] ?? null;
+            $meta = $credentials['meta'] ?? null;
             ?>
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -44,7 +44,8 @@
                     <form method="POST" action="<?= base_url('config/credentials/save/meta') ?>">
                         <div class="mb-3">
                             <label for="meta_json" class="form-label fw-medium">Credential JSON</label>
-                            <textarea id="meta_json" name="credential_json" class="form-control font-monospace" rows="6" placeholder='{"system_user_token": "...", "fb_page_id": "...", "ig_account_id": "..."}'><?= $meta && isset($meta->credential_data) ? htmlspecialchars($meta->credential_data) : '' ?></textarea>
+                            <textarea id="meta_json" name="credential_json" class="form-control font-monospace" rows="6"
+                                placeholder='{"system_user_token": "...", "fb_page_id": "...", "ig_account_id": "..."}'><?= $meta && isset($meta->credential_data) ? htmlspecialchars($meta->credential_data) : '' ?></textarea>
                         </div>
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary btn-sm">
@@ -57,7 +58,7 @@
 
             <!-- GA4 -->
             <?php
-                $ga4 = $credentials['ga4'] ?? null;
+            $ga4 = $credentials['ga4'] ?? null;
             ?>
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -90,7 +91,7 @@
 
             <!-- YOUTUBE -->
             <?php
-                $yt = $credentials['youtube'] ?? null;
+            $yt = $credentials['youtube'] ?? null;
             ?>
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">

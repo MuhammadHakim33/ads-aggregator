@@ -81,16 +81,6 @@ $route['config/role/edit/(:num)'] = 'Config/role/edit/$1';
 $route['config/role/delete/(:num)'] = 'Config/role/delete/$1';
 $route['config/role'] = 'Config/role/index';
 
-$route['config/platform/create'] = 'Config/Platform/create';
-$route['config/platform/edit/(:num)'] = 'Config/Platform/edit/$1';
-$route['config/platform/delete/(:num)'] = 'Config/Platform/delete/$1';
-$route['config/platform'] = 'Config/Platform/index';
-
-$route['config/keyword-type/create'] = 'Config/Keyword_type/create';
-$route['config/keyword-type/edit/(:num)'] = 'Config/Keyword_type/edit/$1';
-$route['config/keyword-type/delete/(:num)'] = 'Config/Keyword_type/delete/$1';
-$route['config/keyword-type'] = 'Config/Keyword_type/index';
-
 $route['auth/login'] = 'auth/login';
 $route['auth/logout'] = 'auth/logout';
 

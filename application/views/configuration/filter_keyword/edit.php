@@ -45,7 +45,8 @@
                                         Type <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-select" id="type" name="type" required>
-                                        <option value="html" <?= set_select('type', 'html', $keyword->type === 'html') ?>>HTML</option>
+                                        <option value="html" <?= set_select('type', 'html', $keyword->type === 'html') ?>>
+                                            HTML</option>
                                         <option value="keyword" <?= set_select('type', 'keyword', $keyword->type === 'keyword') ?>>Keyword</option>
                                         <option value="hostname" <?= set_select('type', 'hostname', $keyword->type === 'hostname') ?>>Hostname</option>
                                     </select>
@@ -55,26 +56,25 @@
                                     <label for="keyword" class="form-label fw-medium">
                                         Keyword <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text"
-                                        class="form-control"
-                                        id="keyword"
-                                        name="keyword"
+                                    <input type="text" class="form-control" id="keyword" name="keyword"
                                         value="<?= set_value('keyword', $keyword->keyword) ?>"
-                                        placeholder="e.g. Content partnership"
-                                        required minlength="2" maxlength="255">
+                                        placeholder="e.g. Content partnership" required minlength="2" maxlength="255">
                                     <?= form_error('keyword', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <div class="mb-4">
                                     <label for="is_active" class="form-label fw-medium">Status</label>
                                     <select class="form-select" id="is_active" name="is_active">
-                                        <option value="1" <?= set_select('is_active', '1', $keyword->is_active == 1) ?>>Aktif</option>
-                                        <option value="0" <?= set_select('is_active', '0', $keyword->is_active == 0) ?>>Nonaktif</option>
+                                        <option value="1" <?= set_select('is_active', '1', $keyword->is_active == 1) ?>>
+                                            Aktif</option>
+                                        <option value="0" <?= set_select('is_active', '0', $keyword->is_active == 0) ?>>
+                                            Nonaktif</option>
                                     </select>
                                     <?= form_error('is_active', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="d-flex gap-2 justify-content-end">
-                                    <a href="<?= base_url('config/filter-keyword') ?>" class="btn btn-outline-secondary">Cancel</a>
+                                    <a href="<?= base_url('config/filter-keyword') ?>"
+                                        class="btn btn-outline-secondary">Cancel</a>
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-check-lg me-1"></i> Save Changes
                                     </button>

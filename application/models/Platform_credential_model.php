@@ -44,19 +44,16 @@ class Platform_credential_model extends CI_Model
             'credential_data' => json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
         ];
 
-        $this->db->insert($this->table, $payload);
-        return $this->db->insert_id();
+        return $this->db->insert($this->table, $payload);
     }
 
     public function update($platform, $data)
     {
         $payload = [
-            'platform' => $platform,
             'credential_data' => json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
         ];
 
         $this->db->where('platform', $platform);
-        $this->db->update($this->table, $payload);
-        return $this->db->affected_rows() > 0;
+        return $this->db->update($this->table, $payload);
     }
 }

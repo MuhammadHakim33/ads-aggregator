@@ -49,15 +49,34 @@ CREATE TABLE contracts (
   client_id INT NOT NULL,
   contract_number VARCHAR(100) UNIQUE NOT NULL,
   value DECIMAL(15,2) NOT NULL,
-  start_date DATE NOT NULL,
-  end_date DATE NOT NULL,
+  start_date DATE NULL,
+  end_date DATE NULL,
   terminated_at TIMESTAMP NULL,
   termination_reason TEXT NULL,
   document_path VARCHAR(500) NULL,
+  deleted_at TIMESTAMP NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
   FOREIGN KEY (client_id) REFERENCES clients(id)
+);
+
+-- =========================
+-- CAMPAIGNS
+-- =========================
+CREATE TABLE campaigns (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  contract_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  description TEXT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  -- status ENUM('draft', 'active', 'paused', 'completed', 'cancelled') NOT NULL DEFAULT 'draft',
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (contract_id) REFERENCES contracts(id)
 );
 
 -- =========================
@@ -78,13 +97,12 @@ CREATE TABLE filter_keywords (
 CREATE TABLE ad_contents (
   id INT PRIMARY KEY AUTO_INCREMENT,
   title VARCHAR(255),
-  contract_id INT NULL,
+  campaign_id INT NULL,
   platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
   content_identifier VARCHAR(255) UNIQUE NOT NULL,
-  is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-  FOREIGN KEY (contract_id) REFERENCES contracts(id)
+  FOREIGN KEY (campaign_id) REFERENCES campaigns(id)
 );
 
 -- =========================

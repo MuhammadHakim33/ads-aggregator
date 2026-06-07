@@ -26,6 +26,12 @@
             </a>
         </li>
         <li class="nav-item">
+            <a href="<?= base_url('contract') ?>"
+                class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'contract' ? 'active text-white' : '' ?>">
+                <i class="bi bi-file-earmark-text me-2"></i> Contract
+            </a>
+        </li>
+        <li class="nav-item">
             <a href="<?= base_url('ads') ?>"
                 class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'ads' ? 'active text-white' : '' ?>">
                 <i class="bi bi-collection-play me-2"></i> Ads

@@ -53,19 +53,13 @@ class Contract extends MY_Controller
             if ($this->form_validation->run() === TRUE) {
                 $client = $this->Client_model->get_by_id($this->input->post('client_id'));
                 if (!$client) {
-                    $this->session->set_flashdata('errors', '<p>Selected Client not found.</p>');
+                    $this->session->set_flashdata('errors', 'Selected Client not found.');
                     redirect('contract/create');
                     return;
                 }
 
-                // Auto-generate contract number and validate that it is unique
-                do {
-                    $contract_number = $this->generate_contract_number($client->company_name);
-                } while (!$this->Contract_model->is_contract_number_unique($contract_number));
-
+                // handle file upload if present
                 $document_path = null;
-
-                // Handle file upload if present
                 if (!empty($_FILES['document']['name'])) {
                     $config['upload_path'] = './uploads/contracts/';
                     $config['allowed_types'] = 'pdf|doc|docx';
@@ -84,6 +78,11 @@ class Contract extends MY_Controller
                     }
                 }
 
+                // auto generate contract number and validate until unique
+                do {
+                    $contract_number = $this->generate_contract_number($client->company_name);
+                } while (!$this->Contract_model->is_contract_number_unique($contract_number));
+
                 $insert_id = $this->Contract_model->insert([
                     'client_id' => $this->input->post('client_id'),
                     'contract_number' => $contract_number,
@@ -98,7 +97,7 @@ class Contract extends MY_Controller
                     redirect('contract');
                     return;
                 } else {
-                    $this->session->set_flashdata('errors', '<p>Failed to create contract. Please try again.</p>');
+                    $this->session->set_flashdata('errors', 'Failed to create contract. Please try again.');
                 }
             }
         }
@@ -116,7 +115,7 @@ class Contract extends MY_Controller
     {
         $contract = $this->Contract_model->get_by_id($id);
         if (!$contract) {
-            $this->session->set_flashdata('errors', '<p>Contract not found.</p>');
+            $this->session->set_flashdata('errors', 'Contract not found.');
             redirect('contract');
             return;
         }
@@ -155,13 +154,12 @@ class Contract extends MY_Controller
             if ($this->form_validation->run() === TRUE) {
                 $update_data = [
                     'client_id' => $this->input->post('client_id'),
-                    'contract_number' => $contract->contract_number,
                     'value' => $this->input->post('value'),
                     'start_date' => $this->input->post('start_date'),
                     'end_date' => $this->input->post('end_date'),
                 ];
 
-                // Check termination toggle
+                // check termination toggle
                 $is_terminated = $this->input->post('is_terminated');
                 if ($is_terminated) {
                     $update_data['terminated_at'] = $this->input->post('terminated_at') ?: date('Y-m-d H:i:s');
@@ -171,7 +169,7 @@ class Contract extends MY_Controller
                     $update_data['termination_reason'] = null;
                 }
 
-                // Handle file upload if present
+                // handle file upload if present
                 if (!empty($_FILES['document']['name'])) {
                     $config['upload_path'] = './uploads/contracts/';
                     $config['allowed_types'] = 'pdf|doc|docx';
@@ -184,9 +182,9 @@ class Contract extends MY_Controller
                         $upload_data = $this->upload->data();
                         $update_data['document_path'] = 'uploads/contracts/' . $upload_data['file_name'];
 
-                        // Optionally delete old file
+                        // optionally delete old file
                         if ($contract->document_path && file_exists('./' . $contract->document_path)) {
-                            @unlink('./' . $contract->document_path);
+                            unlink('./' . $contract->document_path);
                         }
                     } else {
                         $this->session->set_flashdata('errors', $this->upload->display_errors());
@@ -222,14 +220,14 @@ class Contract extends MY_Controller
 
         $contract = $this->Contract_model->get_by_id($id);
         if (!$contract) {
-            $this->session->set_flashdata('errors', '<p>Contract not found.</p>');
+            $this->session->set_flashdata('errors', 'Contract not found.');
             redirect('contract');
             return;
         }
 
-        // Check if contract has campaigns (optional check for security)
+        // check if contract has campaigns (optional check for security)
         if ($this->Contract_model->has_campaigns($id)) {
-            $this->session->set_flashdata('errors', '<p>Cannot delete contract. It has active campaigns associated with it.</p>');
+            $this->session->set_flashdata('errors', 'Cannot delete contract. It has active campaigns associated with it.');
             redirect('contract');
             return;
         }
@@ -238,7 +236,7 @@ class Contract extends MY_Controller
         if ($deleted) {
             $this->session->set_flashdata('success', 'Contract deleted successfully.');
         } else {
-            $this->session->set_flashdata('errors', '<p>Failed to delete contract. Please try again.</p>');
+            $this->session->set_flashdata('errors', 'Failed to delete contract. Please try again.');
         }
 
         redirect('contract');
@@ -256,7 +254,7 @@ class Contract extends MY_Controller
         if (file_exists($file_path)) {
             force_download($file_path, NULL);
         } else {
-            $this->session->set_flashdata('errors', '<p>Contract document file not found on server.</p>');
+            $this->session->set_flashdata('errors', 'Contract document file not found on server.');
             redirect('contract');
         }
     }

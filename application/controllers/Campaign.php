@@ -70,7 +70,7 @@ class Campaign extends MY_Controller
                     redirect('campaign');
                     return;
                 } else {
-                    $this->session->set_flashdata('errors', '<p>Failed to create campaign. Please try again.</p>');
+                    $this->session->set_flashdata('errors', 'Failed to create campaign. Please try again.');
                 }
             }
         }
@@ -78,7 +78,7 @@ class Campaign extends MY_Controller
         $data = [
             'title' => 'Create Campaign',
             'active_menu' => 'campaign',
-            'contracts' => $this->Contract_model->get_all()
+            'contracts' => $this->Contract_model->get_all_for_select()
         ];
 
         $this->render('campaign/create', $data);
@@ -88,7 +88,7 @@ class Campaign extends MY_Controller
     {
         $campaign = $this->Campaign_model->get_by_id($id);
         if (!$campaign) {
-            $this->session->set_flashdata('errors', '<p>Campaign not found.</p>');
+            $this->session->set_flashdata('errors', 'Campaign not found.');
             redirect('campaign');
             return;
         }
@@ -143,7 +143,7 @@ class Campaign extends MY_Controller
             'title' => 'Edit Campaign',
             'active_menu' => 'campaign',
             'campaign' => $campaign,
-            'contracts' => $this->Contract_model->get_all()
+            'contracts' => $this->Contract_model->get_all_for_select()
         ];
 
         $this->render('campaign/edit', $data);
@@ -158,14 +158,14 @@ class Campaign extends MY_Controller
 
         $campaign = $this->Campaign_model->get_by_id($id);
         if (!$campaign) {
-            $this->session->set_flashdata('errors', '<p>Campaign not found.</p>');
+            $this->session->set_flashdata('errors', 'Campaign not found.');
             redirect('campaign');
             return;
         }
 
-        // Restrict deletion if active ads are linked
+        // restrict deletion if active ads are linked
         if ($this->Campaign_model->has_ads($id)) {
-            $this->session->set_flashdata('errors', '<p>Cannot delete campaign. It is linked to active ad contents.</p>');
+            $this->session->set_flashdata('errors', 'Cannot delete campaign. It is linked to active ad contents.');
             redirect('campaign');
             return;
         }
@@ -174,13 +174,11 @@ class Campaign extends MY_Controller
         if ($deleted) {
             $this->session->set_flashdata('success', 'Campaign deleted successfully.');
         } else {
-            $this->session->set_flashdata('errors', '<p>Failed to delete campaign. Please try again.</p>');
+            $this->session->set_flashdata('errors', 'Failed to delete campaign. Please try again.');
         }
 
         redirect('campaign');
     }
-
-    // Callbacks for validation
 
     public function contract_check($contract_id)
     {
@@ -200,9 +198,11 @@ class Campaign extends MY_Controller
         if ($d && $d->format('Y-m-d') === $date) {
             return TRUE;
         }
+
         $this->form_validation->set_message([
             'valid_date' => 'The {field} field must be in YYYY-MM-DD format.'
         ]);
+
         return FALSE;
     }
 
@@ -211,7 +211,7 @@ class Campaign extends MY_Controller
         $start_date = $this->input->post('start_date');
         $contract_id = $this->input->post('contract_id');
 
-        // Check 1: start_date <= end_date
+        // check start_date <= end_date
         if (strtotime($end_date) < strtotime($start_date)) {
             $this->form_validation->set_message([
                 'date_range_check' => 'The End Date must be equal to or after the Start Date.'
@@ -219,22 +219,22 @@ class Campaign extends MY_Controller
             return FALSE;
         }
 
-        // Check 2: must fall within the parent contract dates
+        // check must fall within the parent contract dates
         $contract = $this->Contract_model->get_by_id($contract_id);
         if ($contract) {
-            // Verify start date boundary
+            // verify start date boundary
             if (strtotime($start_date) < strtotime($contract->start_date)) {
                 $this->form_validation->set_message([
-                    'date_range_check' => 'Campaign Start Date cannot be earlier than Contract Start Date (' . $contract->start_date . ').'
+                    'date_range_check' => "Campaign Start Date cannot be earlier than Contract Start Date ({$contract->start_date})."
                 ]);
                 return FALSE;
             }
 
-            // Verify end date boundary (taking into account early termination if it exists)
+            // verify end date boundary (taking into account early termination if it exists)
             $contract_max_end = $contract->terminated_at ? date('Y-m-d', strtotime($contract->terminated_at)) : $contract->end_date;
             if (strtotime($end_date) > strtotime($contract_max_end)) {
                 $this->form_validation->set_message([
-                    'date_range_check' => 'Campaign End Date cannot exceed Contract End Date (' . $contract_max_end . ').'
+                    'date_range_check' => "Campaign End Date cannot exceed Contract End Date ({$contract_max_end})."
                 ]);
                 return FALSE;
             }

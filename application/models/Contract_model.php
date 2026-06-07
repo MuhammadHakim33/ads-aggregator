@@ -32,6 +32,17 @@ class Contract_model extends CI_Model
         return $this->db->get()->result();
     }
 
+    public function get_all_for_select()
+    {
+        $this->db->select('contracts.*, clients.company_name as client_name');
+        $this->db->from($this->table);
+        $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
+        $this->db->where('contracts.deleted_at', NULL);
+        $this->db->where('contracts.terminated_at', NULL);
+        $this->db->order_by('contracts.created_at', 'DESC');
+        return $this->db->get()->result();
+    }
+
     public function get_by_id($id)
     {
         $this->db->select('contracts.*, clients.company_name as client_name');
@@ -73,13 +84,10 @@ class Contract_model extends CI_Model
         return $this->db->count_all_results('campaigns') > 0;
     }
 
-    public function is_contract_number_unique($contract_number, $exclude_id = null)
+    public function is_contract_number_unique($contract_number)
     {
         $this->db->where('contract_number', $contract_number);
         $this->db->where('deleted_at', NULL);
-        if ($exclude_id !== null) {
-            $this->db->where('id !=', $exclude_id);
-        }
         return $this->db->count_all_results($this->table) === 0;
     }
 }

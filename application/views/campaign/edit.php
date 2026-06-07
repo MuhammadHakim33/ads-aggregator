@@ -21,23 +21,24 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     <?php endif; ?>
-                    
+
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">Campaign Information</h6>
                         </div>
                         <div class="card-body">
                             <form action="<?= base_url('campaign/edit/' . $campaign->id) ?>" method="POST">
-                                
+
                                 <div class="mb-3">
                                     <label for="contract_id" class="form-label fw-medium">
                                         Parent Contract <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" id="contract_id" name="contract_id" required>
+                                    <select class="form-select" id="contract_id" name="contract_id">
                                         <option value="" disabled>Select Contract</option>
                                         <?php foreach ($contracts as $contract): ?>
                                             <option value="<?= $contract->id ?>" <?= set_select('contract_id', $contract->id, $campaign->contract_id == $contract->id) ?>>
-                                                <?= htmlspecialchars(ucwords($contract->client_name)) ?> (<?= htmlspecialchars($contract->contract_number) ?>)
+                                                <?= ucwords($contract->client_name) ?>
+                                                (<?= $contract->contract_number ?>)
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -49,14 +50,14 @@
                                         Campaign Name <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" id="name" name="name"
-                                        value="<?= set_value('name', $campaign->name) ?>" required>
+                                        value="<?= set_value('name', $campaign->name) ?>">
                                     <?= form_error('name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="description" class="form-label fw-medium">Description</label>
-                                    <textarea class="form-control" id="description" name="description" rows="3" 
-                                        placeholder="Brief description of campaign goals..."><?= set_value('description', $campaign->description) ?></textarea>
+                                    <textarea class="form-control" id="description" name="description"
+                                        rows="3"><?= set_value('description', $campaign->description) ?></textarea>
                                     <?= form_error('description', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
@@ -66,7 +67,7 @@
                                             Start Date <span class="text-danger">*</span>
                                         </label>
                                         <input type="date" class="form-control" id="start_date" name="start_date"
-                                            value="<?= set_value('start_date', $campaign->start_date) ?>" required>
+                                            value="<?= set_value('start_date', $campaign->start_date) ?>">
                                         <?= form_error('start_date', '<div class="form-text text-danger">', '</div>'); ?>
                                     </div>
 
@@ -75,7 +76,7 @@
                                             End Date <span class="text-danger">*</span>
                                         </label>
                                         <input type="date" class="form-control" id="end_date" name="end_date"
-                                            value="<?= set_value('end_date', $campaign->end_date) ?>" required>
+                                            value="<?= set_value('end_date', $campaign->end_date) ?>">
                                         <?= form_error('end_date', '<div class="form-text text-danger">', '</div>'); ?>
                                     </div>
                                 </div>

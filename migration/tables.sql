@@ -73,6 +73,7 @@ CREATE TABLE campaigns (
   end_date DATE NOT NULL,
   -- status ENUM('draft', 'active', 'paused', 'completed', 'cancelled') NOT NULL DEFAULT 'draft',
   is_active BOOLEAN DEFAULT TRUE,
+  deleted_at TIMESTAMP NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   

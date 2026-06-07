@@ -32,6 +32,12 @@
             </a>
         </li>
         <li class="nav-item">
+            <a href="<?= base_url('campaign') ?>"
+                class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'campaign' ? 'active text-white' : '' ?>">
+                <i class="bi bi-megaphone me-2"></i> Campaign
+            </a>
+        </li>
+        <li class="nav-item">
             <a href="<?= base_url('ads') ?>"
                 class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'ads' ? 'active text-white' : '' ?>">
                 <i class="bi bi-collection-play me-2"></i> Ads

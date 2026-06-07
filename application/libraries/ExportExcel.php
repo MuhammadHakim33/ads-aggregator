@@ -30,7 +30,6 @@ class ExportExcel implements Exporter
         $infoRows = [
             ['Ad Title', $ad->title ?? '-'],
             ['Platform', ucfirst($ad->platform ?? '-')],
-            ['Ad Type', ucfirst($ad->ad_type ?? '-')],
             ['Client', $ad->company_name ?? '-'],
             ['PIC', $ad->pic_name ?? '-'],
             ['Status', ($ad->is_active ? 'Active' : 'Inactive')],

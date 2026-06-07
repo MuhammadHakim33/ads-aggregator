@@ -31,23 +31,25 @@ class Ads extends MY_Controller
 
     public function connect()
     {
+        $this->load->model('Campaign_model');
+
         if ($this->input->method() === 'post') {
             $selected_ids = $this->input->post('selected_ids') ?? [];
-            $client_map = $this->input->post('client_id') ?? [];
+            $campaign_map = $this->input->post('campaign_id') ?? [];
 
             $saved = 0;
             foreach ($selected_ids as $ad_id) {
                 $ad_id = (int) $ad_id;
-                $client_id = (int) $client_map[$ad_id];
+                $campaign_id = (int) $campaign_map[$ad_id];
 
-                $rows = $this->Client_model->assign_client($ad_id, $client_id);
+                $rows = $this->Ad_model->assign_campaign($ad_id, $campaign_id);
                 $saved += $rows;
             }
 
             if ($saved > 0) {
-                $this->session->set_flashdata('success', "{$saved} ads successfully connected to client.");
+                $this->session->set_flashdata('success', "{$saved} ads successfully connected to campaign.");
             } else {
-                $this->session->set_flashdata('errors', 'No ads were successfully saved. Please select a client for the checked rows.');
+                $this->session->set_flashdata('errors', 'No ads were successfully saved. Please select a campaign for the checked rows.');
             }
 
             redirect('ads/connect');
@@ -62,7 +64,7 @@ class Ads extends MY_Controller
         $data = [
             'title' => 'Connect Ads',
             'active_menu' => 'ads',
-            'clients' => $this->Client_model->get_all(),
+            'campaigns' => $this->Campaign_model->get_all(),
             'unconnected' => $this->Ad_model->get_unconnected_ads(),
             'platform_labels' => $platform_labels
         ];

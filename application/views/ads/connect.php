@@ -11,7 +11,7 @@
             <!-- page heading -->
             <div class="d-flex justify-content-between align-items-center pb-2 mb-4">
                 <div>
-                    <h5 class="mb-0 fw-semibold">Connect Ads to Client</h5>
+                    <h5 class="mb-0 fw-semibold">Connect Ads to Campaign</h5>
                 </div>
                 <div>
                     <a href="<?= base_url('ads') ?>" class="btn btn-outline-secondary btn-sm">
@@ -45,7 +45,7 @@
                                     <th scope="col">Identifier/Title</th>
                                     <th scope="col">Platform</th>
                                     <th scope="col" class="text-center">Link</th>
-                                    <th scope="col" style="width: 250px;">Client</th>
+                                    <th scope="col" style="width: 250px;">Campaign</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -53,7 +53,7 @@
                                     <tr>
                                         <td colspan="6" class="text-center text-muted py-5">
                                             <i class="bi bi-check-circle fs-1 d-block mb-2 text-success"></i>
-                                            All ads have been connected to clients.
+                                            All ads have been connected to campaigns.
                                         </td>
                                     </tr>
                                 <?php else: ?>
@@ -97,10 +97,10 @@
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <select name="client_id[<?= $ad->id ?>]" class="form-select form-select-sm client-select" disabled>
-                                                <option value="" disabled selected>Select Client</option>
-                                                <?php foreach ($clients as $client): ?>
-                                                    <option value="<?= $client->id ?>"><?= htmlspecialchars($client->company_name) ?></option>
+                                            <select name="campaign_id[<?= $ad->id ?>]" class="form-select form-select-sm campaign-select" disabled>
+                                                <option value="" disabled selected>Select Campaign</option>
+                                                <?php foreach ($campaigns as $campaign): ?>
+                                                    <option value="<?= $campaign->id ?>"><?= htmlspecialchars(ucwords($campaign->name)) ?> (<?= htmlspecialchars($campaign->contract_number) ?>)</option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </td>
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let count = 0;
         rowChecks.forEach(chk => {
             const tr = chk.closest('tr');
-            const select = tr.querySelector('.client-select');
+            const select = tr.querySelector('.campaign-select');
             
             if (chk.checked) {
                 count++;

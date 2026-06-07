@@ -34,7 +34,6 @@ class FacebookDriver extends Platform_driver
                 'title' => mb_substr($p['message'] ?? 'No Text', 0, 200),
                 'content_identifier' => $p['id'],
                 'platform' => 'facebook',
-                'ad_type' => 'social',
             ];
         }, $raw);
     }

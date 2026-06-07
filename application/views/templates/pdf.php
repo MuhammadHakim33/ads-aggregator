@@ -207,10 +207,6 @@
                 <td class="value"><?= htmlspecialchars(ucfirst($ad->platform ?? '-')) ?></td>
             </tr>
             <tr>
-                <td class="label">Ad Type</td>
-                <td class="value"><?= htmlspecialchars(ucfirst($ad->ad_type ?? '-')) ?></td>
-            </tr>
-            <tr>
                 <td class="label">Client</td>
                 <td class="value"><?= htmlspecialchars($ad->company_name ?? '-') ?></td>
             </tr>

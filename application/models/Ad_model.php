@@ -15,16 +15,14 @@ class Ad_model extends CI_Model
         $placeholders = [];
 
         foreach ($rows as $row) {
-            $client_id = isset($row['client_id']) ? (int)$row['client_id'] : 'NULL';
             $title = isset($row['title']) ? $this->db->escape($row['title']) : 'NULL';
             $platform = $this->db->escape($row['platform']);
             $content_identifier = $this->db->escape($row['content_identifier']);
-            $ad_type = $this->db->escape($row['ad_type']);
 
-            $placeholders[] = "({$client_id}, {$title}, {$platform}, {$content_identifier}, {$ad_type})";
+            $placeholders[] = "({$title}, {$platform}, {$content_identifier})";
         }
 
-        $sql = "INSERT IGNORE INTO ". $this->table_contents ." (client_id, title, platform, content_identifier, ad_type) VALUES " . implode(',', $placeholders);
+        $sql = "INSERT IGNORE INTO ". $this->table_contents ." (title, platform, content_identifier) VALUES " . implode(',', $placeholders);
 
         $this->db->query($sql);
 
@@ -89,15 +87,18 @@ class Ad_model extends CI_Model
                 a.id,
                 a.title,
                 a.platform,
-                a.ad_type,
                 a.content_identifier,
                 a.is_active,
                 a.created_at,
-                c.id          AS client_id,
+                camp.id        AS campaign_id,
+                camp.name      AS campaign_name,
+                c.id           AS client_id,
                 c.company_name,
                 c.pic_name
             FROM {$this->table_contents} a
-            LEFT JOIN clients c ON c.id = a.client_id
+            LEFT JOIN campaigns camp ON camp.id = a.campaign_id
+            LEFT JOIN contracts cont ON cont.id = camp.contract_id
+            LEFT JOIN clients c ON c.id = cont.client_id
             WHERE a.id = {$ad_content_id}
             LIMIT 1
         ");
@@ -125,9 +126,11 @@ class Ad_model extends CI_Model
 
     public function get_all_ad_metrics($limit = null, $offset = null)
     {
-        $this->db->select('a.*, c.company_name');
+        $this->db->select('a.*, camp.name as campaign_name, c.company_name');
         $this->db->from($this->table_contents . ' a');
-        $this->db->join('clients c', 'c.id = a.client_id', 'left');
+        $this->db->join('campaigns camp', 'camp.id = a.campaign_id', 'left');
+        $this->db->join('contracts cont', 'cont.id = camp.contract_id', 'left');
+        $this->db->join('clients c', 'c.id = cont.client_id', 'left');
         $this->db->order_by('a.created_at', 'DESC');
         
         if ($limit !== null) {
@@ -161,18 +164,26 @@ class Ad_model extends CI_Model
             $metrics_by_ad[$m->ad_content_id][] = $m;
         }
         
-        foreach ($ad_contents as &$ad) {
+        foreach ($ad_contents as $ad) {
             $ad->metrics = isset($metrics_by_ad[$ad->id]) ? $metrics_by_ad[$ad->id] : [];
         }
 
         return $ad_contents;
     }
 
+
     public function get_unconnected_ads()
     {
-        $this->db->where('client_id IS NULL', NULL, FALSE);
+        $this->db->where('campaign_id IS NULL', NULL, FALSE);
         $this->db->order_by('platform', 'ASC');
         $this->db->order_by('created_at', 'DESC');
         return $this->db->get($this->table_contents)->result();
+    }
+
+    public function assign_campaign($ad_content_id, $campaign_id)
+    {
+        $this->db->where('id', $ad_content_id);
+        $this->db->update($this->table_contents, ['campaign_id' => $campaign_id ?: null]);
+        return $this->db->affected_rows();
     }
 }

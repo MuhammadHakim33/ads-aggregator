@@ -34,7 +34,6 @@ class InstagramDriver extends Platform_driver
             return [
                 'title' => mb_substr($p['caption'] ?? 'No Caption', 0, 200),
                 'content_identifier' => $p['id'],
-                'ad_type' => 'social',
             ];
         }, $raw);
     }

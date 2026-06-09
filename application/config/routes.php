@@ -72,11 +72,11 @@ $route['contract'] = 'contract/index';
 $route['campaign/create'] = 'campaign/create';
 $route['campaign/edit/(:num)'] = 'campaign/edit/$1';
 $route['campaign/delete/(:num)'] = 'campaign/delete/$1';
+$route['campaign/export/(:any)/(:num)'] = 'campaign/export/$1/$2';
 $route['campaign'] = 'campaign/index';
 
 $route['ads'] = 'ads/index';
 $route['ads/connect'] = 'ads/connect';
-$route['ads/export/(:any)/(:num)'] = 'ads/export/$1/$2';
 $route['ads/(:num)'] = 'ads/index/$1';
 
 $route['config/platforms/meta'] = 'Config/Platforms/meta';

@@ -242,4 +242,32 @@ class Campaign extends MY_Controller
 
         return TRUE;
     }
+
+    public function export($format, $id)
+    {
+        $this->load->library('Export_registry');
+        
+        $campaign = $this->Campaign_model->get_campaign_with_ads_and_metrics($id);
+        if (!$campaign) {
+            show_error('Campaign not found.', 404);
+            return;
+        }
+
+        if (!$this->export_registry->has($format)) {
+            show_error("Unknown export format: {$format}", 400);
+            return;
+        }
+
+        $exporter = $this->make_exporter($format);
+        $filename = 'report_campaign_' . $id . '_' . date('Ymd');
+        $exporter->generate($campaign, $filename);
+    }
+
+    private function make_exporter($format)
+    {
+        $conf = $this->export_registry->configs()[$format];
+        require_once $conf['class_path'];
+        $class = $conf['class'];
+        return new $class();
+    }
 }

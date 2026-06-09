@@ -51,8 +51,7 @@
                                     <th scope="col" class="text-center">Metric</th>
                                     <th scope="col" class="text-center">Status</th>
                                     <th scope="col" class="text-center">Link</th>
-                                    <th scope="col" class="text-center">Detail</th>
-                                    <th scope="col" class="text-center">Export</th>
+                                    <th class="text-center" style="width: 80px;">Detail</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -65,21 +64,20 @@
                                     ?>
                                     <tr class="ad-row" data-active="<?= $ad->is_active ? '1' : '0' ?>">
                                         <td>
-                                            <div class="fw-medium"><?= htmlspecialchars($ad->title ?? '-') ?></div>
-                                            <small
-                                                class="text-muted font-monospace"><?= htmlspecialchars($ad->content_identifier) ?></small>
+                                            <div class="fw-medium"><?= $ad->title ?? '-' ?></div>
+                                            <small class="text-muted font-monospace"><?= $ad->content_identifier ?></small>
                                         </td>
                                         <td>
                                             <?php if (!empty($ad->campaign_name)): ?>
-                                                <div class="fw-medium text-dark"><?= htmlspecialchars($ad->campaign_name) ?></div>
-                                                <div class="text-muted small"><?= htmlspecialchars($ad->company_name) ?></div>
+                                                <div class="fw-medium text-dark"><?= $ad->campaign_name ?></div>
+                                                <div class="text-muted small"><?= $ad->company_name ?></div>
                                             <?php else: ?>
                                                 <span class="text-muted fst-italic">unconnected</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
                                             <span class="badge text-bg-light">
-                                                <?= htmlspecialchars($platform_labels[strtolower($ad->platform)] ?? ucfirst($ad->platform)) ?>
+                                                <?= $platform_labels[strtolower($ad->platform)] ?? ucfirst($ad->platform) ?>
                                             </span>
                                         </td>
                                         <td class="text-center">
@@ -126,40 +124,12 @@
                                                 <span class="text-muted small">No metrics</span>
                                             <?php endif; ?>
                                         </td>
-                                        <!-- export dropdown -->
-                                        <td class="text-center">
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                                    id="exportDropdown-<?= $ad->id ?>" data-bs-toggle="dropdown"
-                                                    aria-expanded="false" title="Export">
-                                                    <i class="bi bi-download"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end"
-                                                    aria-labelledby="exportDropdown-<?= $ad->id ?>">
-                                                    <li>
-                                                        <a class="dropdown-item"
-                                                            href="<?= base_url('ads/export/pdf/' . $ad->id) ?>" target="_blank">
-                                                            <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
-                                                            Export PDF
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a class="dropdown-item"
-                                                            href="<?= base_url('ads/export/excel/' . $ad->id) ?>">
-                                                            <i class="bi bi-file-earmark-spreadsheet text-success me-2"></i>
-                                                            Export Excel
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </td>
                                     </tr>
                                     <?php if ($metricCount > 0): ?>
                                         <!-- metrics collapse row -->
-                                        <tr class="ad-metrics-row bg-body-secondary"
-                                            data-platform="<?= htmlspecialchars($ad->platform) ?>"
+                                        <tr class="ad-metrics-row bg-body-secondary" data-platform="<?= ($ad->platform) ?>"
                                             data-active="<?= $ad->is_active ? '1' : '0' ?>">
-                                            <td colspan="8" class="p-0 border-top-0">
+                                            <td colspan="7" class="p-0 border-top-0">
                                                 <div class="collapse" id="<?= $collapseId ?>">
                                                     <div class="p-3">
                                                         <table class="table table-sm table-bordered mb-0 bg-white rounded">
@@ -177,7 +147,7 @@
                                                                 <?php foreach ($ad->metrics as $metric): ?>
                                                                     <tr>
                                                                         <td class="fw-medium small">
-                                                                            <?= htmlspecialchars(ucwords(str_replace('_', ' ', $metric->metric_name))) ?>
+                                                                            <?= (ucwords(str_replace('_', ' ', $metric->metric_name))) ?>
                                                                         </td>
                                                                         <td class="text-end font-monospace small">
                                                                             <?= number_format($metric->metric_value, 2, ',', '.') ?>

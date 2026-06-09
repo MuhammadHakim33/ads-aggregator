@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
-    <title>Ad Report – <?= htmlspecialchars($ad->title ?? 'N/A') ?></title>
+    <title>Campaign Report – <?= $campaign->name ?? 'N/A' ?></title>
     <style>
         * {
             margin: 0;
@@ -22,11 +23,6 @@
             padding: 18px 24px;
             margin-bottom: 24px;
             overflow: hidden;
-        }
-
-        .page-header .logo {
-            height: 48px;
-            display: block;
         }
 
         .page-header .report-label {
@@ -103,6 +99,7 @@
 
         .metrics-section {
             margin: 0 24px 24px;
+            page-break-inside: avoid;
         }
 
         .metrics-section .section-title {
@@ -172,7 +169,7 @@
         }
 
         .page-footer {
-            margin: 0 24px;
+            margin: 24px;
             padding-top: 10px;
             border-top: 1px solid #e2e8f0;
             text-align: right;
@@ -181,43 +178,51 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- header -->
     <div class="page-header">
-        <div class="report-label">Ad Metrics Report</div>
+        <div class="report-label">Campaign Metrics Report</div>
     </div>
 
     <!-- card -->
     <div class="info-card">
-        <div class="card-title">Ad Information</div>
+        <div class="card-title">Campaign Information</div>
         <table class="info-grid">
             <tr>
-                <td class="label">Ad Title</td>
-                <td class="value"><?= htmlspecialchars($ad->title ?? '-') ?></td>
+                <td class="label">Campaign Name</td>
+                <td class="value"><?= ucwords($campaign->name ?? '-') ?></td>
             </tr>
+            <?php if (!empty($campaign->description)): ?>
+                <tr>
+                    <td class="label">Description</td>
+                    <td class="value" style="font-weight: normal;"><?= $campaign->description ?></td>
+                </tr>
+            <?php endif; ?>
             <tr>
-                <td class="label">Content ID</td>
-                <td class="value" style="font-family: monospace; font-size:10px;">
-                    <?= htmlspecialchars($ad->content_identifier ?? '-') ?>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Platform</td>
-                <td class="value"><?= htmlspecialchars(ucfirst($ad->platform ?? '-')) ?></td>
+                <td class="label">Contract Number</td>
+                <td class="value"><?= $campaign->contract_number ?? '-' ?></td>
             </tr>
             <tr>
                 <td class="label">Client</td>
-                <td class="value"><?= htmlspecialchars($ad->company_name ?? '-') ?></td>
+                <td class="value"><?= ucwords($campaign->client_name ?? '-') ?></td>
             </tr>
             <tr>
                 <td class="label">PIC</td>
-                <td class="value"><?= htmlspecialchars($ad->pic_name ?? '-') ?></td>
+                <td class="value"><?= $campaign->client_pic ?? '-' ?></td>
+            </tr>
+            <tr>
+                <td class="label">Campaign Schedule</td>
+                <td class="value">
+                    <?= date('d M Y', strtotime($campaign->start_date)) ?> &ndash;
+                    <?= date('d M Y', strtotime($campaign->end_date)) ?>
+                </td>
             </tr>
             <tr>
                 <td class="label">Status</td>
                 <td class="value">
-                    <?php $active = (bool)($ad->is_active ?? false); ?>
+                    <?php $active = (bool) ($campaign->is_active ?? false); ?>
                     <span class="badge <?= $active ? 'badge-active' : 'badge-inactive' ?>">
                         <?= $active ? 'Active' : 'Inactive' ?>
                     </span>
@@ -232,42 +237,62 @@
         </table>
     </div>
 
-    <!-- metrics table -->
-    <div class="metrics-section">
-        <div class="section-title">Metrics</div>
+    <!-- ads list with metrics -->
+    <?php if (!empty($campaign->ads)): ?>
+        <?php foreach ($campaign->ads as $ad): ?>
+            <div class="metrics-section">
+                <div class="section-title">Ad: <?= $ad->title ?? '-' ?></div>
+                <table class="info-grid" style="margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                    <tr>
+                        <td class="label" style="width: 20%; padding: 5px 10px;">Platform</td>
+                        <td class="value" style="width: 30%; padding: 5px 10px;"><?= ucfirst($ad->platform ?? '-') ?></td>
+                        <td class="label" style="width: 20%; padding: 5px 10px;">Content ID</td>
+                        <td class="value" style="width: 30%; padding: 5px 10px; font-family: monospace; font-size: 10px;">
+                            <?= $ad->content_identifier ?? '-' ?></td>
+                    </tr>
+                </table>
 
-        <?php if (!empty($ad->metrics)): ?>
-        <table class="metrics-table">
-            <thead>
-                <tr>
-                    <th>Metric Name</th>
-                    <th class="text-right">Value</th>
-                    <th>Last Updated</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($ad->metrics as $metric): ?>
-                <tr>
-                    <td><?= htmlspecialchars(ucwords(str_replace('_', ' ', $metric->metric_name))) ?></td>
-                    <td class="metric-value">
-                        <?= number_format((float)$metric->metric_value, 2, ',', '.') ?>
-                    </td>
-                    <td class="metric-date">
-                        <?= date('d M Y H:i', strtotime($metric->updated_at)) ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-        <?php else: ?>
-            <p class="no-metrics">No metric data available for this ad.</p>
-        <?php endif; ?>
-    </div>
+                <?php if (!empty($ad->metrics)): ?>
+                    <table class="metrics-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%;">Metric Name</th>
+                                <th class="text-right" style="width: 25%;">Value</th>
+                                <th style="width: 25%;">Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($ad->metrics as $metric): ?>
+                                <tr>
+                                    <td><?= ucwords(str_replace('_', ' ', $metric->metric_name)) ?></td>
+                                    <td class="metric-value">
+                                        <?= number_format((float) $metric->metric_value, 2, ',', '.') ?>
+                                    </td>
+                                    <td class="metric-date">
+                                        <?= date('d M Y H:i', strtotime($metric->updated_at)) ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p class="no-metrics" style="border: 1px solid #e2e8f0; border-radius: 4px; padding: 10px;">No metric data
+                        available for this ad.</p>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <div class="metrics-section">
+            <p class="no-metrics" style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px;">No ads connected to
+                this campaign.</p>
+        </div>
+    <?php endif; ?>
 
     <!-- footer -->
     <div class="page-footer">
-        Ads Aggregator &mdash; Confidential &mdash; <?= date('Y') ?>
+        Ads Aggregator &mdash; Campaign Export Report &mdash; <?= date('Y') ?>
     </div>
 
 </body>
+
 </html>

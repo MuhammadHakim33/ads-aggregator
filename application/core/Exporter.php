@@ -2,5 +2,5 @@
 
 interface Exporter
 {
-    public function generate($ad, $filename);
+    public function generate($data, $filename);
 }

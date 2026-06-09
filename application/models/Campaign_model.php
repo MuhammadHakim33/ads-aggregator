@@ -8,7 +8,7 @@ class Campaign_model extends CI_Model
     public function __construct()
     {
         parent::__construct();
-        
+
         // Safety check: Create the campaigns table if it doesn't exist
         if (!$this->db->table_exists($this->table)) {
             $sql = "CREATE TABLE IF NOT EXISTS campaigns (
@@ -93,5 +93,49 @@ class Campaign_model extends CI_Model
         $this->db->where('campaign_id', $id);
         $this->db->where('is_active', 1);
         return $this->db->count_all_results('ad_contents') > 0;
+    }
+
+    public function get_campaign_with_ads_and_metrics($campaign_id)
+    {
+        // get campaign details with contract and client info
+        $this->db->select('camp.*, cont.contract_number, cont.value as contract_value, c.company_name as client_name, c.pic_name as client_pic');
+        $this->db->from($this->table . ' camp');
+        $this->db->join('contracts cont', 'cont.id = camp.contract_id', 'left');
+        $this->db->join('clients c', 'c.id = cont.client_id', 'left');
+        $this->db->where('camp.id', $campaign_id);
+        $this->db->where('camp.deleted_at', NULL);
+        $campaign = $this->db->get()->row();
+
+        if (!$campaign) {
+            return null;
+        }
+
+        // get all ads associated with this campaign
+        $this->db->select('ad.*');
+        $this->db->from('ad_contents ad');
+        $this->db->where('ad.campaign_id', $campaign_id);
+        $ads = $this->db->get()->result();
+
+        if (!empty($ads)) {
+            $ad_ids = array_column($ads, 'id');
+
+            // get all metrics for these ads
+            $this->db->where_in('ad_content_id', $ad_ids);
+            $this->db->order_by('metric_name', 'ASC');
+            $metrics = $this->db->get('ad_metrics')->result();
+
+            // map metrics to ads
+            $metrics_by_ad = [];
+            foreach ($metrics as $m) {
+                $metrics_by_ad[$m->ad_content_id][] = $m;
+            }
+
+            foreach ($ads as &$ad) {
+                $ad->metrics = $metrics_by_ad[$ad->id] ?? [];
+            }
+        }
+
+        $campaign->ads = $ads;
+        return $campaign;
     }
 }

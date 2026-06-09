@@ -71,30 +71,4 @@ class Ads extends MY_Controller
 
         $this->render('ads/connect', $data);
     }
-
-    public function export($format, $id)
-    {
-        $ad = $this->Ad_model->get_ad_with_metrics($id);
-        if (!$ad) {
-            show_error('Ad content not found.', 404);
-            return;
-        }
-
-        if (!$this->export_registry->has($format)) {
-            show_error("Unknown export format: {$format}", 400);
-            return;
-        }
-
-        $exporter = $this->make_exporter($format);
-        $filename = 'report_' . $id . '_' . date('Ymd');
-        $exporter->generate($ad, $filename);
-    }
-
-    private function make_exporter($format)
-    {
-        $conf = $this->export_registry->configs()[$format];
-        require_once $conf['class_path'];
-        $class = $conf['class'];
-        return new $class();
-    }
 }

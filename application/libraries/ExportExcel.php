@@ -8,11 +8,10 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Color;
 
 class ExportExcel implements Exporter
 {
-    public function generate($ad, $filename)
+    public function generate($campaign, $filename)
     {
         // sanitize filename
         $filename = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $filename);
@@ -20,7 +19,7 @@ class ExportExcel implements Exporter
         // instantiate spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Ad Metrics');
+        $sheet->setTitle('Campaign Metrics');
 
         // initialize header and style
         $headerBgColor = '1A2332';
@@ -28,11 +27,12 @@ class ExportExcel implements Exporter
         $accentColor = 'E8F0FE';
 
         $infoRows = [
-            ['Ad Title', $ad->title ?? '-'],
-            ['Platform', ucfirst($ad->platform ?? '-')],
-            ['Client', $ad->company_name ?? '-'],
-            ['PIC', $ad->pic_name ?? '-'],
-            ['Status', ($ad->is_active ? 'Active' : 'Inactive')],
+            ['Campaign Name', ucwords($campaign->name ?? '-')],
+            ['Contract Number', $campaign->contract_number ?? '-'],
+            ['Client', ucwords($campaign->client_name ?? '-')],
+            ['PIC', $campaign->client_pic ?? '-'],
+            ['Schedule', date('d M Y', strtotime($campaign->start_date)) . ' - ' . date('d M Y', strtotime($campaign->end_date))],
+            ['Status', ($campaign->is_active ? 'Active' : 'Inactive')],
             ['Generated',   date('d M Y H:i')],
         ];
 
@@ -52,13 +52,15 @@ class ExportExcel implements Exporter
         $row++;
 
         // metrics table header
-        $metricsHeaderRow = $row;
-        $sheet->setCellValue('A' . $row, 'Metric');
-        $sheet->setCellValue('B' . $row, 'Value');
-        $sheet->setCellValue('C' . $row, 'Last Updated');
+        $sheet->setCellValue('A' . $row, 'Ad Title');
+        $sheet->setCellValue('B' . $row, 'Platform');
+        $sheet->setCellValue('C' . $row, 'Content ID');
+        $sheet->setCellValue('D' . $row, 'Metric');
+        $sheet->setCellValue('E' . $row, 'Value');
+        $sheet->setCellValue('F' . $row, 'Last Updated');
 
         // style metrics header row
-        $sheet->getStyle('A' . $row . ':C' . $row)->applyFromArray([
+        $sheet->getStyle('A' . $row . ':F' . $row)->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => $headerFgColor]],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $headerBgColor]],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],
@@ -68,37 +70,66 @@ class ExportExcel implements Exporter
         ]);
         $row++;
 
-        // metric rows
-        if (!empty($ad->metrics)) {
-            foreach ($ad->metrics as $i => $metric) {
-                $bgColor = ($i % 2 === 0) ? 'FFFFFF' : $accentColor;
+        // loop ads and metrics
+        $index = 0;
+        if (!empty($campaign->ads)) {
+            foreach ($campaign->ads as $ad) {
+                if (!empty($ad->metrics)) {
+                    foreach ($ad->metrics as $metric) {
+                        $bgColor = ($index % 2 === 0) ? 'FFFFFF' : $accentColor;
 
-                $metricLabel = ucwords(str_replace('_', ' ', $metric->metric_name));
-                $sheet->setCellValue('A' . $row, $metricLabel);
-                $sheet->setCellValue('B' . $row, (float) $metric->metric_value);
-                $sheet->setCellValue('C' . $row, date('d M Y H:i', strtotime($metric->updated_at)));
+                        $sheet->setCellValue('A' . $row, $ad->title ?? '-');
+                        $sheet->setCellValue('B' . $row, ucfirst($ad->platform ?? '-'));
+                        $sheet->setCellValue('C' . $row, $ad->content_identifier ?? '-');
+                        $sheet->setCellValue('D' . $row, ucwords(str_replace('_', ' ', $metric->metric_name)));
+                        $sheet->setCellValue('E' . $row, (float) $metric->metric_value);
+                        $sheet->setCellValue('F' . $row, date('d M Y H:i', strtotime($metric->updated_at)));
 
-                // format value cell as number with thousand separator
-                $sheet->getStyle('B' . $row)->getNumberFormat()->setFormatCode('#,##0.##');
-                // style metric rows
-                $sheet->getStyle('A' . $row . ':C' . $row)->applyFromArray([
-                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
-                    'borders' => [
-                        'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']],
-                    ],
-                ]);
-                $row++;
+                        // format value cell
+                        $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode('#,##0.##');
+
+                        // style metric rows
+                        $sheet->getStyle('A' . $row . ':F' . $row)->applyFromArray([
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
+                            'borders' => [
+                                'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']],
+                            ],
+                        ]);
+                        $row++;
+                        $index++;
+                    }
+                } else {
+                    // Ad has no metrics
+                    $bgColor = ($index % 2 === 0) ? 'FFFFFF' : $accentColor;
+                    $sheet->setCellValue('A' . $row, $ad->title ?? '-');
+                    $sheet->setCellValue('B' . $row, ucfirst($ad->platform ?? '-'));
+                    $sheet->setCellValue('C' . $row, $ad->content_identifier ?? '-');
+                    $sheet->setCellValue('D' . $row, 'No metric data available.');
+                    $sheet->mergeCells('D' . $row . ':F' . $row);
+
+                    $sheet->getStyle('A' . $row . ':F' . $row)->applyFromArray([
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
+                        'borders' => [
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']],
+                        ],
+                    ]);
+                    $row++;
+                    $index++;
+                }
             }
         } else {
-            $sheet->setCellValue('A' . $row, 'No metric data available.');
-            $sheet->mergeCells('A' . $row . ':C' . $row);
+            $sheet->setCellValue('A' . $row, 'No ads found for this campaign.');
+            $sheet->mergeCells('A' . $row . ':F' . $row);
             $sheet->getStyle('A' . $row)->getFont()->setItalic(true)->getColor()->setRGB('999999');
         }
 
         // column widths
-        $sheet->getColumnDimension('A')->setWidth(28);
-        $sheet->getColumnDimension('B')->setWidth(20);
-        $sheet->getColumnDimension('C')->setWidth(22);
+        $sheet->getColumnDimension('A')->setWidth(35);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getColumnDimension('C')->setWidth(25);
+        $sheet->getColumnDimension('D')->setWidth(28);
+        $sheet->getColumnDimension('E')->setWidth(18);
+        $sheet->getColumnDimension('F')->setWidth(22);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '.xlsx"');

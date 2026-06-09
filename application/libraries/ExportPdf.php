@@ -8,12 +8,12 @@ use Dompdf\Options;
 
 class ExportPdf implements Exporter
 {
-    public function generate($ad, $filename)
+    public function generate($campaign, $filename)
     {
         $CI =& get_instance();
         
         // generate html from view
-        $html = $CI->load->view('templates/pdf', ['ad' => $ad], true);
+        $html = $CI->load->view('templates/pdf', ['campaign' => $campaign], true);
         // sanitize filename
         $filename = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $filename);
         

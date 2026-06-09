@@ -46,27 +46,51 @@
                             <?php foreach ($campaigns as $campaign): ?>
                                 <tr>
                                     <td class="fw-medium">
-                                        <?= htmlspecialchars(ucwords($campaign->name)) ?>
+                                        <?= ucwords($campaign->name) ?>
                                         <?php if ($campaign->description): ?>
                                             <div class="text-muted mt-1 fw-normal" style="font-size: 0.8rem;">
-                                                <?= htmlspecialchars($campaign->description) ?>
+                                                <?= $campaign->description ?>
                                             </div>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?= htmlspecialchars($campaign->contract_number) ?></td>
-                                    <td><?= htmlspecialchars(ucwords($campaign->client_name)) ?></td>
+                                    <td><?= $campaign->contract_number ?></td>
+                                    <td><?= ucwords($campaign->client_name) ?></td>
                                     <td><?= date('Y-m-d', strtotime($campaign->start_date)) ?></td>
                                     <td><?= date('Y-m-d', strtotime($campaign->end_date)) ?></td>
                                     <td class="text-end">
+                                        <div class="dropdown d-inline-block">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                                id="exportDropdown-<?= $campaign->id ?>" data-bs-toggle="dropdown"
+                                                aria-expanded="false" title="Export">
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end"
+                                                aria-labelledby="exportDropdown-<?= $campaign->id ?>">
+                                                <li>
+                                                    <a class="dropdown-item text-start"
+                                                        href="<?= base_url('campaign/export/pdf/' . $campaign->id) ?>"
+                                                        target="_blank">
+                                                        <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                                                        Export PDF
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item text-start"
+                                                        href="<?= base_url('campaign/export/excel/' . $campaign->id) ?>">
+                                                        <i class="bi bi-file-earmark-spreadsheet text-success me-2"></i>
+                                                        Export Excel
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                         <a href="<?= base_url('campaign/edit/' . $campaign->id) ?>"
-                                            class="btn btn-sm btn-outline-secondary" title="Edit">
+                                            class="btn btn-sm btn-outline-secondary ms-1" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Delete"
                                             data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                            data-id="<?= $campaign->id ?>" 
-                                            data-name="<?= htmlspecialchars($campaign->name) ?>"
-                                            data-client="<?= htmlspecialchars($campaign->client_name) ?>">
+                                            data-id="<?= $campaign->id ?>" data-name="<?= $campaign->name ?>"
+                                            data-client="<?= $campaign->client_name ?>">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -101,7 +125,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete campaign <strong id="deleteCampaignName" class="text-danger"></strong> for <strong id="deleteClientName"></strong>?
+                Are you sure you want to delete campaign <strong id="deleteCampaignName" class="text-danger"></strong>
+                for <strong id="deleteClientName"></strong>?
                 This action will perform a soft delete.
             </div>
             <div class="modal-footer border-0">

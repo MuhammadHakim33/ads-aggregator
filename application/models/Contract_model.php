@@ -90,4 +90,17 @@ class Contract_model extends CI_Model
         $this->db->where('deleted_at', NULL);
         return $this->db->count_all_results($this->table) === 0;
     }
+
+    public function count_active()
+    {
+        $this->db->where('deleted_at', NULL);
+        $this->db->where('terminated_at', NULL);
+        return $this->db->count_all_results($this->table);
+    }
+
+    public function count_total()
+    {
+        $this->db->where('deleted_at', NULL);
+        return $this->db->count_all_results($this->table);
+    }
 }

@@ -95,6 +95,13 @@ class Campaign_model extends CI_Model
         return $this->db->count_all_results('ad_contents') > 0;
     }
 
+    public function count_running()
+    {
+        $this->db->where('deleted_at', NULL);
+        $this->db->where('end_date >=', date('Y-m-d'));
+        return $this->db->count_all_results($this->table);
+    }
+
     public function get_campaign_with_ads_and_metrics($campaign_id)
     {
         // get campaign details with contract and client info

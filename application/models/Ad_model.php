@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Ad_model extends CI_Model 
+class Ad_model extends CI_Model
 {
     private $table_contents = 'ad_contents';
     private $table_metrics = 'ad_metrics';
@@ -22,7 +22,7 @@ class Ad_model extends CI_Model
             $placeholders[] = "({$title}, {$platform}, {$content_identifier})";
         }
 
-        $sql = "INSERT IGNORE INTO ". $this->table_contents ." (title, platform, content_identifier) VALUES " . implode(',', $placeholders);
+        $sql = "INSERT IGNORE INTO " . $this->table_contents . " (title, platform, content_identifier) VALUES " . implode(',', $placeholders);
 
         $this->db->query($sql);
 
@@ -38,9 +38,9 @@ class Ad_model extends CI_Model
         $placeholders = [];
 
         foreach ($rows as $row) {
-            $ad_content_id  = (int)$row['ad_content_id'];
-            $metric_name    = $this->db->escape($row['metric_name']);
-            $metric_value   = $this->db->escape($row['metric_value']);
+            $ad_content_id = (int) $row['ad_content_id'];
+            $metric_name = $this->db->escape($row['metric_name']);
+            $metric_value = $this->db->escape($row['metric_value']);
 
             $placeholders[] = "({$ad_content_id}, {$metric_name}, {$metric_value})";
         }
@@ -78,9 +78,9 @@ class Ad_model extends CI_Model
         return $this->db->query($sql)->result();
     }
 
-    public function count_active()
+    public function count_unconnected()
     {
-        $this->db->where('is_active', 1);
+        $this->db->where('campaign_id IS NULL', NULL, FALSE);
         return $this->db->count_all_results($this->table_contents);
     }
 
@@ -139,7 +139,7 @@ class Ad_model extends CI_Model
         $this->db->join('contracts cont', 'cont.id = camp.contract_id', 'left');
         $this->db->join('clients c', 'c.id = cont.client_id', 'left');
         $this->db->order_by('a.created_at', 'DESC');
-        
+
         if ($limit !== null) {
             if ($offset !== null) {
                 $this->db->limit($limit, $offset);
@@ -155,7 +155,7 @@ class Ad_model extends CI_Model
         }
 
         $ad_ids = array_column($ad_contents, 'id');
-        
+
         // Chunk metrics query just in case the limit is high
         $metrics = [];
         $chunks = array_chunk($ad_ids, 500);
@@ -165,12 +165,12 @@ class Ad_model extends CI_Model
             $res = $this->db->get($this->table_metrics)->result();
             $metrics = array_merge($metrics, $res);
         }
-        
+
         $metrics_by_ad = [];
         foreach ($metrics as $m) {
             $metrics_by_ad[$m->ad_content_id][] = $m;
         }
-        
+
         foreach ($ad_contents as $ad) {
             $ad->metrics = isset($metrics_by_ad[$ad->id]) ? $metrics_by_ad[$ad->id] : [];
         }

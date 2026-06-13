@@ -45,6 +45,28 @@ class Cron_log_model extends CI_Model
         return $this->db->get($this->table)->result();
     }
 
+    public function get_last_per_platform()
+    {
+        $sql = "
+            SELECT cl.*
+            FROM {$this->table} cl
+            INNER JOIN (
+                SELECT platform, job_name, MAX(id) as max_id
+                FROM {$this->table}
+                GROUP BY platform, job_name
+            ) latest ON cl.id = latest.max_id
+            ORDER BY cl.platform, cl.job_name
+        ";
+        $rows = $this->db->query($sql)->result();
+
+        // key by "platform|job_name" for easy lookup in view
+        $map = [];
+        foreach ($rows as $row) {
+            $map[$row->platform . '|' . $row->job_name] = $row;
+        }
+        return $map;
+    }
+
     private function _elapsed_ms($id)
     {
         $row = $this->db->select('started_at')->where('id', $id)->get($this->table)->row();

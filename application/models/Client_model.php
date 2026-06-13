@@ -61,6 +61,12 @@ class Client_model extends CI_Model
         return $this->db->count_all_results($this->table);
     }
 
+    public function count_total()
+    {
+        $this->db->where('deleted_at', NULL);
+        return $this->db->count_all_results($this->table);
+    }
+
     // public function get_clients_summary()
     // {
     //     $query = $this->db->query("

@@ -14,6 +14,7 @@ class Platform extends CI_Controller
         $this->load->library('Platform_registry');
         $this->load->model('Filter_keyword_model');
         $this->load->model('Ad_model');
+        $this->load->model('Cron_log_model');
     }
 
     // usage: php index.php Cron/Platform fetch [platform] [since] [until]
@@ -47,6 +48,8 @@ class Platform extends CI_Controller
     {
         echo "[{$platform}] Fetch Contents {$since} to {$until}\n";
 
+        $log_id = $this->Cron_log_model->start('fetch', $platform);
+
         try {
             // prepare driver
             $driver = $this->make_driver($platform);
@@ -57,6 +60,7 @@ class Platform extends CI_Controller
 
             if (empty($contents)) {
                 echo "[{$platform}] No contents found.\n\n";
+                $this->Cron_log_model->finish($log_id, 'success', 0);
                 return;
             }
 
@@ -68,36 +72,48 @@ class Platform extends CI_Controller
             $result = $this->Ad_model->bulk_upsert_contents($contents);
             echo "[{$platform}] " . $result['created'] . " contents saved.\n\n";
 
+            $this->Cron_log_model->finish($log_id, 'success', $result['created']);
+
         } catch (\Exception $e) {
             log_message('error', "[Cron/Platform::fetch_contents:{$platform}] " . $e->getMessage());
             echo "[{$platform}] ERROR: " . $e->getMessage() . "\n\n";
+
+            $this->Cron_log_model->finish($log_id, 'failed', 0, $e->getMessage());
         }
     }
 
     private function run_sync($platform, $since, $until)
     {
-        echo "[{$platform}] Sync Insights {$since} to {$until}\n";
+        echo "[{$platform}] Sync Insights\n";
+
+        $log_id = $this->Cron_log_model->start('sync', $platform);
 
         try {
             // prepare driver
             $driver = $this->make_driver($platform);
-            // get saved content id
-            $saved = $this->Ad_model->get_identifiers_by_platform($platform, $since, $until);
+            // get saved content identifiers with campaign date ranges
+            $saved = $this->Ad_model->get_identifiers_by_platform($platform);
 
             if (empty($saved)) {
                 echo "[{$platform}] No active content found in DB.\n\n";
+                $this->Cron_log_model->finish($log_id, 'success', 0);
                 return;
             }
 
-            // prepare data
-            $identifiers = array_column($saved, 'content_identifier');
+            // prepare content_id_map
             $content_id_map = array_column($saved, 'id', 'content_identifier');
 
-            // fetch insights
-            $insights = $driver->fetch_insights($identifiers, $since, $until);
+            // fetch insights — GA4 groups by campaign date range, others call once
+            if ($platform === 'ga4') {
+                $insights = $this->fetch_ga4_insights_by_campaign($driver, $saved, $since, $until);
+            } else {
+                $identifiers = array_column($saved, 'content_identifier');
+                $insights = $driver->fetch_insights($identifiers, $since, $until);
+            }
 
             if (empty($insights)) {
                 echo "[{$platform}] No insights returned from API.\n\n";
+                $this->Cron_log_model->finish($log_id, 'success', 0);
                 return;
             }
 
@@ -107,10 +123,37 @@ class Platform extends CI_Controller
             $result = $this->Ad_model->bulk_upsert_metrics($metric_rows);
             echo "[{$platform}] " . $result['upserted'] . " metric rows saved.\n\n";
 
+            $this->Cron_log_model->finish($log_id, 'success', $result['upserted']);
+
         } catch (\Exception $e) {
             log_message('error', "[Cron/Platform::sync_insights:{$platform}] " . $e->getMessage());
             echo "[{$platform}] ERROR: " . $e->getMessage() . "\n\n";
+
+            $this->Cron_log_model->finish($log_id, 'failed', 0, $e->getMessage());
         }
+    }
+
+    private function fetch_ga4_insights_by_campaign($driver, $saved, $default_since, $default_until)
+    {
+        // group identifiers by unique campaign date range
+        // articles with no campaign fall back to the default 1-month window
+        $groups = [];
+        foreach ($saved as $row) {
+            $s = $row->campaign_start_date ?? $default_since;
+            $u = $row->campaign_end_date   ?? $default_until;
+            $key = $s . '|' . $u;
+            $groups[$key][] = $row->content_identifier;
+        }
+
+        $all_insights = [];
+        foreach ($groups as $key => $identifiers) {
+            [$s, $u] = explode('|', $key);
+            echo "[ga4] Syncing " . count($identifiers) . " article(s) for {$s} to {$u}\n";
+            $group_insights = $driver->fetch_insights($identifiers, $s, $u);
+            $all_insights = array_merge($all_insights, $group_insights);
+        }
+
+        return $all_insights;
     }
 
     private function make_driver($platform)
@@ -159,7 +202,8 @@ class Platform extends CI_Controller
     {
         $rows = [];
         foreach ($insights as $identifier => $metrics) {
-            if (!isset($content_map[$identifier])) continue;
+            if (!isset($content_map[$identifier]))
+                continue;
 
             $ad_content_id = $content_map[$identifier];
 
@@ -175,7 +219,7 @@ class Platform extends CI_Controller
                 ];
             }
         }
-        
+
         return $rows;
     }
 }

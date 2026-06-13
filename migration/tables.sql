@@ -150,3 +150,18 @@ CREATE TABLE platform_credentials (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- =========================
+-- CRON LOGS
+-- =========================
+CREATE TABLE cron_logs (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  job_name VARCHAR(100) NOT NULL COMMENT 'fetch, sync',
+  platform VARCHAR(50) NOT NULL COMMENT 'facebook, instagram, gam, ga4, youtube',
+  status ENUM('success', 'failed', 'partial') NOT NULL,
+  rows_affected INT DEFAULT 0 COMMENT 'jumlah contents saved atau metrics upserted',
+  duration_ms INT DEFAULT 0 COMMENT 'durasi eksekusi dalam milidetik',
+  error_message TEXT NULL COMMENT 'pesan error jika status failed',
+  started_at TIMESTAMP NOT NULL,
+  finished_at TIMESTAMP NOT NULL,
+);

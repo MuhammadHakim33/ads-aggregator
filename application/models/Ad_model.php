@@ -58,17 +58,24 @@ class Ad_model extends CI_Model
         return ['upserted' => $this->db->affected_rows()];
     }
 
-    public function get_identifiers_by_platform($platform, $since, $until)
+    public function get_identifiers_by_platform($platform)
     {
-        $this->db->select('id, content_identifier');
-        $this->db->where('is_active', 1);
-        $this->db->where('platform', $platform);
-        
-        if ($since && $until) {
-            $this->db->where(" DATE(created_at) BETWEEN '{$since}' AND '{$until}' ");
-        }
+        $platform = $this->db->escape_str($platform);
 
-        return $this->db->get($this->table_contents)->result();
+        $sql = "
+            SELECT ac.id, ac.content_identifier,
+                   camp.start_date AS campaign_start_date,
+                   camp.end_date   AS campaign_end_date
+            FROM {$this->table_contents} ac
+            LEFT JOIN campaigns camp ON camp.id = ac.campaign_id
+            WHERE ac.platform = '{$platform}'
+              AND (
+                ac.campaign_id IS NULL
+                OR (camp.end_date >= CURDATE() AND camp.deleted_at IS NULL)
+              )
+        ";
+
+        return $this->db->query($sql)->result();
     }
 
     public function count_active()

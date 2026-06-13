@@ -17,7 +17,16 @@ abstract class Platform_driver
     abstract public function fetch_insights($identifiers);
 
     // filter capability
-    public function supports_keyword_filter() { return true; }
-    public function supports_hostname_filter() { return false; }
-    public function supports_html_filter() { return false; }
+    public function supports_keyword_filter()
+    {
+        return true;
+    }
+    public function supports_hostname_filter()
+    {
+        return false;
+    }
+    public function supports_html_filter()
+    {
+        return false;
+    }
 }

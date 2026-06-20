@@ -157,6 +157,24 @@ class Campaign extends MY_Controller
         $this->render('campaign/edit', $data);
     }
 
+    public function detail($id)
+    {
+        $campaign = $this->Campaign_model->get_campaign_with_ads_and_metrics($id);
+        if (!$campaign) {
+            $this->session->set_flashdata('errors', 'Campaign not found.');
+            redirect('campaign');
+            return;
+        }
+
+        $data = [
+            'title'         => 'Campaign Detail',
+            'active_menu'   => 'campaign',
+            'campaign'      => $campaign,
+        ];
+
+        $this->render('campaign/detail', $data);
+    }
+
     public function delete($id)
     {
         if ($this->input->method() !== 'post') {

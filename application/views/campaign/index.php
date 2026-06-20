@@ -108,6 +108,10 @@
                                                 </li>
                                             </ul>
                                         </div>
+                                        <a href="<?= base_url('campaign/detail/' . $campaign->id) ?>"
+                                            class="btn btn-sm btn-outline-primary ms-1" title="Detail">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
                                         <a href="<?= base_url('campaign/edit/' . $campaign->id) ?>"
                                             class="btn btn-sm btn-outline-secondary ms-1" title="Edit">
                                             <i class="bi bi-pencil"></i>

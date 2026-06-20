@@ -12,10 +12,18 @@ class Account extends MY_Controller
 
     public function index()
     {
+        $filters = [
+            'q' => $this->input->get('q'),
+            'role_id' => $this->input->get('role_id'),
+            'status' => $this->input->get('status')
+        ];
+
         $data = [
             'title' => 'Account',
             'active_menu' => 'account',
-            'accounts' => $this->Account_model->get_all_with_roles()
+            'filters' => $filters,
+            'accounts' => $this->Account_model->get_all_with_roles($filters),
+            'roles' => $this->Role_model->get_all()
         ];
 
         $this->render('account/index', $data);

@@ -8,7 +8,26 @@
 
             <!-- action bar -->
             <div class="d-flex justify-content-between align-items-center pb-2 mb-3">
-                <div></div>
+                <form method="GET" action="<?= current_url() ?>" class="d-flex gap-2 align-items-center mb-0">
+                    <select name="client_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <option value="">All Clients</option>
+                        <?php foreach($clients as $c): ?>
+                            <option value="<?= $c->id ?>" <?= (isset($filters['client_id']) && $filters['client_id'] == $c->id) ? 'selected' : '' ?>><?= htmlspecialchars($c->company_name) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+
+                    <div class="input-group input-group-sm" style="width: 250px;">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search contracts..." value="<?= html_escape($filters['q'] ?? '') ?>">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+                    
+                    <?php if(!empty($filters['q']) || !empty($filters['client_id'])): ?>
+                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-circle"></i></a>
+                    <?php endif; ?>
+                </form>
+
                 <a href="<?= base_url('contract/create') ?>" class="btn btn-sm btn-primary">
                     <i class="bi bi-plus-lg me-1"></i> Create Contract
                 </a>

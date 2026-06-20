@@ -42,13 +42,31 @@ class Campaign_model extends CI_Model
         }
     }
 
-    public function get_all()
+    public function get_all($filters = [])
     {
         $this->db->select('campaigns.*, contracts.contract_number, clients.company_name as client_name');
         $this->db->from($this->table);
         $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
         $this->db->where('campaigns.deleted_at', NULL);
+
+        if (!empty($filters['q'])) {
+            $q = $this->db->escape_like_str($filters['q']);
+            $this->db->group_start();
+            $this->db->like('campaigns.name', $q);
+            $this->db->or_like('campaigns.description', $q);
+            $this->db->or_like('clients.company_name', $q);
+            $this->db->group_end();
+        }
+
+        if (!empty($filters['client_id'])) {
+            $this->db->where('contracts.client_id', $filters['client_id']);
+        }
+
+        if (isset($filters['status']) && $filters['status'] !== '') {
+            $this->db->where('campaigns.is_active', $filters['status']);
+        }
+
         $this->db->order_by('campaigns.created_at', 'DESC');
         return $this->db->get()->result();
     }

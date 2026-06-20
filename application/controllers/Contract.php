@@ -15,10 +15,17 @@ class Contract extends MY_Controller
 
     public function index()
     {
+        $filters = [
+            'q' => $this->input->get('q'),
+            'client_id' => $this->input->get('client_id')
+        ];
+
         $data = [
             'title' => 'Contracts',
             'active_menu' => 'contract',
-            'contracts' => $this->Contract_model->get_all()
+            'filters' => $filters,
+            'contracts' => $this->Contract_model->get_all($filters),
+            'clients' => $this->Client_model->get_all()
         ];
 
         $this->render('contract/index', $data);

@@ -6,12 +6,25 @@ class Client_model extends CI_Model
     public $table = 'clients';
     // private $table_contents = 'ad_contents';
 
-    public function get_all()
+    public function get_all($filters = [])
     {
         $this->db->select('clients.*, accounts.name as ae_name');
         $this->db->from($this->table);
         $this->db->join('accounts', 'accounts.id = clients.ae_id', 'left');
         $this->db->where('clients.deleted_at', NULL);
+
+        if (!empty($filters['q'])) {
+            $q = $this->db->escape_like_str($filters['q']);
+            $this->db->group_start();
+            $this->db->like('clients.company_name', $q);
+            $this->db->or_like('clients.pic_name', $q);
+            $this->db->group_end();
+        }
+
+        if (isset($filters['status']) && $filters['status'] !== '') {
+            $this->db->where('clients.is_active', $filters['status']);
+        }
+
         return $this->db->get()->result();
     }
 

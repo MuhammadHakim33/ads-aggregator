@@ -12,10 +12,16 @@ class Client extends MY_Controller
 
     public function index()
     {
+        $filters = [
+            'q' => $this->input->get('q'),
+            'status' => $this->input->get('status')
+        ];
+
         $data = [
             'title' => 'Client',
             'active_menu' => 'client',
-            'clients' => $this->Client_model->get_all()
+            'filters' => $filters,
+            'clients' => $this->Client_model->get_all($filters)
         ];
 
         $this->render('client/index', $data);

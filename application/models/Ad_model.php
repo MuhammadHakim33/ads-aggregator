@@ -132,7 +132,7 @@ class Ad_model extends CI_Model
         return $this->db->count_all_results($this->table_contents);
     }
 
-    public function get_all_ad_metrics($limit = null, $offset = null)
+    public function get_all_ad_metrics($filters = [])
     {
         $this->db->select('a.*, camp.name as campaign_name, c.company_name');
         $this->db->from($this->table_contents . ' a');
@@ -141,11 +141,28 @@ class Ad_model extends CI_Model
         $this->db->join('clients c', 'c.id = cont.client_id', 'left');
         $this->db->order_by('a.created_at', 'DESC');
 
-        if ($limit !== null) {
-            if ($offset !== null) {
-                $this->db->limit($limit, $offset);
-            } else {
-                $this->db->limit($limit);
+        if (!empty($filters['q'])) {
+            $q = $this->db->escape_like_str($filters['q']);
+            $this->db->group_start();
+            $this->db->like('a.title', $q);
+            $this->db->or_like('a.content_identifier', $q);
+            $this->db->or_like('camp.name', $q);
+            $this->db->group_end();
+        }
+
+        if (!empty($filters['platform'])) {
+            $this->db->where('a.platform', $filters['platform']);
+        }
+
+        if (isset($filters['status']) && $filters['status'] !== '') {
+            $this->db->where('a.is_active', $filters['status']);
+        }
+
+        if (isset($filters['has_campaign']) && $filters['has_campaign'] !== '') {
+            if ($filters['has_campaign'] === '1') {
+                $this->db->where('a.campaign_id IS NOT NULL', NULL, FALSE);
+            } else if ($filters['has_campaign'] === '0') {
+                $this->db->where('a.campaign_id IS NULL', NULL, FALSE);
             }
         }
 
@@ -182,9 +199,22 @@ class Ad_model extends CI_Model
     }
 
 
-    public function get_unconnected_ads()
+    public function get_unconnected_ads($filters = [])
     {
         $this->db->where('campaign_id IS NULL', NULL, FALSE);
+
+        if (!empty($filters['q'])) {
+            $q = $this->db->escape_like_str($filters['q']);
+            $this->db->group_start();
+            $this->db->like('title', $q);
+            $this->db->or_like('content_identifier', $q);
+            $this->db->group_end();
+        }
+
+        if (!empty($filters['platform'])) {
+            $this->db->where('platform', $filters['platform']);
+        }
+
         $this->db->order_by('platform', 'ASC');
         $this->db->order_by('created_at', 'DESC');
         return $this->db->get($this->table_contents)->result();

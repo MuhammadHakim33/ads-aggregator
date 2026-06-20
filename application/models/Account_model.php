@@ -6,10 +6,27 @@ class Account_model extends CI_Model
     private $table = 'accounts';
     private $table_roles = 'roles';
 
-    public function get_all_with_roles()
+    public function get_all_with_roles($filters = [])
     {
         $this->db->select("{$this->table}.*, {$this->table_roles}.name AS role_name");
         $this->db->join("{$this->table_roles}", "{$this->table_roles}.id = {$this->table}.role_id");
+
+        if (!empty($filters['q'])) {
+            $q = $this->db->escape_like_str($filters['q']);
+            $this->db->group_start();
+            $this->db->like("{$this->table}.name", $q);
+            $this->db->or_like("{$this->table}.email", $q);
+            $this->db->group_end();
+        }
+
+        if (!empty($filters['role_id'])) {
+            $this->db->where("{$this->table}.role_id", $filters['role_id']);
+        }
+
+        if (isset($filters['status']) && $filters['status'] !== '') {
+            $this->db->where("{$this->table}.is_active", $filters['status']);
+        }
+
         return $this->db->get($this->table)->result();
     }
 

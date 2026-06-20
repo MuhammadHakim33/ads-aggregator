@@ -15,10 +15,18 @@ class Campaign extends MY_Controller
 
     public function index()
     {
+        $filters = [
+            'q' => $this->input->get('q'),
+            'client_id' => $this->input->get('client_id'),
+            'status' => $this->input->get('status')
+        ];
+
         $data = [
             'title' => 'Campaigns',
             'active_menu' => 'campaign',
-            'campaigns' => $this->Campaign_model->get_all()
+            'filters' => $filters,
+            'campaigns' => $this->Campaign_model->get_all($filters),
+            'clients' => $this->Client_model->get_all()
         ];
 
         $this->render('campaign/index', $data);

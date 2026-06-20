@@ -11,7 +11,37 @@
 
             <!-- page heading -->
             <div class="d-flex justify-content-between align-items-center pb-2 mb-4">
-                <div></div>
+                <form method="GET" action="<?= current_url() ?>" class="d-flex gap-2 align-items-center mb-0">
+                    <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        <option value="1" <?= (isset($filters['status']) && $filters['status'] === '1') ? 'selected' : '' ?>>Active</option>
+                        <option value="0" <?= (isset($filters['status']) && $filters['status'] === '0') ? 'selected' : '' ?>>Inactive</option>
+                    </select>
+
+                    <select name="platform" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <option value="">All Platforms</option>
+                        <?php foreach($platform_labels as $key => $label): ?>
+                            <option value="<?= $key ?>" <?= (isset($filters['platform']) && $filters['platform'] == $key) ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+
+                    <select name="has_campaign" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <option value="">All Campaign Status</option>
+                        <option value="1" <?= (isset($filters['has_campaign']) && $filters['has_campaign'] === '1') ? 'selected' : '' ?>>Connected</option>
+                        <option value="0" <?= (isset($filters['has_campaign']) && $filters['has_campaign'] === '0') ? 'selected' : '' ?>>Unconnected</option>
+                    </select>
+
+                    <div class="input-group input-group-sm" style="width: 250px;">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search ads..." value="<?= html_escape($filters['q'] ?? '') ?>">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+                    
+                    <?php if(!empty($filters['q']) || (isset($filters['status']) && $filters['status'] !== '') || !empty($filters['platform']) || (isset($filters['has_campaign']) && $filters['has_campaign'] !== '')): ?>
+                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-circle"></i></a>
+                    <?php endif; ?>
+                </form>
                 <div class="d-flex align-items-center gap-2">
                     <a href="<?= base_url('ads/connect') ?>" class="btn btn-primary btn-sm">
                         <i class="bi bi-link-45deg"></i> Connect Ads

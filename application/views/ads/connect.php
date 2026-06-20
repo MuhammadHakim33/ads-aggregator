@@ -10,8 +10,27 @@
         <div class="container-fluid py-4">
             <!-- page heading -->
             <div class="d-flex justify-content-between align-items-center pb-2 mb-4">
-                <div>
+                <div class="d-flex align-items-center gap-3">
                     <h5 class="mb-0 fw-semibold">Connect Ads to Campaign</h5>
+                    <form method="GET" action="<?= current_url() ?>" class="d-flex gap-2 align-items-center mb-0">
+                        <select name="platform" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                            <option value="">All Platforms</option>
+                            <?php foreach($platform_labels as $key => $label): ?>
+                                <option value="<?= $key ?>" <?= (isset($filters['platform']) && $filters['platform'] == $key) ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <div class="input-group input-group-sm" style="width: 200px;">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search ads..." value="<?= html_escape($filters['q'] ?? '') ?>">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-sm btn-primary d-none">Filter</button>
+                        
+                        <?php if(!empty($filters['q']) || !empty($filters['platform'])): ?>
+                            <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-circle"></i></a>
+                        <?php endif; ?>
+                    </form>
                 </div>
                 <div>
                     <a href="<?= base_url('ads') ?>" class="btn btn-outline-secondary btn-sm">

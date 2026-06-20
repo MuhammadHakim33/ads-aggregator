@@ -19,10 +19,18 @@ class Ads extends MY_Controller
             $platform_labels[$name] = $conf['label'] ?? ucfirst($name);
         }
 
+        $filters = [
+            'q' => $this->input->get('q'),
+            'platform' => $this->input->get('platform'),
+            'status' => $this->input->get('status'),
+            'has_campaign' => $this->input->get('has_campaign')
+        ];
+
         $data = [
             'title' => 'Ads',
             'active_menu' => 'ads',
-            'ad_contents' => $this->Ad_model->get_all_ad_metrics(),
+            'filters' => $filters,
+            'ad_contents' => $this->Ad_model->get_all_ad_metrics($filters),
             'platform_labels' => $platform_labels
         ];
 
@@ -61,11 +69,17 @@ class Ads extends MY_Controller
             $platform_labels[$name] = $conf['label'] ?? ucfirst($name);
         }
 
+        $filters = [
+            'q' => $this->input->get('q'),
+            'platform' => $this->input->get('platform')
+        ];
+
         $data = [
             'title' => 'Connect Ads',
             'active_menu' => 'ads',
+            'filters' => $filters,
             'campaigns' => $this->Campaign_model->get_all(),
-            'unconnected' => $this->Ad_model->get_unconnected_ads(),
+            'unconnected' => $this->Ad_model->get_unconnected_ads($filters),
             'platform_labels' => $platform_labels
         ];
 

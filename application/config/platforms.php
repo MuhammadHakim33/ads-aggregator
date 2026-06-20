@@ -12,6 +12,8 @@ $config['platforms'] = [
             'post_clicks',
             'post_reactions_by_type_total',
             'post_total_media_view_unique',
+            'post_engaged_users',
+            'post_impressions_unique',
         ],
         'filters' => [
             'keyword' => true,

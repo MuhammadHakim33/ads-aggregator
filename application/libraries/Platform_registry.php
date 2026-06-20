@@ -33,9 +33,4 @@ class Platform_registry
     {
         return $this->configs[$name] ?? null;
     }
-   
-    public function names_as_list()
-    {
-        return implode(',', $this->enabled_names());
-    }
 }

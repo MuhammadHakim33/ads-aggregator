@@ -40,6 +40,14 @@ class InstagramDriver extends Platform_driver
 
     public function fetch_insights($ids)
     {
-        return $this->client->get_media_insights($ids);
+        $insights = $this->client->get_media_insights($ids);
+        
+        foreach ($insights as $id => &$metrics) {
+            $interactions = $metrics['total_interactions'] ?? 0;
+            $reach = $metrics['reach'] ?? 0;
+            $metrics['engagement_rate'] = ($reach > 0) ? round(($interactions / $reach) * 100, 2) : 0;
+        }
+
+        return $insights;
     }
 }

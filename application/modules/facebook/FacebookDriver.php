@@ -40,6 +40,14 @@ class FacebookDriver extends Platform_driver
 
     public function fetch_insights($identifiers)
     {
-        return $this->client->get_post_insights($identifiers);
+        $insights = $this->client->get_post_insights($identifiers);
+        
+        foreach ($insights as $id => &$metrics) {
+            $engaged = $metrics['post_engaged_users'] ?? 0;
+            $reach = $metrics['post_impressions_unique'] ?? 0;
+            $metrics['engagement_rate'] = ($reach > 0) ? round(($engaged / $reach) * 100, 2) : 0;
+        }
+
+        return $insights;
     }
 }

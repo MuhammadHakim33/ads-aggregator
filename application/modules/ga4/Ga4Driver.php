@@ -19,17 +19,17 @@ class Ga4Driver extends Platform_driver
             echo "[ga4] WARNING: Credentials are empty or incomplete. Skipping.\n";
             return;
         }
-        
+
         $platform_config = $this->CI->config->item('platforms')['ga4'] ?? [];
         $metrics = $platform_config['metrics'] ?? [];
-        
+
         // initialize GA4 api client
         $this->client = new Ga4ApiClient($credentials, $this->CI->request, $metrics);
     }
 
-    public function name() 
-    { 
-        return 'ga4'; 
+    public function name()
+    {
+        return 'ga4';
     }
 
     public function fetch_contents($since, $until, $filters = [])
@@ -47,7 +47,7 @@ class Ga4Driver extends Platform_driver
         $raw = $result['ad_contents'] ?? [];
 
         // map to ad_contents database schema
-        return array_map(function($article) {
+        return array_map(function ($article) {
             return [
                 'title' => mb_substr($article['page_title'] ?? '', 0, 200),
                 'content_identifier' => $article['page_path'],
@@ -63,10 +63,10 @@ class Ga4Driver extends Platform_driver
         }
         $since = $since ?? date('Y-m-d', strtotime('-30 days'));
         $until = $until ?? date('Y-m-d');
-        
+
         $result = $this->client->get_articles_insight($since, $until, $identifiers);
         $ad_metrics = $result['ad_metrics'] ?? [];
-        
+
         $formatted = [];
         foreach ($ad_metrics as $item) {
             $formatted[$item['page_path']] = $item['metrics'];

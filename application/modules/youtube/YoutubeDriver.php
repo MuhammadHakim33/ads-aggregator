@@ -54,6 +54,18 @@ class YoutubeDriver extends Platform_driver
         if (!$this->is_configured) {
             return [];
         }
-        return $this->client->get_video_stats($identifiers);
+        
+        $insights = $this->client->get_video_stats($identifiers);
+        
+        foreach ($insights as $id => &$metrics) {
+            $likes = $metrics['likeCount'] ?? 0;
+            $comments = $metrics['commentCount'] ?? 0;
+            $views = $metrics['viewCount'] ?? 0;
+            
+            $engagements = $likes + $comments;
+            $metrics['engagement_rate'] = ($views > 0) ? round(($engagements / $views) * 100, 2) : 0;
+        }
+
+        return $insights;
     }
 }

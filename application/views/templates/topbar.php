@@ -1,9 +1,9 @@
 <nav class="navbar sticky-top navbar-expand-lg border-bottom bg-body-tertiary">
     <div class="container-fluid">
-        <button class="btn btn-outline-secondary btn-sm me-2" type="button"
-            data-bs-toggle="collapse" data-bs-target="#sidebarCollapse"
-            aria-expanded="true" aria-controls="sidebarCollapse">
-            <i class="bi bi-layout-sidebar"></i>
+        <button class="btn btn-outline-secondary btn-sm me-2 d-md-none" type="button"
+            data-bs-toggle="offcanvas" data-bs-target="#sidebarCollapse"
+            aria-controls="sidebarCollapse">
+            <i class="bi bi-list fs-5 lh-1"></i>
         </button>
         <span class="navbar-brand mb-0 h6"><?= isset($title) ? $title : 'Page' ?></span>
         <div class="ms-auto dropdown">

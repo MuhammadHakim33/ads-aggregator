@@ -1,12 +1,19 @@
-<aside class="collapse show collapse-horizontal col-sm-2 p-3 border-end bg-body-tertiary vh-100 sticky-top"
-    id="sidebarCollapse">
-    <a href="<?= base_url('welcome') ?>"
-        class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
-        <i class="bi bi-bar-chart-fill me-2 fs-4 text-primary"></i>
-        <span class="fs-6 fw-semibold">Kontan Ad Reporter</span>
-    </a>
-    <hr>
-    <ul class="nav nav-pills flex-column mb-auto">
+<aside class="offcanvas-md offcanvas-start border-end bg-body-tertiary flex-shrink-0" tabindex="-1" id="sidebarCollapse" aria-labelledby="sidebarLabel" style="width: 250px; z-index: 1045;">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title d-flex align-items-center" id="sidebarLabel">
+            <i class="bi bi-bar-chart-fill me-2 fs-4 text-primary"></i>
+            <span class="fs-6 fw-semibold">Kontan Ad Reporter</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarCollapse" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column p-3">
+        <a href="<?= base_url('welcome') ?>"
+            class="d-none d-md-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+            <i class="bi bi-bar-chart-fill me-2 fs-4 text-primary"></i>
+            <span class="fs-6 fw-semibold">Kontan Ad Reporter</span>
+        </a>
+        <hr class="d-none d-md-block">
+        <ul class="nav nav-pills flex-column mb-auto w-100">
         <li class="nav-item">
             <a href="<?= base_url('dashboard') ?>"
                 class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'dashboard' ? 'active text-white' : '' ?>">
@@ -81,5 +88,6 @@
                 <i class="bi bi-shield-lock me-2"></i> Roles
             </a>
         </li>
-    </ul>
+        </ul>
+    </div>
 </aside>

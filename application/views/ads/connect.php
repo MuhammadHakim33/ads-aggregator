@@ -1,18 +1,18 @@
 <?php $this->load->view('templates/header'); ?>
 
-<div class="d-flex">
+<div class="d-flex flex-nowrap min-vh-100">
     <!-- template sidebar -->
     <?php $this->load->view('templates/sidebar'); ?>
     <!-- main content -->
-    <main class="col-sm-10 bg-body-tertiary" id="main">
+    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
         <!-- template top navbar -->
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
             <!-- page heading -->
-            <div class="d-flex justify-content-between align-items-center pb-2 mb-4">
-                <div class="d-flex align-items-center gap-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 mb-4">
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
                     <h5 class="mb-0 fw-semibold">Connect Ads to Campaign</h5>
-                    <form method="GET" action="<?= current_url() ?>" class="d-flex gap-2 align-items-center mb-0">
+                    <form method="GET" action="<?= current_url() ?>" class="d-flex flex-wrap gap-2 align-items-center mb-0">
                         <select name="platform" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="">All Platforms</option>
                             <?php foreach($platform_labels as $key => $label): ?>

@@ -1,16 +1,16 @@
 <?php $this->load->view('templates/header'); ?>
 
-<div class="d-flex">
+<div class="d-flex flex-nowrap min-vh-100">
     <!-- template sidebar -->
     <?php $this->load->view('templates/sidebar'); ?>
     <!-- main content -->
-    <main class="col-sm-10 bg-body-tertiary" id="main">
+    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
         <!-- template top navbar -->
         <?php $this->load->view('templates/topbar'); ?>
         <!-- content area -->
         <div class="container-fluid py-4">
             <!-- action bar -->
-            <div class="d-flex justify-content-between align-items-center pb-2 mb-3">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 pb-2 mb-3">
                 <div class="mb-0"></div>
                 <a href="<?= base_url('config/role/create') ?>" class="btn btn-sm btn-primary">
                     <i class="bi bi-plus-lg me-1"></i> Create Role

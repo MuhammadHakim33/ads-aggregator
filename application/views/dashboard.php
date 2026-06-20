@@ -10,9 +10,9 @@ $platforms = [
 ];
 ?>
 
-<div class="d-flex">
+<div class="d-flex flex-nowrap min-vh-100">
     <?php $this->load->view('templates/sidebar'); ?>
-    <main class="col-sm-10 bg-body-tertiary" id="main">
+    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
             <!-- page heading -->

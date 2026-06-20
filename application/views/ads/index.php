@@ -1,17 +1,17 @@
 <?php $this->load->view('templates/header'); ?>
 
-<div class="d-flex">
+<div class="d-flex flex-nowrap min-vh-100">
     <!-- template sidebar -->
     <?php $this->load->view('templates/sidebar'); ?>
     <!-- main content -->
-    <main class="col-sm-10 bg-body-tertiary" id="main">
+    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
         <!-- template top navbar -->
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
 
             <!-- page heading -->
-            <div class="d-flex justify-content-between align-items-center pb-2 mb-4">
-                <form method="GET" action="<?= current_url() ?>" class="d-flex gap-2 align-items-center mb-0">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 mb-4">
+                <form method="GET" action="<?= current_url() ?>" class="d-flex flex-wrap gap-2 align-items-center mb-0">
                     <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                         <option value="">All Status</option>
                         <option value="1" <?= (isset($filters['status']) && $filters['status'] === '1') ? 'selected' : '' ?>>Active</option>
@@ -20,7 +20,7 @@
 
                     <select name="platform" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                         <option value="">All Platforms</option>
-                        <?php foreach($platform_labels as $key => $label): ?>
+                        <?php foreach ($platform_labels as $key => $label): ?>
                             <option value="<?= $key ?>" <?= (isset($filters['platform']) && $filters['platform'] == $key) ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -32,14 +32,17 @@
                     </select>
 
                     <div class="input-group input-group-sm" style="width: 250px;">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search ads..." value="<?= html_escape($filters['q'] ?? '') ?>">
+                        <span class="input-group-text bg-white border-end-0"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search ads..."
+                            value="<?= html_escape($filters['q'] ?? '') ?>">
                     </div>
-                    
+
                     <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-                    
-                    <?php if(!empty($filters['q']) || (isset($filters['status']) && $filters['status'] !== '') || !empty($filters['platform']) || (isset($filters['has_campaign']) && $filters['has_campaign'] !== '')): ?>
-                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-circle"></i></a>
+
+                    <?php if (!empty($filters['q']) || (isset($filters['status']) && $filters['status'] !== '') || !empty($filters['platform']) || (isset($filters['has_campaign']) && $filters['has_campaign'] !== '')): ?>
+                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i
+                                class="bi bi-x-circle"></i></a>
                     <?php endif; ?>
                 </form>
                 <div class="d-flex align-items-center gap-2">
@@ -81,7 +84,6 @@
                                     <th scope="col" class="text-center">Metric</th>
                                     <th scope="col" class="text-center">Status</th>
                                     <th scope="col" class="text-center">Link</th>
-                                    <th class="text-center" style="width: 80px;">Detail</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -143,24 +145,13 @@
                                                 <span class="text-muted">-</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-center">
-                                            <?php if ($metricCount > 0): ?>
-                                                <button class="btn btn-sm btn-outline-primary" type="button"
-                                                    data-bs-toggle="collapse" data-bs-target="#<?= $collapseId ?>"
-                                                    aria-expanded="false" aria-controls="<?= $collapseId ?>">
-                                                    <i class="bi bi-chevron-down"></i>
-                                                </button>
-                                            <?php else: ?>
-                                                <span class="text-muted small">No metrics</span>
-                                            <?php endif; ?>
-                                        </td>
                                     </tr>
                                     <?php if ($metricCount > 0): ?>
                                         <!-- metrics collapse row -->
                                         <tr class="ad-metrics-row bg-body-secondary" data-platform="<?= ($ad->platform) ?>"
                                             data-active="<?= $ad->is_active ? '1' : '0' ?>">
-                                            <td colspan="7" class="p-0 border-top-0">
-                                                <div class="collapse" id="<?= $collapseId ?>">
+                                            <td colspan="6" class="p-0 border-top-0">
+                                                <div>
                                                     <div class="p-3">
                                                         <table class="table table-sm table-bordered mb-0 bg-white rounded">
                                                             <thead class="table-light">
@@ -211,21 +202,6 @@
     </main>
 </div>
 
-<script>
-    (function () {
-        // rotate chevron icon on collapse toggle
-        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(btn => {
-            const targetId = btn.getAttribute('data-bs-target');
-            const collapseEl = document.querySelector(targetId);
-            if (!collapseEl) return;
-            collapseEl.addEventListener('show.bs.collapse', () => {
-                btn.querySelector('i')?.classList.replace('bi-chevron-down', 'bi-chevron-up');
-            });
-            collapseEl.addEventListener('hide.bs.collapse', () => {
-                btn.querySelector('i')?.classList.replace('bi-chevron-up', 'bi-chevron-down');
-            });
-        });
-    })();
-</script>
+
 
 <?php $this->load->view('templates/footer'); ?>

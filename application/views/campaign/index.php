@@ -1,14 +1,14 @@
 <?php $this->load->view('templates/header'); ?>
 
-<div class="d-flex">
+<div class="d-flex flex-nowrap min-vh-100">
     <?php $this->load->view('templates/sidebar'); ?>
-    <main class="col-sm-10 bg-body-tertiary" id="main">
+    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
 
             <!-- action bar -->
-            <div class="d-flex justify-content-between align-items-center pb-2 mb-3">
-                <form method="GET" action="<?= current_url() ?>" class="d-flex gap-2 align-items-center mb-0">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 mb-3">
+                <form method="GET" action="<?= current_url() ?>" class="d-flex flex-wrap gap-2 align-items-center mb-0">
                     <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                         <option value="">All Status</option>
                         <option value="1" <?= (isset($filters['status']) && $filters['status'] === '1') ? 'selected' : '' ?>>Active</option>

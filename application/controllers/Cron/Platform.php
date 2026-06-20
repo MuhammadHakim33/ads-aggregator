@@ -52,9 +52,10 @@ class Platform extends CI_Controller
 
         try {
             // prepare driver
+            $conf = $this->platform_registry->config($platform);
             $driver = $this->make_driver($platform);
             // prepare filter
-            $filters = $this->build_filters($driver);
+            $filters = $this->build_filters($conf);
             // get contents
             $contents = $driver->fetch_contents($since, $until, $filters);
 
@@ -173,24 +174,24 @@ class Platform extends CI_Controller
         return new $class();
     }
 
-    private function build_filters($driver)
+    private function build_filters($conf)
     {
         $filters = [];
 
         // build keyword filter
-        if ($driver->supports_keyword_filter()) {
+        if (!empty($conf['filters']['keyword'])) {
             $kws = $this->Filter_keyword_model->get_by_type('keyword');
             $filters['keywords'] = array_column($kws, 'keyword');
         }
 
         // build hostname filter
-        if ($driver->supports_hostname_filter()) {
+        if (!empty($conf['filters']['hostname'])) {
             $kws = $this->Filter_keyword_model->get_by_type('hostname');
             $filters['hostnames'] = array_column($kws, 'keyword');
         }
 
         // build html filter
-        if ($driver->supports_html_filter()) {
+        if (!empty($conf['filters']['html'])) {
             $kws = $this->Filter_keyword_model->get_by_type('html');
             $filters['html'] = array_column($kws, 'keyword');
         }

@@ -13,6 +13,11 @@ $config['platforms'] = [
             'post_reactions_by_type_total',
             'post_total_media_view_unique',
         ],
+        'filters' => [
+            'keyword' => true,
+            'hostname' => false,
+            'html' => false,
+        ],
     ],
     'instagram' => [
         'enabled' => true,
@@ -33,6 +38,11 @@ $config['platforms'] = [
             'ig_reels_video_view_total_time',
             'reels_skip_rate',
         ],
+        'filters' => [
+            'keyword' => true,
+            'hostname' => false,
+            'html' => false,
+        ],
     ],
     'youtube' => [
         'enabled' => true,
@@ -44,14 +54,22 @@ $config['platforms'] = [
             'likeCount',
             'commentCount',
         ],
+        'filters' => [
+            'keyword' => true,
+            'hostname' => false,
+            'html' => false,
+        ],
     ],
     'ga4' => [
         'enabled' => true,
         'label' => 'Google Analytics 4',
         'driver_class' => 'Ga4Driver',
         'driver_path' => APPPATH . 'modules/ga4/Ga4Driver.php',
-        'supports_hostname_filter' => true,
-        'supports_html_filter' => true,
+        'filters' => [
+            'keyword' => false,
+            'hostname' => true,
+            'html' => true,
+        ],
         'metrics' => [
             'screenPageViews',
             'activeUsers',

@@ -126,7 +126,6 @@ CREATE TABLE ad_metrics (
 -- =========================
 CREATE TABLE complaints (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  contract_id INT NOT NULL,
   ad_content_id INT NOT NULL,
   subject VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
@@ -135,7 +134,6 @@ CREATE TABLE complaints (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
-  FOREIGN KEY (contract_id) REFERENCES contracts(id),
   FOREIGN KEY (ad_content_id) REFERENCES ad_contents(id)
 );
 

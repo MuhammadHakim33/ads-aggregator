@@ -32,16 +32,6 @@ class Ga4Driver extends Platform_driver
         return 'ga4'; 
     }
 
-    public function supports_hostname_filter() 
-    { 
-        return true; 
-    }
-    
-    public function supports_html_filter() 
-    { 
-        return true; 
-    }
-
     public function fetch_contents($since, $until, $filters = [])
     {
         if (!$this->is_configured) {

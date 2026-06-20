@@ -31,8 +31,9 @@ class FacebookDriver extends Platform_driver
         // map to ad_contents database schema
         return array_map(function($p) {
             return [
-                'title' => mb_substr($p['message'] ?? 'No Text', 0, 200),
+                'title' => mb_substr($p['message'] ?? 'No Caption', 0, 200),
                 'content_identifier' => $p['id'],
+                'published_at' => isset($p['created_time']) ? date('Y-m-d H:i:s', strtotime($p['created_time'])) : null,
                 'platform' => 'facebook',
             ];
         }, $raw);

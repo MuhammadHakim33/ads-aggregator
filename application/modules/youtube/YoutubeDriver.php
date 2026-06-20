@@ -44,6 +44,7 @@ class YoutubeDriver extends Platform_driver
             return [
                 'title' => mb_substr($p['snippet']['title'] ?? '', 0, 200),
                 'content_identifier' => $p['id'] ?? '',
+                'published_at' => isset($p['snippet']['publishedAt']) ? date('Y-m-d H:i:s', strtotime($p['snippet']['publishedAt'])) : null,
                 'platform' => 'youtube',
             ];
         }, $raw);

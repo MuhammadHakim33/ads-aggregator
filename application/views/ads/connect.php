@@ -41,7 +41,7 @@
                                     <th scope="col" class="text-center" style="width: 50px;">
                                         <input class="form-check-input" type="checkbox" id="checkAll">
                                     </th>
-                                    <th scope="col">Fetched</th>
+                                    <th scope="col">Published</th>
                                     <th scope="col">Identifier/Title</th>
                                     <th scope="col">Platform</th>
                                     <th scope="col" class="text-center">Link</th>
@@ -63,7 +63,11 @@
                                             <input class="form-check-input row-check" type="checkbox" name="selected_ids[]" value="<?= $ad->id ?>">
                                         </td>
                                         <td>
-                                            <small class="text-muted"><?= date('d M Y, H:i', strtotime($ad->created_at)) ?></small>
+                                            <?php if (!empty($ad->published_at)): ?>
+                                                <small class="text-dark fw-medium"><?= date('d M Y, H:i', strtotime($ad->published_at)) ?></small>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <div class="fw-medium" >

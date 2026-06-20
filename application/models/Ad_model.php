@@ -18,11 +18,12 @@ class Ad_model extends CI_Model
             $title = isset($row['title']) ? $this->db->escape($row['title']) : 'NULL';
             $platform = $this->db->escape($row['platform']);
             $content_identifier = $this->db->escape($row['content_identifier']);
+            $published_at = isset($row['published_at']) ? $this->db->escape($row['published_at']) : 'NULL';
 
-            $placeholders[] = "({$title}, {$platform}, {$content_identifier})";
+            $placeholders[] = "({$title}, {$platform}, {$content_identifier}, {$published_at})";
         }
 
-        $sql = "INSERT IGNORE INTO " . $this->table_contents . " (title, platform, content_identifier) VALUES " . implode(',', $placeholders);
+        $sql = "INSERT IGNORE INTO " . $this->table_contents . " (title, platform, content_identifier, published_at) VALUES " . implode(',', $placeholders);
 
         $this->db->query($sql);
 
@@ -168,7 +169,9 @@ class Ad_model extends CI_Model
 
         $metrics_by_ad = [];
         foreach ($metrics as $m) {
-            $metrics_by_ad[$m->ad_content_id][] = $m;
+            if (isset($m->ad_content_id)) {
+                $metrics_by_ad[$m->ad_content_id][] = $m;
+            }
         }
 
         foreach ($ad_contents as $ad) {

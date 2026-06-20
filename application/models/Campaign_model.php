@@ -106,6 +106,14 @@ class Campaign_model extends CI_Model
         return $this->db->affected_rows();
     }
 
+    public function get_by_contract_id($contract_id)
+    {
+        $this->db->where('contract_id', $contract_id);
+        $this->db->where('deleted_at', NULL);
+        $this->db->order_by('created_at', 'DESC');
+        return $this->db->get($this->table)->result();
+    }
+
     public function has_ads($id)
     {
         $this->db->where('campaign_id', $id);

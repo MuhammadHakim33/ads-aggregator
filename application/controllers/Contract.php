@@ -10,6 +10,7 @@ class Contract extends MY_Controller
         parent::__construct();
         $this->load->model('Contract_model');
         $this->load->model('Client_model');
+        $this->load->model('Campaign_model');
         $this->load->helper('download');
     }
 
@@ -20,12 +21,21 @@ class Contract extends MY_Controller
             'client_id' => $this->input->get('client_id')
         ];
 
+        $contracts = $this->Contract_model->get_all($filters);
+
+        // build campaigns map keyed by contract_id
+        $campaigns_by_contract = [];
+        foreach ($contracts as $contract) {
+            $campaigns_by_contract[$contract->id] = $this->Campaign_model->get_by_contract_id($contract->id);
+        }
+
         $data = [
             'title' => 'Contracts',
             'active_menu' => 'contract',
             'filters' => $filters,
-            'contracts' => $this->Contract_model->get_all($filters),
-            'clients' => $this->Client_model->get_all()
+            'contracts' => $contracts,
+            'clients' => $this->Client_model->get_all(),
+            'campaigns_by_contract' => $campaigns_by_contract
         ];
 
         $this->render('contract/index', $data);

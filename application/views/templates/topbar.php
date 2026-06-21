@@ -12,7 +12,7 @@
                 <span class="badge bg-secondary"><?= $current_account['role'] ?></span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end text-small shadow">
-                <li><a href="#" class="dropdown-item">Profile</a></li>
+                <li><a href="<?= base_url('account/profile') ?>" class="dropdown-item"><i class="bi bi-person me-2"></i>Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <form action="<?= base_url('auth/logout') ?>" method="POST">

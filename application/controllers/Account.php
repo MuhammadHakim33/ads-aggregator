@@ -29,6 +29,81 @@ class Account extends MY_Controller
         $this->render('account/index', $data);
     }
 
+    public function profile()
+    {
+        $id = $this->session->userdata('id');
+        $account = $this->Account_model->get_by_id($id);
+        if (!$account) {
+            $this->session->set_flashdata('errors', 'Account not found.');
+            redirect('dashboard');
+            return;
+        }
+
+        if ($this->input->method() === 'post') {
+            $section = $this->input->post('section');
+
+            if ($section === 'info') {
+                $this->form_validation->set_rules([
+                    [
+                        'field' => 'name',
+                        'label' => 'Name',
+                        'rules' => 'trim|required|min_length[3]|max_length[50]'
+                    ],
+                    [
+                        'field' => 'email',
+                        'label' => 'Email',
+                        'rules' => 'trim|required|valid_email|callback_email_check[' . $id . ']'
+                    ],
+                ]);
+
+                if ($this->form_validation->run() === TRUE) {
+                    $this->Account_model->update($id, [
+                        'name' => $this->input->post('name'),
+                        'email' => strtolower($this->input->post('email')),
+                    ]);
+
+                    $this->session->set_userdata('name', $this->input->post('name'));
+                    $this->session->set_flashdata('success', 'Profile information updated successfully.');
+                    redirect('account/profile');
+                    return;
+                }
+
+            } elseif ($section === 'password') {
+                $this->form_validation->set_rules([
+                    [
+                        'field' => 'password',
+                        'label' => 'Password',
+                        'rules' => 'trim|required|min_length[6]'
+                    ],
+                    [
+                        'field' => 'password_confirm',
+                        'label' => 'Confirm Password',
+                        'rules' => 'trim|required|matches[password]'
+                    ]
+                ]);
+
+                if ($this->form_validation->run() === TRUE) {
+                    $this->Account_model->update($id, [
+                        'password' => $this->input->post('password'),
+                    ]);
+
+                    $this->session->set_flashdata('success', 'Password updated successfully.');
+                    redirect('account/profile');
+                    return;
+                }
+            }
+        }
+
+        $data = [
+            'title' => 'My Profile',
+            'active_menu' => '',
+            'account' => $account,
+        ];
+
+        $this->render('account/profile', $data);
+    }
+
+
     public function create()
     {
         if ($this->input->method() === 'post') {

@@ -32,7 +32,9 @@ class Account_model extends CI_Model
 
     public function get_by_id($id)
     {
-        $this->db->where('id', $id);
+        $this->db->select("{$this->table}.*, {$this->table_roles}.name AS role_name");
+        $this->db->join("{$this->table_roles}", "{$this->table_roles}.id = {$this->table}.role_id", 'left');
+        $this->db->where("{$this->table}.id", $id);
         return $this->db->get($this->table)->row();
     }
 

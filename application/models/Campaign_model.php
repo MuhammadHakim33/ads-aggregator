@@ -5,42 +5,42 @@ class Campaign_model extends CI_Model
 {
     public $table = 'campaigns';
 
-    public function __construct()
-    {
-        parent::__construct();
+    // public function __construct()
+    // {
+    //     parent::__construct();
 
-        // Safety check: Create the campaigns table if it doesn't exist
-        if (!$this->db->table_exists($this->table)) {
-            $sql = "CREATE TABLE IF NOT EXISTS campaigns (
-              id INT PRIMARY KEY AUTO_INCREMENT,
-              contract_id INT NOT NULL,
-              name VARCHAR(255) NOT NULL,
-              description TEXT NULL,
-              start_date DATE NOT NULL,
-              end_date DATE NOT NULL,
-              is_active BOOLEAN DEFAULT TRUE,
-              deleted_at TIMESTAMP NULL,
-              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-              
-              FOREIGN KEY (contract_id) REFERENCES contracts(id)
-            )";
-            $this->db->query($sql);
-        } else {
-            // Dynamically verify and add deleted_at if missing (safety check for option A)
-            if (!$this->db->field_exists('deleted_at', $this->table)) {
-                $this->load->dbforge();
-                $fields = [
-                    'deleted_at' => [
-                        'type' => 'TIMESTAMP',
-                        'null' => TRUE,
-                        'default' => NULL
-                    ]
-                ];
-                $this->dbforge->add_column($this->table, $fields);
-            }
-        }
-    }
+    //     // Safety check: Create the campaigns table if it doesn't exist
+    //     if (!$this->db->table_exists($this->table)) {
+    //         $sql = "CREATE TABLE IF NOT EXISTS campaigns (
+    //           id INT PRIMARY KEY AUTO_INCREMENT,
+    //           contract_id INT NOT NULL,
+    //           name VARCHAR(255) NOT NULL,
+    //           description TEXT NULL,
+    //           start_date DATE NOT NULL,
+    //           end_date DATE NOT NULL,
+    //           is_active BOOLEAN DEFAULT TRUE,
+    //           deleted_at TIMESTAMP NULL,
+    //           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    //           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    //           FOREIGN KEY (contract_id) REFERENCES contracts(id)
+    //         )";
+    //         $this->db->query($sql);
+    //     } else {
+    //         // Dynamically verify and add deleted_at if missing (safety check for option A)
+    //         if (!$this->db->field_exists('deleted_at', $this->table)) {
+    //             $this->load->dbforge();
+    //             $fields = [
+    //                 'deleted_at' => [
+    //                     'type' => 'TIMESTAMP',
+    //                     'null' => TRUE,
+    //                     'default' => NULL
+    //                 ]
+    //             ];
+    //             $this->dbforge->add_column($this->table, $fields);
+    //         }
+    //     }
+    // }
 
     public function get_all($filters = [])
     {
@@ -170,5 +170,12 @@ class Campaign_model extends CI_Model
 
         $campaign->ads = $ads;
         return $campaign;
+    }
+
+    public function deactivate_by_contract($contract_id)
+    {
+        $this->db->where('contract_id', $contract_id);
+        $this->db->update($this->table, ['is_active' => 0]);
+        return $this->db->affected_rows();
     }
 }

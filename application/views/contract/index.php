@@ -118,7 +118,7 @@
                     </table>
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Showing <?= count($contracts) ?> contract(s)</small>
+                    <small class="text-muted">Showing <?= count($contracts) ?> contract</small>
                 </div>
             </div>
 

@@ -167,9 +167,9 @@ class Campaign extends MY_Controller
         }
 
         $data = [
-            'title'         => 'Campaign Detail',
-            'active_menu'   => 'campaign',
-            'campaign'      => $campaign,
+            'title' => 'Campaign Detail',
+            'active_menu' => 'campaign',
+            'campaign' => $campaign,
         ];
 
         $this->render('campaign/detail', $data);
@@ -290,7 +290,7 @@ class Campaign extends MY_Controller
     public function export($format, $id)
     {
         $this->load->library('Export_registry');
-        
+
         $campaign = $this->Campaign_model->get_campaign_with_ads_and_metrics($id);
         if (!$campaign) {
             show_error('Campaign not found.', 404);

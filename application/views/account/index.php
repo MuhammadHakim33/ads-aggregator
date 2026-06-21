@@ -114,7 +114,7 @@
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
                     <small class="text-muted">Showing
-                        <?= count($accounts) ?> account(s)
+                        <?= count($accounts) ?> accounts
                     </small>
                 </div>
             </div>

@@ -98,9 +98,12 @@ class Contract_model extends CI_Model
         return $this->db->count_all_results('campaigns') > 0;
     }
 
-    public function is_contract_number_unique($contract_number)
+    public function is_contract_number_unique($contract_number, $exclude_id = null)
     {
         $this->db->where('contract_number', $contract_number);
+        if ($exclude_id) {
+            $this->db->where('id !=', $exclude_id);
+        }
         $this->db->where('deleted_at', NULL);
         return $this->db->count_all_results($this->table) === 0;
     }

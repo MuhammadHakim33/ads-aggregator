@@ -102,7 +102,7 @@
                     </table>
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Showing <?= count($clients) ?> client(s)</small>
+                    <small class="text-muted">Showing <?= count($clients) ?> client</small>
                 </div>
             </div>
 

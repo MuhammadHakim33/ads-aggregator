@@ -95,17 +95,7 @@
                                         </td>
                                         <td class="text-center">
                                             <?php
-                                                $post_url = '#';
-                                                $platform = strtolower($ad->platform);
-                                                if ($platform === 'facebook') {
-                                                    $post_url = 'https://www.facebook.com/' . $ad->content_identifier;
-                                                } elseif ($platform === 'instagram') {
-                                                    $post_url = 'https://www.instagram.com/p/' . $ad->content_identifier . '/';
-                                                } elseif ($platform === 'youtube') {
-                                                    $post_url = 'https://www.youtube.com/watch?v=' . $ad->content_identifier;
-                                                } elseif ($platform === 'ga4') {
-                                                    $post_url = 'https://' . $ad->content_identifier;
-                                                }
+                                                $post_url = generate_ad_post_url($ad->platform, $ad->content_identifier);
                                             ?>
                                             <?php if ($post_url !== '#'): ?>
                                                 <a href="<?= $post_url ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Buka postingan asli">

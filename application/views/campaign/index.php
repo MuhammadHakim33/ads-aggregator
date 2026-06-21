@@ -5,7 +5,6 @@
     <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
-
             <!-- action bar -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 mb-3">
                 <form method="GET" action="<?= current_url() ?>" class="d-flex flex-wrap gap-2 align-items-center mb-0">
@@ -17,20 +16,23 @@
 
                     <select name="client_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                         <option value="">All Clients</option>
-                        <?php foreach($clients as $c): ?>
+                        <?php foreach ($clients as $c): ?>
                             <option value="<?= $c->id ?>" <?= (isset($filters['client_id']) && $filters['client_id'] == $c->id) ? 'selected' : '' ?>><?= htmlspecialchars($c->company_name) ?></option>
                         <?php endforeach; ?>
                     </select>
 
                     <div class="input-group input-group-sm" style="width: 250px;">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search campaigns..." value="<?= html_escape($filters['q'] ?? '') ?>">
+                        <span class="input-group-text bg-white border-end-0"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0"
+                            placeholder="Search campaigns..." value="<?= html_escape($filters['q'] ?? '') ?>">
                     </div>
-                    
+
                     <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-                    
-                    <?php if(!empty($filters['q']) || (isset($filters['status']) && $filters['status'] !== '') || !empty($filters['client_id'])): ?>
-                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-circle"></i></a>
+
+                    <?php if (!empty($filters['q']) || (isset($filters['status']) && $filters['status'] !== '') || !empty($filters['client_id'])): ?>
+                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i
+                                class="bi bi-x-circle"></i></a>
                     <?php endif; ?>
                 </form>
 
@@ -83,31 +85,6 @@
                                     <td><?= date('Y-m-d', strtotime($campaign->start_date)) ?></td>
                                     <td><?= date('Y-m-d', strtotime($campaign->end_date)) ?></td>
                                     <td class="text-end">
-                                        <div class="dropdown d-inline-block">
-                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                                id="exportDropdown-<?= $campaign->id ?>" data-bs-toggle="dropdown"
-                                                aria-expanded="false" title="Export">
-                                                <i class="bi bi-download"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end"
-                                                aria-labelledby="exportDropdown-<?= $campaign->id ?>">
-                                                <li>
-                                                    <a class="dropdown-item text-start"
-                                                        href="<?= base_url('campaign/export/pdf/' . $campaign->id) ?>"
-                                                        target="_blank">
-                                                        <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
-                                                        Export PDF
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item text-start"
-                                                        href="<?= base_url('campaign/export/excel/' . $campaign->id) ?>">
-                                                        <i class="bi bi-file-earmark-spreadsheet text-success me-2"></i>
-                                                        Export Excel
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
                                         <a href="<?= base_url('campaign/detail/' . $campaign->id) ?>"
                                             class="btn btn-sm btn-outline-primary ms-1" title="Detail">
                                             <i class="bi bi-eye"></i>
@@ -134,7 +111,7 @@
                     </table>
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Showing <?= count($campaigns) ?> campaign(s)</small>
+                    <small class="text-muted">Showing <?= count($campaigns) ?> campaigns</small>
                 </div>
             </div>
 

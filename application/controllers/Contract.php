@@ -181,6 +181,9 @@ class Contract extends MY_Controller
                 if ($is_terminated) {
                     $update_data['terminated_at'] = $this->input->post('terminated_at') ?: date('Y-m-d H:i:s');
                     $update_data['termination_reason'] = $this->input->post('termination_reason');
+
+                    // Set all campaigns under this contract to inactive
+                    $this->Campaign_model->deactivate_by_contract($id);
                 } else {
                     $update_data['terminated_at'] = null;
                     $update_data['termination_reason'] = null;

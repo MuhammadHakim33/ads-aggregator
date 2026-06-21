@@ -16,14 +16,17 @@
                     </select>
 
                     <div class="input-group input-group-sm" style="width: 250px;">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search clients..." value="<?= html_escape($filters['q'] ?? '') ?>">
+                        <span class="input-group-text bg-white border-end-0"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0"
+                            placeholder="Search clients..." value="<?= html_escape($filters['q'] ?? '') ?>">
                     </div>
-                    
+
                     <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-                    
-                    <?php if(!empty($filters['q']) || (isset($filters['status']) && $filters['status'] !== '')): ?>
-                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-circle"></i></a>
+
+                    <?php if (!empty($filters['q']) || (isset($filters['status']) && $filters['status'] !== '')): ?>
+                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i
+                                class="bi bi-x-circle"></i></a>
                     <?php endif; ?>
                 </form>
 
@@ -61,15 +64,20 @@
                         </thead>
                         <tbody>
                             <?php foreach ($clients as $client): ?>
-                                <?php $status_class = $client->is_active ? 'success' : 'secondary'; ?>
                                 <tr>
                                     <td class="fw-medium"><?= ucwords($client->company_name) ?></td>
                                     <td><?= ucwords($client->pic_name ?? '-') ?></td>
                                     <td><?= ucwords($client->ae_name ?? '') ?></td>
                                     <td>
-                                        <span class="badge text-bg-<?= $status_class ?>">
-                                            <?= $client->is_active ? 'Active' : 'Inactive' ?>
-                                        </span>
+                                        <?php if (!empty($client->is_active)): ?>
+                                            <span class="badge bg-success bg-opacity-10 text-success">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Active
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Inactive
+                                            </span>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="text-end">
                                         <a href="<?= base_url('client/edit/' . $client->id) ?>"

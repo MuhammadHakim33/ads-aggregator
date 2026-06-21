@@ -112,6 +112,11 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <small class="text-muted">Showing
+                        <?= count($accounts) ?> account(s)
+                    </small>
+                </div>
             </div>
         </div>
     </main>

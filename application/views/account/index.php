@@ -1,13 +1,9 @@
 <?php $this->load->view('templates/header'); ?>
 
 <div class="d-flex flex-nowrap min-vh-100">
-    <!-- template sidebar -->
     <?php $this->load->view('templates/sidebar'); ?>
-    <!-- main content -->
     <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
-        <!-- template top navbar -->
         <?php $this->load->view('templates/topbar'); ?>
-        <!-- content area -->
         <div class="container-fluid py-4">
             <!-- action bar -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 mb-3">
@@ -20,20 +16,23 @@
 
                     <select name="role_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                         <option value="">All Roles</option>
-                        <?php foreach($roles as $r): ?>
-                            <option value="<?= $r->id ?>" <?= (isset($filters['role_id']) && $filters['role_id'] == $r->id) ? 'selected' : '' ?>><?= htmlspecialchars(ucwords($r->name)) ?></option>
+                        <?php foreach ($roles as $r): ?>
+                            <option value="<?= $r->id ?>" <?= (isset($filters['role_id']) && $filters['role_id'] == $r->id) ? 'selected' : '' ?>><?= ucwords($r->name) ?></option>
                         <?php endforeach; ?>
                     </select>
 
                     <div class="input-group input-group-sm" style="width: 250px;">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search accounts..." value="<?= html_escape($filters['q'] ?? '') ?>">
+                        <span class="input-group-text bg-white border-end-0"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0"
+                            placeholder="Search accounts..." value="<?= html_escape($filters['q'] ?? '') ?>">
                     </div>
-                    
+
                     <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-                    
-                    <?php if(!empty($filters['q']) || (isset($filters['status']) && $filters['status'] !== '') || !empty($filters['role_id'])): ?>
-                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-circle"></i></a>
+
+                    <?php if (!empty($filters['q']) || (isset($filters['status']) && $filters['status'] !== '') || !empty($filters['role_id'])): ?>
+                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i
+                                class="bi bi-x-circle"></i></a>
                     <?php endif; ?>
                 </form>
 
@@ -71,22 +70,24 @@
                         </thead>
                         <tbody>
                             <?php foreach ($accounts as $account): ?>
-                                <?php
-                                // status badge
-                                $status_class = $account->is_active ? 'success' : 'secondary';
-                                ?>
                                 <tr>
                                     <td class="fw-medium"><?= ucwords($account->name) ?></td>
                                     <td><?= $account->email ?></td>
                                     <td>
-                                        <span class="badge text-bg-secondary">
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary">
                                             <?= ucwords($account->role_name) ?>
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge text-bg-<?= $status_class ?>">
-                                            <?= $account->is_active ? 'Active' : 'Inactive' ?>
-                                        </span>
+                                        <?php if (!empty($account->is_active)): ?>
+                                            <span class="badge bg-success bg-opacity-10 text-success">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Active
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Inactive
+                                            </span>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="text-end">
                                         <a href="<?= base_url('account/edit/' . $account->id) ?>"
@@ -111,23 +112,7 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- pagination -->
-                <div class="card-footer d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Showing <?= count($accounts) ?> account</small>
-                    <!-- <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item disabled"><a class="page-link" href="#"><i
-                                        class="bi bi-chevron-left"></i></a></li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>
-                            </li>
-                        </ul>
-                    </nav> -->
-                </div>
             </div>
-
         </div>
     </main>
 </div>

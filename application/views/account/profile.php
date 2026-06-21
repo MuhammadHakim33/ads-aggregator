@@ -8,7 +8,7 @@
             <!-- flash alerts -->
             <?php if ($this->session->flashdata('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle me-2"></i><?= $this->session->flashdata('success') ?>
+                    <?= $this->session->flashdata('success') ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>

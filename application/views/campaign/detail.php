@@ -205,8 +205,8 @@ $ads = $campaign->ads ?? [];
                                                     <?php if ($post_url !== '#'): ?>
                                                         <a href="<?= $post_url ?>" target="_blank"
                                                             class="btn btn-outline-primary btn-sm px-2 py-1"
-                                                            title="Buka postingan asli" style="font-size: 0.7rem;">
-                                                            Post
+                                                            style="font-size: 0.7rem;">
+                                                            <i class="bi bi-box-arrow-up-right"></i>
                                                         </a>
                                                     <?php endif; ?>
                                                     <form

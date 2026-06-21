@@ -39,7 +39,7 @@ class Campaign extends MY_Controller
                 [
                     'field' => 'contract_id',
                     'label' => 'Contract',
-                    'rules' => 'trim|required|integer|callback_contract_check'
+                    'rules' => 'trim|required|integer|callback_contract_create_check'
                 ],
                 [
                     'field' => 'name',
@@ -212,6 +212,24 @@ class Campaign extends MY_Controller
         if (!$contract) {
             $this->form_validation->set_message([
                 'contract_check' => 'The selected Contract does not exist or is inactive.'
+            ]);
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    public function contract_create_check($contract_id)
+    {
+        $contract = $this->Contract_model->get_by_id($contract_id);
+        if (!$contract) {
+            $this->form_validation->set_message([
+                'contract_create_check' => 'The selected Contract does not exist or is inactive.'
+            ]);
+            return FALSE;
+        }
+        if ($contract->terminated_at || strtotime($contract->end_date) < strtotime(date('Y-m-d'))) {
+            $this->form_validation->set_message([
+                'contract_create_check' => 'Cannot create campaign for an expired or terminated contract.'
             ]);
             return FALSE;
         }

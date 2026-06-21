@@ -52,6 +52,7 @@ class Contract_model extends CI_Model
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
         $this->db->where('contracts.deleted_at', NULL);
         $this->db->where('contracts.terminated_at', NULL);
+        $this->db->where('contracts.end_date >=', date('Y-m-d'));
         $this->db->order_by('contracts.created_at', 'DESC');
         return $this->db->get()->result();
     }

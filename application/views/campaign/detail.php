@@ -243,17 +243,24 @@ $ads = $campaign->ads ?? [];
                                                 </div>
                                             <?php endif; ?>
                                         </div>
-                                        <div class="flex-shrink-0 text-end">
-                                            <?php if (!empty($ad->is_active)): ?>
-                                                <span class="badge bg-success bg-opacity-75"
-                                                    style="font-size: 0.68rem;">Active</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-secondary bg-opacity-75"
-                                                    style="font-size: 0.68rem;">Inactive</span>
-                                            <?php endif; ?>
-                                            <div class="text-muted mt-1" style="font-size: 0.72rem;">
-                                                <?= count($metrics) ?> metric<?= count($metrics) !== 1 ? 's' : '' ?>
+                                        <div class="flex-shrink-0 text-end d-flex flex-column align-items-end gap-1">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="text-muted" style="font-size: 0.72rem;">
+                                                    <?= count($metrics) ?> metric<?= count($metrics) !== 1 ? 's' : '' ?>
+                                                </div>
+                                                <?php if (!empty($ad->is_active)): ?>
+                                                    <span class="badge bg-success bg-opacity-75"
+                                                        style="font-size: 0.68rem;">Active</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-secondary bg-opacity-75"
+                                                        style="font-size: 0.68rem;">Inactive</span>
+                                                <?php endif; ?>
                                             </div>
+                                            <form action="<?= base_url('campaign/unconnect_ad/' . $campaign->id . '/' . $ad->id) ?>" method="POST" class="mt-1" onsubmit="return confirm('Are you sure you want to disconnect this ad from the campaign?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm px-2 py-1 lh-1" title="Unconnect Ad" style="font-size: 0.7rem;">
+                                                    <i class="bi bi-x-circle me-1"></i> Unconnect
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
 

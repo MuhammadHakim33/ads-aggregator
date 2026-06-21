@@ -296,4 +296,26 @@ class Campaign extends MY_Controller
         $class = $conf['class'];
         return new $class();
     }
+
+    public function unconnect_ad($campaign_id, $ad_id)
+    {
+        if ($this->input->method() !== 'post') {
+            show_404();
+            return;
+        }
+
+        $this->load->model('Ad_model');
+        $campaign_id = (int) $campaign_id;
+        $ad_id = (int) $ad_id;
+
+        $rows = $this->Ad_model->assign_campaign($ad_id, NULL);
+
+        if ($rows > 0) {
+            $this->session->set_flashdata('success', 'Ad successfully disconnected from campaign.');
+        } else {
+            $this->session->set_flashdata('errors', 'Failed to disconnect ad. It may have already been removed.');
+        }
+
+        redirect('campaign/detail/' . $campaign_id);
+    }
 }

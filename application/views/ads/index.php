@@ -8,50 +8,32 @@
         <!-- template top navbar -->
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
-
             <!-- page heading -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 mb-4">
-                <form method="GET" action="<?= current_url() ?>" class="d-flex flex-wrap gap-2 align-items-center mb-0">
-                    <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                        <option value="">All Status</option>
-                        <option value="1" <?= (isset($filters['status']) && $filters['status'] === '1') ? 'selected' : '' ?>>Active</option>
-                        <option value="0" <?= (isset($filters['status']) && $filters['status'] === '0') ? 'selected' : '' ?>>Inactive</option>
-                    </select>
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
+                    <h5 class="mb-0 fw-semibold">Connect Ads to Campaign</h5>
+                    <form method="GET" action="<?= current_url() ?>" class="d-flex flex-wrap gap-2 align-items-center mb-0">
+                        <select name="platform" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                            <option value="">All Platforms</option>
+                            <?php foreach($platform_labels as $key => $label): ?>
+                                <option value="<?= $key ?>" <?= (isset($filters['platform']) && $filters['platform'] == $key) ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+                            <?php endforeach; ?>
+                        </select>
 
-                    <select name="platform" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                        <option value="">All Platforms</option>
-                        <?php foreach ($platform_labels as $key => $label): ?>
-                            <option value="<?= $key ?>" <?= (isset($filters['platform']) && $filters['platform'] == $key) ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-
-                    <select name="has_campaign" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                        <option value="">All Campaign Status</option>
-                        <option value="1" <?= (isset($filters['has_campaign']) && $filters['has_campaign'] === '1') ? 'selected' : '' ?>>Connected</option>
-                        <option value="0" <?= (isset($filters['has_campaign']) && $filters['has_campaign'] === '0') ? 'selected' : '' ?>>Unconnected</option>
-                    </select>
-
-                    <div class="input-group input-group-sm" style="width: 250px;">
-                        <span class="input-group-text bg-white border-end-0"><i
-                                class="bi bi-search text-muted"></i></span>
-                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search ads..."
-                            value="<?= html_escape($filters['q'] ?? '') ?>">
-                    </div>
-
-                    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-
-                    <?php if (!empty($filters['q']) || (isset($filters['status']) && $filters['status'] !== '') || !empty($filters['platform']) || (isset($filters['has_campaign']) && $filters['has_campaign'] !== '')): ?>
-                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i
-                                class="bi bi-x-circle"></i></a>
-                    <?php endif; ?>
-                </form>
-                <div class="d-flex align-items-center gap-2">
-                    <a href="<?= base_url('ads/connect') ?>" class="btn btn-primary btn-sm">
-                        <i class="bi bi-link-45deg"></i> Connect Ads
-                    </a>
+                        <div class="input-group input-group-sm" style="width: 200px;">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search ads..." value="<?= html_escape($filters['q'] ?? '') ?>">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-sm btn-primary d-none">Filter</button>
+                        
+                        <?php if(!empty($filters['q']) || !empty($filters['platform'])): ?>
+                            <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-circle"></i></a>
+                        <?php endif; ?>
+                    </form>
                 </div>
-            </div>
 
+            </div>
             <!-- flash alerts -->
             <?php if ($this->session->flashdata('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -65,143 +47,154 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
-
-            <!-- ad contents table -->
-            <?php if (empty($ad_contents)): ?>
-                <div class="text-center text-muted py-5 card">
-                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                    No ads content found.
-                </div>
-            <?php else: ?>
-                <div class="card">
+            <div class="card shadow-sm border-0">
+                <form action="<?= base_url('ads') ?>" method="post" id="mappingForm">
                     <div class="table-responsive">
-                        <table class="table table-hover table-bordered align-middle mb-0" id="adTable">
+                        <table class="table table-hover table-bordered align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th scope="col" style="width:25%">Ads</th>
-                                    <th scope="col">Campaign</th>
+                                    <th scope="col" class="text-center" style="width: 50px;">
+                                        <input class="form-check-input" type="checkbox" id="checkAll">
+                                    </th>
+                                    <th scope="col">Published</th>
+                                    <th scope="col">Identifier/Title</th>
                                     <th scope="col">Platform</th>
-                                    <th scope="col" class="text-center">Metric</th>
-                                    <th scope="col" class="text-center">Status</th>
                                     <th scope="col" class="text-center">Link</th>
+                                    <th scope="col" style="width: 250px;">Campaign</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($ad_contents as $i => $ad): ?>
-                                    <?php
-                                    $statusClass = $ad->is_active ? 'success' : 'secondary';
-                                    $statusText = $ad->is_active ? 'Active' : 'Inactive';
-                                    $collapseId = 'metrics-' . $ad->id;
-                                    $metricCount = count($ad->metrics ?? []);
-                                    ?>
-                                    <tr class="ad-row" data-active="<?= $ad->is_active ? '1' : '0' ?>">
-                                        <td>
-                                            <div class="fw-medium"><?= $ad->title ?? '-' ?></div>
-                                            <small class="text-muted font-monospace"><?= $ad->content_identifier ?></small>
+                                <?php if (empty($unconnected)): ?>
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-5">
+                                            <i class="bi bi-check-circle fs-1 d-block mb-2 text-success"></i>
+                                            All ads have been connected to campaigns.
                                         </td>
-                                        <td>
-                                            <?php if (!empty($ad->campaign_name)): ?>
-                                                <div class="fw-medium text-dark"><?= $ad->campaign_name ?></div>
-                                                <div class="text-muted small"><?= $ad->company_name ?></div>
-                                            <?php else: ?>
-                                                <span class="text-muted fst-italic">unconnected</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <span class="badge text-bg-light">
-                                                <?= $platform_labels[strtolower($ad->platform)] ?? ucfirst($ad->platform) ?>
-                                            </span>
-                                        </td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php foreach ($unconnected as $ad): ?>
+                                    <tr>
                                         <td class="text-center">
-                                            <?php if ($metricCount > 0): ?>
-                                                <span class="badge text-bg-light rounded-pill"><?= $metricCount ?></span>
+                                            <input class="form-check-input row-check" type="checkbox" name="selected_ids[]" value="<?= $ad->id ?>">
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($ad->published_at)): ?>
+                                                <small class="text-dark fw-medium"><?= date('d M Y, H:i', strtotime($ad->published_at)) ?></small>
                                             <?php else: ?>
                                                 <span class="text-muted">-</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-center">
-                                            <span class="badge text-bg-<?= $statusClass ?>"><?= $statusText ?></span>
+                                        <td>
+                                            <div class="fw-medium" >
+                                                <?= htmlspecialchars($ad->title ?: '-') ?>
+                                            </div>
+                                            <small class="font-monospace text-muted"><?= htmlspecialchars($ad->content_identifier) ?></small>
+                                        </td>
+                                        <td>
+                                            <span class="badge text-bg-light"><?= htmlspecialchars($platform_labels[strtolower($ad->platform)] ?? ucfirst($ad->platform)) ?></span>
                                         </td>
                                         <td class="text-center">
                                             <?php
-                                            $post_url = '#';
-                                            $platform = strtolower($ad->platform);
-                                            if ($platform === 'facebook') {
-                                                $post_url = 'https://www.facebook.com/' . $ad->content_identifier;
-                                            } elseif ($platform === 'instagram') {
-                                                $post_url = 'https://www.instagram.com/p/' . $ad->content_identifier . '/';
-                                            } elseif ($platform === 'youtube') {
-                                                $post_url = 'https://www.youtube.com/watch?v=' . $ad->content_identifier;
-                                            } elseif ($platform === 'ga4') {
-                                                $post_url = 'https://' . $ad->content_identifier;
-                                            }
+                                                $post_url = '#';
+                                                $platform = strtolower($ad->platform);
+                                                if ($platform === 'facebook') {
+                                                    $post_url = 'https://www.facebook.com/' . $ad->content_identifier;
+                                                } elseif ($platform === 'instagram') {
+                                                    $post_url = 'https://www.instagram.com/p/' . $ad->content_identifier . '/';
+                                                } elseif ($platform === 'youtube') {
+                                                    $post_url = 'https://www.youtube.com/watch?v=' . $ad->content_identifier;
+                                                } elseif ($platform === 'ga4') {
+                                                    $post_url = 'https://' . $ad->content_identifier;
+                                                }
                                             ?>
                                             <?php if ($post_url !== '#'): ?>
-                                                <a href="<?= $post_url ?>" target="_blank" class="btn btn-sm btn-outline-primary"
-                                                    title="Buka postingan asli">
+                                                <a href="<?= $post_url ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Buka postingan asli">
                                                     <i class="bi bi-box-arrow-up-right"></i>
                                                 </a>
                                             <?php else: ?>
                                                 <span class="text-muted">-</span>
                                             <?php endif; ?>
                                         </td>
+                                        <td>
+                                            <select name="campaign_id[<?= $ad->id ?>]" class="form-select form-select-sm campaign-select" disabled>
+                                                <option value="" disabled selected>Select Campaign</option>
+                                                <?php foreach ($campaigns as $campaign): ?>
+                                                    <option value="<?= $campaign->id ?>"><?= htmlspecialchars(ucwords($campaign->name)) ?> (<?= htmlspecialchars($campaign->contract_number) ?>)</option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </td>
                                     </tr>
-                                    <?php if ($metricCount > 0): ?>
-                                        <!-- metrics collapse row -->
-                                        <tr class="ad-metrics-row bg-body-secondary" data-platform="<?= ($ad->platform) ?>"
-                                            data-active="<?= $ad->is_active ? '1' : '0' ?>">
-                                            <td colspan="6" class="p-0 border-top-0">
-                                                <div>
-                                                    <div class="p-3">
-                                                        <table class="table table-sm table-bordered mb-0 bg-white rounded">
-                                                            <thead class="table-light">
-                                                                <tr>
-                                                                    <th class="text-muted small fw-semibold" style="width:40%">
-                                                                        Metric</th>
-                                                                    <th class="text-muted small fw-semibold text-end"
-                                                                        style="width:30%">Value</th>
-                                                                    <th class="text-muted small fw-semibold" style="width:30%">
-                                                                        Updated</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <?php foreach ($ad->metrics as $metric): ?>
-                                                                    <tr>
-                                                                        <td class="fw-medium small">
-                                                                            <?= (ucwords(str_replace('_', ' ', $metric->metric_name))) ?>
-                                                                        </td>
-                                                                        <td class="text-end font-monospace small">
-                                                                            <?= number_format($metric->metric_value, 2, ',', '.') ?>
-                                                                        </td>
-                                                                        <td class="text-muted small">
-                                                                            <?= date('d M Y H:i', strtotime($metric->updated_at)) ?>
-                                                                        </td>
-                                                                    </tr>
-                                                                <?php endforeach; ?>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
-                    <!-- Pagination Footer -->
-                    <?php if (!empty($pagination)): ?>
-                        <div class="card-footer d-flex justify-content-end align-items-center">
-                            <?= $pagination ?>
+                    <?php if (!empty($unconnected)): ?>
+                    <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center border-top-0">
+                        <span class="text-muted small"><span id="checkedCount">0</span> rows selected</span>
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="action" value="ignore" class="btn btn-outline-danger btn-sm px-4 action-btn" disabled formnovalidate
+                                onclick="return confirm('Are you sure you want to ignore and permanently remove these ads?')">
+                                <i class="bi bi-trash"></i> Ignore
+                            </button>
+                            <button type="submit" name="action" value="connect" class="btn btn-primary btn-sm px-4 action-btn" disabled>
+                                <i class="bi bi-link-45deg"></i> Connect
+                            </button>
                         </div>
+                    </div>
                     <?php endif; ?>
-                </div>
-            <?php endif; ?>
+                </form>
+            </div>
 
         </div>
     </main>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const checkAll = document.getElementById('checkAll');
+    const rowChecks = document.querySelectorAll('.row-check');
+    const checkedCountEl = document.getElementById('checkedCount');
+    const actionBtns = document.querySelectorAll('.action-btn');
 
+    function updateState() {
+        let count = 0;
+        rowChecks.forEach(chk => {
+            const tr = chk.closest('tr');
+            const select = tr.querySelector('.campaign-select');
+            
+            if (chk.checked) {
+                count++;
+                tr.classList.add('table-primary');
+                select.disabled = false;
+                select.required = true;
+            } else {
+                tr.classList.remove('table-primary');
+                select.disabled = true;
+                select.required = false;
+            }
+        });
+
+        if (checkedCountEl) checkedCountEl.textContent = count;
+        
+        actionBtns.forEach(btn => {
+            btn.disabled = count === 0;
+        });
+
+        if (checkAll) checkAll.checked = (count > 0 && count === rowChecks.length);
+    }
+
+    if (checkAll) {
+        checkAll.addEventListener('change', function () {
+            rowChecks.forEach(chk => chk.checked = checkAll.checked);
+            updateState();
+        });
+    }
+
+    rowChecks.forEach(chk => {
+        chk.addEventListener('change', updateState);
+    });
+});
+</script>
 
 <?php $this->load->view('templates/footer'); ?>

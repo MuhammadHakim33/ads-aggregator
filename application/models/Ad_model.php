@@ -226,4 +226,19 @@ class Ad_model extends CI_Model
         $this->db->update($this->table_contents, ['campaign_id' => $campaign_id ?: null]);
         return $this->db->affected_rows();
     }
+
+    public function delete_ads($ids)
+    {
+        if (empty($ids)) return 0;
+
+        // Delete related metrics first
+        $this->db->where_in('ad_content_id', $ids);
+        $this->db->delete($this->table_metrics);
+
+        // Delete ads contents
+        $this->db->where_in('id', $ids);
+        $this->db->delete($this->table_contents);
+
+        return $this->db->affected_rows();
+    }
 }

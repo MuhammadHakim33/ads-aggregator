@@ -14,53 +14,40 @@ class Ads extends MY_Controller
 
     public function index()
     {
-        $platform_labels = [];
-        foreach ($this->platform_registry->configs() as $name => $conf) {
-            $platform_labels[$name] = $conf['label'] ?? ucfirst($name);
-        }
-
-        $filters = [
-            'q' => $this->input->get('q'),
-            'platform' => $this->input->get('platform'),
-            'status' => $this->input->get('status'),
-            'has_campaign' => $this->input->get('has_campaign')
-        ];
-
-        $data = [
-            'title' => 'Ads',
-            'active_menu' => 'ads',
-            'filters' => $filters,
-            'ad_contents' => $this->Ad_model->get_all_ad_metrics($filters),
-            'platform_labels' => $platform_labels
-        ];
-
-        $this->render('ads/index', $data);
-    }
-
-    public function connect()
-    {
         $this->load->model('Campaign_model');
 
         if ($this->input->method() === 'post') {
+            $action = $this->input->post('action');
             $selected_ids = $this->input->post('selected_ids') ?? [];
-            $campaign_map = $this->input->post('campaign_id') ?? [];
 
-            $saved = 0;
-            foreach ($selected_ids as $ad_id) {
-                $ad_id = (int) $ad_id;
-                $campaign_id = (int) $campaign_map[$ad_id];
-
-                $rows = $this->Ad_model->assign_campaign($ad_id, $campaign_id);
-                $saved += $rows;
-            }
-
-            if ($saved > 0) {
-                $this->session->set_flashdata('success', "{$saved} ads successfully connected to campaign.");
+            if ($action === 'ignore') {
+                $deleted = $this->Ad_model->delete_ads($selected_ids);
+                if ($deleted > 0) {
+                    $this->session->set_flashdata('success', "{$deleted} unconnected ads successfully ignored and removed.");
+                } else {
+                    $this->session->set_flashdata('errors', 'Failed to ignore selected ads.');
+                }
             } else {
-                $this->session->set_flashdata('errors', 'No ads were successfully saved. Please select a campaign for the checked rows.');
+                // default is connect
+                $campaign_map = $this->input->post('campaign_id') ?? [];
+                $saved = 0;
+                foreach ($selected_ids as $ad_id) {
+                    $ad_id = (int) $ad_id;
+                    $campaign_id = (int) ($campaign_map[$ad_id] ?? 0);
+                    if ($campaign_id > 0) {
+                        $rows = $this->Ad_model->assign_campaign($ad_id, $campaign_id);
+                        $saved += $rows;
+                    }
+                }
+
+                if ($saved > 0) {
+                    $this->session->set_flashdata('success', "{$saved} ads successfully connected to campaign.");
+                } else {
+                    $this->session->set_flashdata('errors', 'No ads were successfully saved. Please ensure a campaign is selected for the checked rows.');
+                }
             }
 
-            redirect('ads/connect');
+            redirect('ads');
             return;
         }
 
@@ -83,6 +70,6 @@ class Ads extends MY_Controller
             'platform_labels' => $platform_labels
         ];
 
-        $this->render('ads/connect', $data);
+        $this->render('ads/index', $data);
     }
 }

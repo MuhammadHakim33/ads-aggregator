@@ -33,6 +33,7 @@ class Account extends MY_Controller
     {
         $id = $this->session->userdata('id');
         $account = $this->Account_model->get_by_id($id);
+
         if (!$account) {
             $this->session->set_flashdata('errors', 'Account not found.');
             redirect('dashboard');
@@ -96,7 +97,6 @@ class Account extends MY_Controller
 
         $data = [
             'title' => 'My Profile',
-            'active_menu' => '',
             'account' => $account,
         ];
 

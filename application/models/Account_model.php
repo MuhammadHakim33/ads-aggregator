@@ -76,13 +76,6 @@ class Account_model extends CI_Model
         return $this->db->affected_rows();
     }
 
-    // public function is_exist_by_id($id)
-    // {
-    //     $this->db->where('id', $id);
-    //     $this->db->where('deleted_at', NULL);
-    //     return $this->db->get($this->table)->num_rows();
-    // }
-
     public function is_ae_exist_by_id($id)
     {
         $this->db->select("{$this->table}.id");

@@ -5,7 +5,6 @@
     <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
-
             <!-- flash alerts -->
             <?php if ($this->session->flashdata('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -19,8 +18,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
-
             <div class="row g-4">
+                <!-- profile card -->
                 <div class="col-12 col-md-4 col-xl-3">
                     <div class="card text-center h-100">
                         <div class="card-body py-4">
@@ -31,11 +30,11 @@
                                 </span>
                             </div>
 
-                            <h6 class="fw-semibold mb-1"><?= htmlspecialchars($account->name) ?></h6>
-                            <div class="text-muted small mb-2"><?= htmlspecialchars($account->email) ?></div>
+                            <h6 class="fw-semibold mb-1"><?= $account->name ?></h6>
+                            <div class="text-muted small mb-2"><?= $account->email ?></div>
 
                             <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1">
-                                <?= htmlspecialchars(ucwords($account->role_name ?? $current_account['role'])) ?>
+                                <?= ucwords($account->role_name ?? $current_account['role']) ?>
                             </span>
 
                             <?php if (!empty($account->is_active)): ?>
@@ -59,40 +58,34 @@
                         </div>
                     </div>
                 </div>
-
+                <!-- form -->
                 <div class="col-12 col-md-8 col-xl-9">
-
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h6 class="mb-0"><i class="bi bi-person me-2 text-primary"></i>Account Information</h6>
+                            <h6 class="mb-0">Account Information</h6>
                         </div>
                         <div class="card-body">
                             <form action="<?= base_url('account/profile') ?>" method="POST" id="profileForm">
-
                                 <div class="row g-3">
                                     <div class="col-12 col-sm-6">
                                         <label for="name" class="form-label fw-medium">
                                             Full Name <span class="text-danger">*</span>
                                         </label>
-                                        <input type="text"
-                                            class="form-control <?= form_error('name') ? 'is-invalid' : '' ?>" id="name"
-                                            name="name" value="<?= set_value('name', $account->name) ?>"
+                                        <input type="text" class="form-control" id="name" name="name"
+                                            value="<?= set_value('name', $account->name) ?>"
                                             placeholder="Your full name">
-                                        <?= form_error('name', '<div class="invalid-feedback">', '</div>'); ?>
+                                        <?= form_error('name', '<div class="form-text text-danger">', '</div>'); ?>
                                     </div>
-
                                     <div class="col-12 col-sm-6">
                                         <label for="email" class="form-label fw-medium">
                                             Email <span class="text-danger">*</span>
                                         </label>
-                                        <input type="email"
-                                            class="form-control <?= form_error('email') ? 'is-invalid' : '' ?>"
-                                            id="email" name="email" value="<?= set_value('email', $account->email) ?>"
+                                        <input type="email" class="form-control" id="email" name="email"
+                                            value="<?= set_value('email', $account->email) ?>"
                                             placeholder="email@example.com">
-                                        <?= form_error('email', '<div class="invalid-feedback">', '</div>'); ?>
+                                        <?= form_error('email', '<div class="form-text text-danger">', '</div>'); ?>
                                     </div>
                                 </div>
-
                                 <div class="d-flex justify-content-end mt-4">
                                     <button type="submit" class="btn btn-primary" form="profileForm" name="section"
                                         value="info">
@@ -102,22 +95,12 @@
                             </form>
                         </div>
                     </div>
-
                     <div class="card">
                         <div class="card-header">
-                            <h6 class="mb-0"><i class="bi bi-shield-lock me-2 text-warning"></i>Change Password</h6>
+                            <h6 class="mb-0">Change Password</h6>
                         </div>
                         <div class="card-body">
                             <form action="<?= base_url('account/profile') ?>" method="POST" id="passwordForm">
-
-                                <?php if (form_error('password') || form_error('password_confirm')): ?>
-                                    <div class="alert alert-danger alert-dismissible fade show py-2 mb-3" role="alert">
-                                        <?= form_error('password') ?>
-                                        <?= form_error('password_confirm') ?>
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                    </div>
-                                <?php endif; ?>
-
                                 <div class="row g-3">
                                     <div class="col-12 col-sm-6">
                                         <label for="password" class="form-label fw-medium">New Password</label>
@@ -129,8 +112,8 @@
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                         </div>
+                                        <?= form_error('password', '<div class="form-text text-danger">', '</div>'); ?>
                                     </div>
-
                                     <div class="col-12 col-sm-6">
                                         <label for="password_confirm" class="form-label fw-medium">Confirm New
                                             Password</label>
@@ -143,13 +126,9 @@
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                         </div>
+                                        <?= form_error('password_confirm', '<div class="form-text text-danger">', '</div>'); ?>
                                     </div>
                                 </div>
-
-                                <!-- hidden fields to pass name/email along -->
-                                <input type="hidden" name="name" value="<?= htmlspecialchars($account->name) ?>">
-                                <input type="hidden" name="email" value="<?= htmlspecialchars($account->email) ?>">
-
                                 <div class="d-flex justify-content-end mt-4">
                                     <button type="submit" class="btn btn-warning" name="section" value="password">
                                         <i class="bi bi-shield-check me-1"></i> Update Password
@@ -158,10 +137,8 @@
                             </form>
                         </div>
                     </div>
-
                 </div>
             </div>
-
         </div>
     </main>
 </div>

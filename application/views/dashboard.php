@@ -15,31 +15,24 @@ $platforms = [
     <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
-            <!-- page heading -->
-            <div class="mb-4">
-                <h5 class="mb-0">Welcome back, <?= $current_account['name'] ?></h5>
-            </div>
             <div class="row g-3 mb-4">
                 <!-- card client active -->
                 <div class="col-sm-6 col-md-4">
-                    <div class="card border-1 shadow-sm h-100">
+                    <div class="card border-1 h-100">
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="rounded-3 bg-primary bg-opacity-10 p-3">
                                 <i class="bi bi-person-check fs-4 text-primary"></i>
                             </div>
                             <div>
                                 <div class="fs-2 fw-bold lh-1"><?= $total_clients_active ?></div>
-                                <div class="text-muted small mt-1">client Active</div>
-                                <div class="text-muted" style="font-size: 0.75rem;">
-                                    from <?= $total_clients ?> total
-                                </div>
+                                <div class="text-muted small mt-1">Client Active</div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- card contract active -->
                 <div class="col-sm-6 col-md-4">
-                    <div class="card border-1 shadow-sm h-100">
+                    <div class="card border-1 h-100">
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="rounded-3 bg-success bg-opacity-10 p-3">
                                 <i class="bi bi-file-earmark-check fs-4 text-success"></i>
@@ -53,7 +46,7 @@ $platforms = [
                 </div>
                 <!-- card ongoing campaign -->
                 <div class="col-sm-6 col-md-4">
-                    <div class="card border-1 shadow-sm h-100">
+                    <div class="card border-1 h-100">
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="rounded-3 bg-warning bg-opacity-10 p-3">
                                 <i class="bi bi-megaphone fs-4 text-warning"></i>
@@ -67,7 +60,7 @@ $platforms = [
                 </div>
                 <!-- card total ads -->
                 <div class="col-sm-6 col-md-4">
-                    <div class="card border-1 shadow-sm h-100">
+                    <div class="card border-1 h-100">
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="rounded-3 bg-info bg-opacity-10 p-3">
                                 <i class="bi bi-collection-play fs-4 text-info"></i>
@@ -81,8 +74,7 @@ $platforms = [
                 </div>
                 <!-- card unconnected ads -->
                 <div class="col-sm-6 col-md-4">
-                    <div
-                        class="card border-1 shadow-sm h-100<?= $total_unconnected_ads > 0 ? ' border border-warning' : '' ?>">
+                    <div class="card border-1 h-100<?= $total_unconnected_ads > 0 ? ' border border-warning' : '' ?>">
                         <div class="card-body d-flex align-items-center gap-3">
                             <div
                                 class="rounded-3 p-3 <?= $total_unconnected_ads > 0 ? 'bg-warning bg-opacity-10' : 'bg-secondary bg-opacity-10' ?>">
@@ -118,7 +110,7 @@ $platforms = [
                 </div>
             <?php endif; ?>
             <div class="card mb-4">
-                <div class="card-body border-bottom pb-2 mb-0 d-flex align-items-center gap-2">
+                <div class="card-body border-bottom d-flex align-items-center gap-2">
                     <i class="bi bi-arrow-repeat text-primary"></i>
                     <span class="fw-medium">Status Sync Platform</span>
                 </div>

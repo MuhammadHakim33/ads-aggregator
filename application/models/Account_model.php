@@ -104,4 +104,31 @@ class Account_model extends CI_Model
         $this->db->where('email', $email);
         return $this->db->get($this->table)->num_rows();
     }
+
+    public function set_reset_token($email, $token, $expired_at)
+    {
+        $this->db->where('email', $email);
+        $this->db->update($this->table, [
+            'reset_token' => $token,
+            'reset_token_expired' => $expired_at
+        ]);
+        return $this->db->affected_rows() > 0;
+    }
+
+    public function get_by_reset_token($token)
+    {
+        $this->db->where('reset_token', $token);
+        $this->db->where('reset_token_expired >', date('Y-m-d H:i:s'));
+        $this->db->where('is_active', 1);
+        return $this->db->get($this->table)->row();
+    }
+
+    public function clear_reset_token($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->update($this->table, [
+            'reset_token' => NULL,
+            'reset_token_expired' => NULL
+        ]);
+    }
 }

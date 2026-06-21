@@ -34,7 +34,7 @@
                     <?= form_error('password', '<div class="form-text text-danger">', '</div>'); ?>
                 </div>
                 <div class="d-flex justify-content-end mb-3">
-                    <a href="#" class="text-decoration-none small">Forgot password?</a>
+                    <a href="<?= base_url('auth/forgot_password') ?>" class="text-decoration-none small">Forgot password?</a>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Sign In</button>
             </form>

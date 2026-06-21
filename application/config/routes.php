@@ -71,13 +71,13 @@ $route['contract'] = 'contract/index';
 
 $route['campaign/create'] = 'campaign/create';
 $route['campaign/edit/(:num)'] = 'campaign/edit/$1';
+$route['campaign/detail/(:num)'] = 'campaign/detail/$1';
 $route['campaign/delete/(:num)'] = 'campaign/delete/$1';
 $route['campaign/export/(:any)/(:num)'] = 'campaign/export/$1/$2';
+$route['campaign/unconnect_ad/(:num)/(:num)'] = 'campaign/unconnect_ad/$1/$2';
 $route['campaign'] = 'campaign/index';
 
 $route['ads'] = 'ads/index';
-$route['ads/connect'] = 'ads/connect';
-$route['ads/(:num)'] = 'ads/index/$1';
 
 $route['config/platforms/meta'] = 'Config/Platforms/meta';
 $route['config/platforms/ga4'] = 'Config/Platforms/ga4';
@@ -99,4 +99,7 @@ $route['auth/logout'] = 'auth/logout';
 
 $route['login'] = 'auth/index';
 
-
+$route['auth/forgot_password'] = 'auth/forgot_password';
+$route['auth/send_reset_link'] = 'auth/send_reset_link';
+$route['auth/reset_password/(:any)'] = 'auth/reset_password/$1';
+$route['auth/update_password'] = 'auth/update_password';

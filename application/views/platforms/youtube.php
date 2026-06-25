@@ -31,7 +31,8 @@
                             <p class="text-muted small mb-2">Format JSON yang dibutuhkan:</p>
                             <pre class="bg-light rounded p-2 small mb-3">
 {
-    "api_key": "AIzaSy...",
+    "client_id": "...",
+    "client_secret": "...",
     "channel_id": "UCxxx..."
 }
 </pre>
@@ -39,11 +40,12 @@
                                 <div class="mb-3">
                                     <label for="yt_credential_json" class="form-label fw-medium">Credential JSON</label>
                                     <textarea id="yt_credential_json" name="credential_json"
-                                        class="form-control font-monospace" rows="6">
-                                        <?= $credential ? htmlspecialchars($credential->credential_data) : '' ?>
-                                    </textarea>
+                                        class="form-control font-monospace" rows="6"><?= $credential ? htmlspecialchars(trim($credential->credential_data)) : '' ?></textarea>
                                 </div>
-                                <div class="d-flex justify-content-end">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="<?= base_url('youtube_oauth/login') ?>" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-google me-1"></i> Authenticate with Google
+                                    </a>
                                     <button type="submit" class="btn btn-primary btn-sm">
                                         <i class="bi bi-check-lg me-1"></i> Save
                                     </button>

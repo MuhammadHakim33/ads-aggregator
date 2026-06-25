@@ -12,8 +12,12 @@ class YoutubeDriver extends Platform_driver
         $this->CI->config->load('platforms');
 
         $cred = $this->CI->Platform_credential_model->get_by_platform('youtube');
-        if (empty($cred) || empty($cred['api_key']) || empty($cred['channel_id'])) {
-            throw new \Exception("Credentials for youtube are empty or incomplete.");
+        if (empty($cred) || empty($cred['client_id']) || empty($cred['client_secret']) || empty($cred['channel_id'])) {
+            throw new \Exception("Credentials for youtube are empty or incomplete. Please ensure client_id, client_secret, and channel_id are set in the database.");
+        }
+        
+        if (empty($cred['access_token']) || empty($cred['refresh_token'])) {
+            throw new \Exception("YouTube OAuth tokens are missing. Please authorize the application by navigating to /youtube_oauth/login.");
         }
 
         $platform_config = $this->CI->config->item('platforms')['youtube'] ?? [];

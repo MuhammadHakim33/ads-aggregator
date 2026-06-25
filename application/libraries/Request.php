@@ -3,10 +3,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Request
 {
-    public function get($url, $params = [])
+    public function get($url, $params = [], $headers = [])
     {
         if (!empty($params)) {
             $url .= '?' . http_build_query($params);
+        }
+
+        $http_headers = ['Accept: application/json'];
+        if (!empty($headers)) {
+            $http_headers = array_merge($http_headers, $headers);
         }
 
         $ch = curl_init();
@@ -14,7 +19,7 @@ class Request
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => TRUE,
             CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+            CURLOPT_HTTPHEADER => $http_headers,
         ]);
 
         $response   = curl_exec($ch);
@@ -29,7 +34,11 @@ class Request
         $data = json_decode($response, TRUE);
 
         if ($http_code !== 200 || isset($data['error'])) {
-            $message = $data['error']['message'] ?? "HTTP $http_code";
+            if (isset($data['error']) && is_string($data['error'])) {
+                $message = $data['error_description'] ?? $data['error'];
+            } else {
+                $message = $data['error']['message'] ?? "HTTP $http_code";
+            }
             throw new \RuntimeException("API Error: ($url) - $message");
         }
 
@@ -64,7 +73,11 @@ class Request
         $data = json_decode($response, TRUE);
 
         if ($http_code !== 200 || isset($data['error'])) {
-            $message = $data['error']['message'] ?? "HTTP $http_code";
+            if (isset($data['error']) && is_string($data['error'])) {
+                $message = $data['error_description'] ?? $data['error'];
+            } else {
+                $message = $data['error']['message'] ?? "HTTP $http_code";
+            }
             throw new \RuntimeException("API Error: ($url) - $message");
         }
 
@@ -99,7 +112,11 @@ class Request
         $data = json_decode($response, TRUE);
 
         if ($http_code !== 200 || isset($data['error'])) {
-            $message = $data['error']['message'] ?? "HTTP $http_code";
+            if (isset($data['error']) && is_string($data['error'])) {
+                $message = $data['error_description'] ?? $data['error'];
+            } else {
+                $message = $data['error']['message'] ?? "HTTP $http_code";
+            }
             throw new \RuntimeException("API Error: ($url) - $message");
         }
 

@@ -199,8 +199,7 @@ $platforms = [
                                     <th scope="col" class="text-center">Status</th>
                                     <th scope="col" class="text-end">Rows</th>
                                     <th scope="col" class="text-end">Duration</th>
-                                    <th scope="col">Time</th>
-                                    <th scope="col">Error</th>
+                                    <th scope="col" colspan="2">Time</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -221,10 +220,7 @@ $platforms = [
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
-                                                <?php if ($pconf): ?>
-                                                    <i class="bi <?= $pconf['icon'] ?> text-<?= $pconf['color'] ?>"></i>
-                                                <?php endif; ?>
-                                                <span><?= $log->platform ?></span>
+                                                <span><?= ucfirst($log->platform) ?></span>
                                             </div>
                                         </td>
                                         <td class="text-center">
@@ -236,20 +232,21 @@ $platforms = [
                                         <td class="text-end font-monospace small text-muted">
                                             <?= $duration ?>
                                         </td>
-                                        <td class="small text-muted text-nowrap">
+                                        <td class="small text-muted text-nowrap" colspan="2">
                                             <?= date('d M Y H:i', strtotime($log->started_at)) ?>
                                         </td>
-                                        <td>
-                                            <?php if ($log->error_message): ?>
-                                                <span class="small text-danger" title="<?= $log->error_message ?>">
-                                                    <i
-                                                        class="bi bi-exclamation-circle me-1"></i><?= mb_strimwidth($log->error_message, 0, 40, '…') ?>
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="text-muted">—</span>
-                                            <?php endif; ?>
-                                        </td>
                                     </tr>
+                                    <?php if ($log->error_message): ?>
+                                        <tr class="table-danger">
+                                            <td colspan="7" class="py-2 px-3 border-top-0">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="small text-danger font-monospace">
+                                                        <?= $log->error_message ?>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>

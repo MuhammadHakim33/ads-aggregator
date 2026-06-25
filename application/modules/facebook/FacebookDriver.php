@@ -12,6 +12,9 @@ class FacebookDriver extends Platform_driver
         $this->CI->config->load('platforms');
         
         $credential = $this->CI->Platform_credential_model->get_by_platform('meta');
+        if (empty($credential) || empty($credential['fb_page_id'])) {
+            throw new \Exception("Credentials for facebook are empty or incomplete.");
+        }
         $platform_config = $this->CI->config->item('platforms')['facebook'] ?? [];
         $metrics = $platform_config['metrics'] ?? [];
         

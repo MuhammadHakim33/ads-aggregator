@@ -20,13 +20,15 @@ class Cron_log_model extends CI_Model
 
     public function finish($id, $status, $rows_affected = 0, $error_message = null)
     {
+        $duration = $this->_elapsed_ms($id);
+
         $this->db->where('id', $id);
         $this->db->update($this->table, [
             'status' => $status,
             'rows_affected' => $rows_affected,
             'error_message' => $error_message,
             'finished_at' => date('Y-m-d H:i:s'),
-            'duration_ms' => $this->_elapsed_ms($id),
+            'duration_ms' => $duration,
         ]);
     }
 
@@ -59,7 +61,6 @@ class Cron_log_model extends CI_Model
         ";
         $rows = $this->db->query($sql)->result();
 
-        // key by "platform|job_name" for easy lookup in view
         $map = [];
         foreach ($rows as $row) {
             $map[$row->platform . '|' . $row->job_name] = $row;

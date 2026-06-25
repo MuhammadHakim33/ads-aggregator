@@ -66,9 +66,19 @@ php index.php Cron/Platform sync facebook 2023-10-01 2023-10-31
 To run the processes automatically in the background of a server (Linux), add the configuration to your crontab (`crontab -e`):
 ```bash
 # Fetch posts for all platforms every hour
-0 * * * * cd /path/to/project/folder && php index.php Cron/Platform fetch all >> /dev/null 2>&1
+# Logs are appended to logs/cron_fetch.log
+0 * * * * cd /path/to/project && php index.php Cron/Platform fetch all >> logs/cron_fetch.log 2>&1
 
-# Fetch insights for all platforms every midnight (00:00)
-0 0 * * * cd /path/to/project/folder && php index.php Cron/Platform sync all >> /dev/null 2>&1
+# Sync insights for all platforms every midnight (00:00)
+# Logs are appended to logs/cron_sync.log
+0 0 * * * cd /path/to/project && php index.php Cron/Platform sync all >> logs/cron_sync.log 2>&1
 ```
-*(Adjust `/path/to/project/folder` to the actual directory where your project is located).*
+*(Adjust `/path/to/project` to the actual directory where your project is located).*
+
+**Log Files:**
+| File | Description |
+|---|---|
+| `logs/cron_fetch.log` | Output log from the fetch cron job |
+| `logs/cron_sync.log` | Output log from the sync cron job |
+
+> **Tip:** To rotate logs and prevent the log files from growing too large, add `logrotate` configuration or clear manually.

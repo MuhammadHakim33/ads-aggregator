@@ -5,7 +5,6 @@ require_once APPPATH . 'modules/ga4/Ga4ApiClient.php';
 class Ga4Driver extends Platform_driver
 {
     private ?Ga4ApiClient $client = null;
-    private bool $is_configured = true;
 
     public function __construct()
     {
@@ -14,10 +13,7 @@ class Ga4Driver extends Platform_driver
 
         $credentials = $this->CI->Platform_credential_model->get_by_platform('ga4');
         if (empty($credentials) || empty($credentials['property_id']) || empty($credentials['service_account']['private_key'])) {
-            $this->is_configured = false;
-            log_message('error', '[GA4] Credentials are empty or incomplete. Skipping fetch/sync.');
-            echo "[ga4] WARNING: Credentials are empty or incomplete. Skipping.\n";
-            return;
+            throw new \Exception("Credentials for ga4 are empty or incomplete.");
         }
 
         $platform_config = $this->CI->config->item('platforms')['ga4'] ?? [];
@@ -34,9 +30,6 @@ class Ga4Driver extends Platform_driver
 
     public function fetch_contents($since, $until, $filters = [])
     {
-        if (!$this->is_configured) {
-            return [];
-        }
         $result = $this->client->get_articles(
             $since,
             $until,
@@ -58,9 +51,6 @@ class Ga4Driver extends Platform_driver
 
     public function fetch_insights($identifiers, $since = null, $until = null): array
     {
-        if (!$this->is_configured) {
-            return [];
-        }
         $since = $since ?? date('Y-m-d', strtotime('-30 days'));
         $until = $until ?? date('Y-m-d');
 

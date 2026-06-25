@@ -1,5 +1,6 @@
 <?php
 require_once APPPATH . 'modules/meta/MetaGraphBaseClient.php';
+require_once APPPATH . 'exceptions/PartialSuccessException.php';
 
 class MetaGraphInstagramClient extends MetaGraphBaseClient
 {
@@ -19,16 +20,17 @@ class MetaGraphInstagramClient extends MetaGraphBaseClient
             'since' => strtotime($since),
             'until' => strtotime($until)
         ];
-        
+
         // request instagram media from meta graph api
         $response = $this->make_request('get', $ig_id . '/media', $params);
         $posts = $response['data'] ?? [];
 
         // filtering posts based on keyword
         if (!empty($keywords)) {
-            $posts = array_filter($posts, function($p) use ($keywords) {
+            $posts = array_filter($posts, function ($p) use ($keywords) {
                 foreach ($keywords as $kw) {
-                    if (stripos($p['caption'] ?? '', $kw) !== false) return true;
+                    if (stripos($p['caption'] ?? '', $kw) !== false)
+                        return true;
                 }
                 return false;
             });
@@ -37,13 +39,14 @@ class MetaGraphInstagramClient extends MetaGraphBaseClient
         return array_values($posts);
     }
 
-    public function get_media_insights($ids)
+    public function get_media_insights($ids): array
     {
         $insights = [];
-        
+        $errors = [];
+
         // standard metrics fallback
         $standard_metrics = !empty($this->metrics) ? implode(',', $this->metrics) : 'reach,saved,shares,likes,comments,total_interactions,profile_activity';
-        
+
         $batch = [];
         foreach ($ids as $id) {
             $batch[] = [
@@ -54,17 +57,17 @@ class MetaGraphInstagramClient extends MetaGraphBaseClient
 
         // request instagram media details and insights from meta graph api
         $response = $this->make_request('post', '', ['batch' => json_encode($batch)]);
-        
+
         $reels_ids = [];
-        // normalize standard insights and identify Reels posts
+        // normalize standard insights and identify Reels posts — kumpulkan error, jangan silent
         foreach ($response as $index => $res) {
+            $id = $ids[$index];
             if ($res['code'] === 200) {
-                $id = $ids[$index];
                 $body = json_decode($res['body'], TRUE);
-                
+
                 // save standard insights
                 $insights[$id] = $this->normalize_insights($body['insights']['data'] ?? []);
-                
+
                 // check if the media is Reels
                 $product_type = $body['media_product_type'] ?? '';
                 if ($product_type === 'REELS') {
@@ -73,7 +76,12 @@ class MetaGraphInstagramClient extends MetaGraphBaseClient
                 continue;
             }
 
-            log_message('error', "Instagram API media insights error: " . $res['body']);
+            // collect error messages per media
+            $body = json_decode($res['body'], true);
+            $msg = $body['error']['message'] ?? $res['body'];
+            $errors[] = "[Media {$id}] {$msg}";
+            $time = date('Y-m-d H:i:s');
+            log_message('error', "[{$time}] Instagram API media insights error [{$id}]: {$msg}");
         }
 
         // fetch Reels specific insights safely only for Reels media
@@ -88,22 +96,33 @@ class MetaGraphInstagramClient extends MetaGraphBaseClient
             }
 
             $reels_response = $this->make_request('post', '', ['batch' => json_encode($reels_batch)]);
-            
+
             foreach ($reels_response as $index => $res) {
+                $id = $reels_ids[$index];
                 if ($res['code'] === 200) {
-                    $id = $reels_ids[$index];
                     $body = json_decode($res['body'], TRUE);
                     $reels_insights = $this->normalize_insights($body['data'] ?? []);
-                    
+
                     // merge standard insights with reels specific insights
                     $insights[$id] = array_merge($insights[$id], $reels_insights);
                     continue;
                 }
 
-                log_message('error', "Instagram Reels API insights error: " . $res['body']);
+                // collect error messages per reels
+                $body = json_decode($res['body'], true);
+                $msg = $body['error']['message'] ?? $res['body'];
+                $errors[] = "[Reels {$id}] {$msg}";
+                $time = date('Y-m-d H:i:s');
+                log_message('error', "[{$time}] Instagram Reels API insights error [{$id}]: {$msg}");
             }
         }
-        
+
+        // if there are errors, throw PartialSuccessException
+        // controller will save the successful data and record the error
+        if (!empty($errors)) {
+            throw new PartialSuccessException($errors, $insights);
+        }
+
         return $insights;
     }
 }

@@ -12,6 +12,9 @@ class InstagramDriver extends Platform_driver
         $this->CI->config->load('platforms');
 
         $cred = $this->CI->Platform_credential_model->get_by_platform('meta');
+        if (empty($cred) || empty($cred['ig_account_id'])) {
+            throw new \Exception("Credentials for instagram are empty or incomplete.");
+        }
         $platform_config = $this->CI->config->item('platforms')['instagram'] ?? [];
         $metrics = $platform_config['metrics'] ?? [];
         $reels_metrics = $platform_config['reels_metrics'] ?? [];

@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+require_once APPPATH . 'exceptions/PartialSuccessException.php';
 
 class Platform extends CI_Controller
 {
@@ -46,8 +47,6 @@ class Platform extends CI_Controller
 
     private function run_fetch($platform, $since, $until)
     {
-        echo "[{$platform}] Fetch Contents {$since} to {$until}\n";
-
         $log_id = $this->Cron_log_model->start('fetch', $platform);
 
         try {
@@ -60,7 +59,6 @@ class Platform extends CI_Controller
             $contents = $driver->fetch_contents($since, $until, $filters);
 
             if (empty($contents)) {
-                echo "[{$platform}] No contents found.\n\n";
                 $this->Cron_log_model->finish($log_id, 'success', 0);
                 return;
             }
@@ -71,22 +69,32 @@ class Platform extends CI_Controller
 
             // bulk upsert contents
             $result = $this->Ad_model->bulk_upsert_contents($contents);
-            echo "[{$platform}] " . $result['created'] . " contents saved.\n\n";
 
             $this->Cron_log_model->finish($log_id, 'success', $result['created']);
 
-        } catch (\Exception $e) {
-            log_message('error', "[Cron/Platform::fetch_contents:{$platform}] " . $e->getMessage());
-            echo "[{$platform}] ERROR: " . $e->getMessage() . "\n\n";
+        } catch (PartialSuccessException $e) {
+            // save the successful data and record the error
+            $partial_contents = $e->getPartialData();
+            foreach ($partial_contents as &$row) {
+                $row['platform'] = $platform;
+            }
+            $saved = empty($partial_contents) ? ['created' => 0] : $this->Ad_model->bulk_upsert_contents($partial_contents);
+            $status = empty($partial_contents) ? 'failed' : 'partial';
 
+            $time = date('Y-m-d H:i:s');
+            log_message('error', "[{$time}] [Cron/Platform::fetch_contents:{$platform}] (partial) " . $e->getMessage());
+            $this->Cron_log_model->finish($log_id, $status, $saved['created'], $e->getMessage());
+
+        } catch (\Throwable $e) {
+            // fatal error no data successfully inserted
+            $time = date('Y-m-d H:i:s');
+            log_message('error', "[{$time}] [Cron/Platform::fetch_contents:{$platform}] " . $e->getMessage());
             $this->Cron_log_model->finish($log_id, 'failed', 0, $e->getMessage());
         }
     }
 
     private function run_sync($platform, $since, $until)
     {
-        echo "[{$platform}] Sync Insights\n";
-
         $log_id = $this->Cron_log_model->start('sync', $platform);
 
         try {
@@ -96,7 +104,6 @@ class Platform extends CI_Controller
             $saved = $this->Ad_model->get_identifiers_by_platform($platform);
 
             if (empty($saved)) {
-                echo "[{$platform}] No active content found in DB.\n\n";
                 $this->Cron_log_model->finish($log_id, 'success', 0);
                 return;
             }
@@ -104,32 +111,44 @@ class Platform extends CI_Controller
             // prepare content_id_map
             $content_id_map = array_column($saved, 'id', 'content_identifier');
 
-            // fetch insights — GA4 groups by campaign date range, others call once
-            if ($platform === 'ga4') {
-                $insights = $this->fetch_ga4_insights_by_campaign($driver, $saved, $since, $until);
-            } else {
-                $identifiers = array_column($saved, 'content_identifier');
-                $insights = $driver->fetch_insights($identifiers, $since, $until);
+            // fetch insights catch PartialSuccessException separately
+            $insights = [];
+            $error_message = null;
+
+            try {
+                if ($platform === 'ga4') {
+                    $insights = $this->fetch_ga4_insights_by_campaign($driver, $saved, $since, $until);
+                } else {
+                    $identifiers = array_column($saved, 'content_identifier');
+                    $insights = $driver->fetch_insights($identifiers, $since, $until);
+                }
+            } catch (PartialSuccessException $e) {
+                // save the partial data and record the error message
+                $insights = $e->getPartialData();
+                $error_message = $e->getMessage();
+                $time = date('Y-m-d H:i:s');
+                log_message('error', "[{$time}] [Cron/Platform::sync_insights:{$platform}] (partial) {$error_message}");
             }
 
             if (empty($insights)) {
-                echo "[{$platform}] No insights returned from API.\n\n";
-                $this->Cron_log_model->finish($log_id, 'success', 0);
+                $status = $error_message ? 'failed' : 'success';
+                $this->Cron_log_model->finish($log_id, $status, 0, $error_message);
                 return;
             }
 
-            // build metric rows
+            // build metric rows dari insights yang berhasil
             $metric_rows = $this->build_metric_rows($insights, $content_id_map);
-            // bulk upsert metrics
+            // bulk upsert metrics — hanya data yang valid masuk DB
             $result = $this->Ad_model->bulk_upsert_metrics($metric_rows);
-            echo "[{$platform}] " . $result['upserted'] . " metric rows saved.\n\n";
 
-            $this->Cron_log_model->finish($log_id, 'success', $result['upserted']);
+            // if there is an error, mark as partial, otherwise success
+            $status = $error_message ? 'partial' : 'success';
+            $this->Cron_log_model->finish($log_id, $status, $result['upserted'], $error_message);
 
-        } catch (\Exception $e) {
-            log_message('error', "[Cron/Platform::sync_insights:{$platform}] " . $e->getMessage());
-            echo "[{$platform}] ERROR: " . $e->getMessage() . "\n\n";
-
+        } catch (\Throwable $e) {
+            // fatal error no data successfully inserted for this platform
+            $time = date('Y-m-d H:i:s');
+            log_message('error', "[{$time}] [Cron/Platform::sync_insights:{$platform}] " . $e->getMessage());
             $this->Cron_log_model->finish($log_id, 'failed', 0, $e->getMessage());
         }
     }
@@ -141,7 +160,7 @@ class Platform extends CI_Controller
         $groups = [];
         foreach ($saved as $row) {
             $s = $row->campaign_start_date ?? $default_since;
-            $u = $row->campaign_end_date   ?? $default_until;
+            $u = $row->campaign_end_date ?? $default_until;
             $key = $s . '|' . $u;
             $groups[$key][] = $row->content_identifier;
         }
@@ -149,7 +168,6 @@ class Platform extends CI_Controller
         $all_insights = [];
         foreach ($groups as $key => $identifiers) {
             [$s, $u] = explode('|', $key);
-            echo "[ga4] Syncing " . count($identifiers) . " article(s) for {$s} to {$u}\n";
             $group_insights = $driver->fetch_insights($identifiers, $s, $u);
             $all_insights = array_merge($all_insights, $group_insights);
         }

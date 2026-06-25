@@ -102,7 +102,7 @@ $platforms = [
                         </span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <a href="<?= base_url('ads/connect') ?>" class="btn btn-warning btn-sm text-nowrap">
+                        <a href="<?= base_url('ads') ?>" class="btn btn-warning btn-sm text-nowrap">
                             <i class="bi bi-link-45deg me-1"></i> Connect Now
                         </a>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>

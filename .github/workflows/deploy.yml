@@ -30,6 +30,7 @@ jobs:
           REMOTE_USER: ${{ secrets.VPS_USERNAME }}
           TARGET: "/var/www/ads-aggregator"
           EXCLUDE: "/.git/, /.github/" 
+          ARGS: "-rltgoDzvO --rsync-path=\"sudo rsync\""
 
       - name: 5. Pastikan Permission Aman
         uses: appleboy/ssh-action@v1.0.3

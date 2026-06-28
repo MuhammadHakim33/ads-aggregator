@@ -6,7 +6,7 @@ $platforms = [
     'instagram' => ['label' => 'Instagram', 'icon' => 'bi-instagram'],
     'youtube' => ['label' => 'YouTube', 'icon' => 'bi-youtube'],
     'ga4' => ['label' => 'GA4', 'icon' => 'bi-bar-chart-line'],
-    // 'gam' => ['label' => 'GAM', 'icon' => 'bi-google'],
+    'gam' => ['label' => 'GAM', 'icon' => 'bi-google'],
 ];
 ?>
 

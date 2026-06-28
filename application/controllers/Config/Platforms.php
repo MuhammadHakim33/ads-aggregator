@@ -3,12 +3,13 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Platforms extends MY_Controller
 {
-    private $credential_platforms = ['meta', 'ga4', 'youtube'];
+    private $credential_platforms = ['meta', 'ga4', 'youtube', 'gam'];
 
     private $platform_keyword_map = [
         'meta' => ['facebook', 'instagram'],
         'ga4' => ['ga4'],
         'youtube' => ['youtube'],
+        'gam' => ['gam'],
     ];
 
     private $keyword_types = ['html', 'keyword', 'hostname'];
@@ -34,6 +35,11 @@ class Platforms extends MY_Controller
     public function youtube()
     {
         $this->_render_platform('youtube');
+    }
+
+    public function gam()
+    {
+        $this->_render_platform('gam');
     }
 
     public function save_credential($platform)
@@ -197,6 +203,13 @@ class Platforms extends MY_Controller
                     'keyword' => $keyword,
                 ];
 
+            case 'gam':
+                return [
+                    'platform' => 'gam',
+                    'type' => 'keyword',
+                    'keyword' => $keyword,
+                ];
+
             case 'meta':
                 return [
                     'platform' => 'facebook',
@@ -256,6 +269,7 @@ class Platforms extends MY_Controller
             'meta' => 'Meta (Facebook + Instagram)',
             'ga4' => 'Google Analytics 4',
             'youtube' => 'YouTube',
+            'gam' => 'Google Ad Manager',
         ];
 
         $data = [

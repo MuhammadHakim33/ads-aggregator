@@ -82,6 +82,7 @@ $route['ads'] = 'ads/index';
 $route['config/platforms/meta'] = 'Config/Platforms/meta';
 $route['config/platforms/ga4'] = 'Config/Platforms/ga4';
 $route['config/platforms/youtube'] = 'Config/Platforms/youtube';
+$route['config/platforms/gam'] = 'Config/Platforms/gam';
 
 $route['config/platforms/save-credential/(:any)'] = 'Config/Platforms/save_credential/$1';
 

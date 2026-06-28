@@ -252,4 +252,17 @@ class Ad_model extends CI_Model
 
         return $this->db->affected_rows();
     }
+
+    public function get_ads_by_client($client_id)
+    {
+        $this->db->select('ad_contents.id, ad_contents.title, ad_contents.platform, campaigns.name as campaign_name');
+        $this->db->from($this->table_contents);
+        $this->db->join('campaigns', 'campaigns.id = ad_contents.campaign_id', 'inner');
+        $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
+        $this->db->where('contracts.client_id', $client_id);
+        $this->db->where('ad_contents.is_active', 1);
+        $this->db->order_by('campaigns.name', 'ASC');
+        $this->db->order_by('ad_contents.title', 'ASC');
+        return $this->db->get()->result();
+    }
 }

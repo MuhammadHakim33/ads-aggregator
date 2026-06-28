@@ -5,7 +5,7 @@
     <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 mb-3">
                 <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
                     <form method="GET" action="<?= current_url() ?>"
                         class="d-flex flex-wrap gap-2 align-items-center mb-0">
@@ -16,14 +16,14 @@
                             <?php endforeach; ?>
                         </select>
 
-                        <div class="input-group input-group-sm" style="width: 200px;">
+                        <div class="input-group input-group-sm" style="width: 250px;">
                             <span class="input-group-text bg-white border-end-0"><i
                                     class="bi bi-search text-muted"></i></span>
                             <input type="text" name="q" class="form-control border-start-0 ps-0"
                                 placeholder="Search ads..." value="<?= html_escape($filters['q'] ?? '') ?>">
                         </div>
 
-                        <button type="submit" class="btn btn-sm btn-primary d-none">Filter</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Filter</button>
 
                         <?php if (!empty($filters['q']) || !empty($filters['platform'])): ?>
                             <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i
@@ -45,7 +45,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
-            <div class="card shadow-sm border-0">
+            <div class="card">
                 <form action="<?= base_url('ads') ?>" method="post" id="mappingForm">
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered align-middle mb-0">

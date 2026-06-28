@@ -72,6 +72,13 @@
                 </li>
             <?php endif; ?>
 
+            <li class="nav-item">
+                <a href="<?= base_url('complaint') ?>"
+                    class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'complaint' ? 'active text-white' : '' ?>">
+                    <i class="bi bi-exclamation-octagon me-2"></i> Complaints
+                </a>
+            </li>
+
             <?php if ($role === 'superadmin'): ?>
                 <!-- platforms section -->
                 <li class="nav-item mt-3 mb-1 px-3">

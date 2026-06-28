@@ -118,7 +118,7 @@ class Account extends MY_Controller
                 $insert_id = $this->Account_model->insert([
                     'name' => $this->input->post('name'),
                     'email' => strtolower($this->input->post('email')),
-                    'password' => password_hash($this->input->post('password'), PASSWORD_BCRYPT),
+                    'password' => $this->input->post('password'),
                     'role_id' => $this->input->post('role_id'),
                     'is_active' => TRUE
                 ]);
@@ -167,7 +167,7 @@ class Account extends MY_Controller
                 // only update if password is not empty
                 $password = $this->input->post('password');
                 if ($password !== null && $password !== '') {
-                    $data['password'] = password_hash($password, PASSWORD_BCRYPT);
+                    $data['password'] = $password;
                 }
 
                 // update account

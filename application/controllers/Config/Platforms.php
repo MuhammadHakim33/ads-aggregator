@@ -43,7 +43,7 @@ class Platforms extends MY_Controller
         }
 
         if (!in_array($platform, $this->credential_platforms)) {
-            $this->session->set_flashdata('errors', '<p>Platform tidak valid.</p>');
+            $this->session->set_flashdata('errors', '<div>Invalid platform.</div>');
             redirect('dashboard');
             return;
         }
@@ -53,24 +53,28 @@ class Platforms extends MY_Controller
         // validate JSON
         $decoded = json_decode($raw, TRUE);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->session->set_flashdata('errors', '<p>Format JSON credential tidak valid. Silakan periksa kembali.</p>');
+            $this->session->set_flashdata('errors', '<div>Invalid JSON format. Please check your credential and try again.</div>');
             redirect('config/platforms/' . $platform);
             return;
         }
 
-        $is_exists = $this->Platform_credential_model->is_exists($platform);
-        if ($is_exists) {
-            $ok = $this->Platform_credential_model->update($platform, $decoded);
-            $msg = 'Credential ' . strtoupper($platform) . ' berhasil diperbarui.';
-        } else {
-            $ok = $this->Platform_credential_model->insert($platform, $decoded);
-            $msg = 'Credential ' . strtoupper($platform) . ' berhasil disimpan.';
-        }
+        try {
+            $is_exists = $this->Platform_credential_model->is_exists($platform);
+            if ($is_exists) {
+                $ok = $this->Platform_credential_model->update($platform, $decoded);
+                $msg = strtoupper($platform) . ' credential updated successfully.';
+            } else {
+                $ok = $this->Platform_credential_model->insert($platform, $decoded);
+                $msg = strtoupper($platform) . ' credential saved successfully.';
+            }
 
-        if ($ok) {
-            $this->session->set_flashdata('success', $msg);
-        } else {
-            $this->session->set_flashdata('errors', '<p>Gagal menyimpan credential. Silakan coba lagi.</p>');
+            if ($ok) {
+                $this->session->set_flashdata('success', $msg);
+            } else {
+                $this->session->set_flashdata('errors', '<div>Failed to save credential. Please try again.</div>');
+            }
+        } catch (\RuntimeException $e) {
+            $this->session->set_flashdata('errors', '<div><strong>Encryption failed:</strong> ' . htmlspecialchars($e->getMessage()) . '</div>');
         }
 
         redirect('config/platforms/' . $platform);
@@ -93,7 +97,7 @@ class Platforms extends MY_Controller
         $errors = $this->_validate_keyword_payload($platform, $payload);
 
         if ($errors) {
-            $this->session->set_flashdata('errors', '<p>' . implode('</p><p>', $errors) . '</p>');
+            $this->session->set_flashdata('errors', '<div>' . implode('</div><div>', $errors) . '</div>');
             redirect('config/platforms/' . $platform);
             return;
         }
@@ -104,7 +108,7 @@ class Platforms extends MY_Controller
         if ($insert_id) {
             $this->session->set_flashdata('success', 'Filter keyword created successfully.');
         } else {
-            $this->session->set_flashdata('errors', '<p>Failed to create filter keyword. Please try again.</p>');
+            $this->session->set_flashdata('errors', '<div>Failed to create filter keyword. Please try again.</div>');
         }
 
         redirect('config/platforms/' . $platform);
@@ -119,7 +123,7 @@ class Platforms extends MY_Controller
 
         $keyword = $this->Filter_keyword_model->get_by_id($id);
         if (!$keyword) {
-            $this->session->set_flashdata('errors', '<p>Filter keyword not found.</p>');
+            $this->session->set_flashdata('errors', '<div>Filter keyword not found.</div>');
             redirect('config/platforms/' . $platform);
             return;
         }
@@ -133,7 +137,7 @@ class Platforms extends MY_Controller
         $errors = $this->_validate_keyword_payload($platform, $payload);
 
         if ($errors) {
-            $this->session->set_flashdata('errors', '<p>' . implode('</p><p>', $errors) . '</p>');
+            $this->session->set_flashdata('errors', '<div>' . implode('</div><div>', $errors) . '</div>');
             redirect('config/platforms/' . $platform);
             return;
         }
@@ -146,7 +150,7 @@ class Platforms extends MY_Controller
         if ($updated) {
             $this->session->set_flashdata('success', 'Filter keyword updated successfully.');
         } else {
-            $this->session->set_flashdata('errors', '<p>Failed to update filter keyword. Please try again.</p>');
+            $this->session->set_flashdata('errors', '<div>Failed to update filter keyword. Please try again.</div>');
         }
 
         redirect('config/platforms/' . $platform);
@@ -165,7 +169,7 @@ class Platforms extends MY_Controller
         }
 
         if ($this->Filter_keyword_model->is_exist_by_id($id) == 0) {
-            $this->session->set_flashdata('errors', '<p>Filter keyword tidak ditemukan.</p>');
+            $this->session->set_flashdata('errors', '<div>Filter keyword not found.</div>');
             redirect('config/platforms/' . $platform);
             return;
         }
@@ -173,9 +177,9 @@ class Platforms extends MY_Controller
         $deleted = $this->Filter_keyword_model->delete($id);
 
         if ($deleted) {
-            $this->session->set_flashdata('success', 'Filter keyword berhasil dihapus.');
+            $this->session->set_flashdata('success', 'Filter keyword deleted successfully.');
         } else {
-            $this->session->set_flashdata('errors', '<p>Gagal menghapus filter keyword. Silakan coba lagi.</p>');
+            $this->session->set_flashdata('errors', '<div>Failed to delete filter keyword. Please try again.</div>');
         }
 
         redirect('config/platforms/' . $platform);
@@ -238,15 +242,10 @@ class Platforms extends MY_Controller
             return;
         }
 
-        $credential_row = NULL;
+        $credential_json = NULL;
         if (in_array($platform, $this->credential_platforms)) {
-            // get raw row (not decoded) so view can display JSON text
-            $rows = $this->Platform_credential_model->get_all();
-            foreach ($rows as $row) {
-                if ($row->platform === $platform) {
-                    $credential_row = $row;
-                    break;
-                }
+            if ($this->Platform_credential_model->is_exists($platform)) {
+                $credential_json = $this->Platform_credential_model->get_raw_decrypted($platform);
             }
         }
 
@@ -264,7 +263,7 @@ class Platforms extends MY_Controller
             'active_menu' => 'platform_' . $platform,
             'platform' => $platform,
             'platform_label' => $labels[$platform] ?? strtoupper($platform),
-            'credential' => $credential_row,
+            'credential' => $credential_json,
             'keywords' => $keywords,
             'kw_platforms' => $kw_platforms,
             'keyword_types' => $this->keyword_types,

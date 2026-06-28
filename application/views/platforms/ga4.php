@@ -43,11 +43,11 @@
 </pre>
                             <form method="POST" action="<?= base_url('config/platforms/save-credential/ga4') ?>">
                                 <div class="mb-3">
-                                    <label for="ga4_credential_json" class="form-label fw-medium">Credential JSON</label>
+                                    <label for="ga4_credential_json" class="form-label fw-medium">Credential
+                                        JSON</label>
                                     <textarea id="ga4_credential_json" name="credential_json"
-                                        class="form-control font-monospace" rows="9">
-                                        <?= $credential ? htmlspecialchars($credential->credential_data) : '' ?>
-                                    </textarea>
+                                        class="form-control font-monospace"
+                                        rows="9"><?= $credential ? htmlspecialchars($credential) : '' ?></textarea>
                                 </div>
                                 <div class="d-flex justify-content-end">
                                     <button type="submit" class="btn btn-primary btn-sm">
@@ -98,7 +98,8 @@
                                             <tr>
                                                 <td><?= ucfirst(htmlspecialchars($item->type)) ?></td>
                                                 <td><?= htmlspecialchars($item->keyword) ?></td>
-                                                <td><span class="badge text-bg-<?= $status_class ?>"><?= $status_label ?></span></td>
+                                                <td><span class="badge text-bg-<?= $status_class ?>"><?= $status_label ?></span>
+                                                </td>
                                                 <td class="text-end">
                                                     <button type="button" class="btn btn-sm btn-outline-secondary btn-edit-kw"
                                                         data-id="<?= $item->id ?>"
@@ -110,7 +111,8 @@
                                                     </button>
                                                     <button type="button"
                                                         class="btn btn-sm btn-outline-danger ms-1 btn-delete-kw"
-                                                        data-id="<?= $item->id ?>" data-keyword="<?= htmlspecialchars($item->keyword) ?>"
+                                                        data-id="<?= $item->id ?>"
+                                                        data-keyword="<?= htmlspecialchars($item->keyword) ?>"
                                                         data-bs-toggle="modal" data-bs-target="#deleteKeywordModal"
                                                         title="Delete">
                                                         <i class="bi bi-trash"></i>

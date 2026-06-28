@@ -40,7 +40,7 @@
                                 <div class="mb-3">
                                     <label for="yt_credential_json" class="form-label fw-medium">Credential JSON</label>
                                     <textarea id="yt_credential_json" name="credential_json"
-                                        class="form-control font-monospace" rows="6"><?= $credential ? htmlspecialchars(trim($credential->credential_data)) : '' ?></textarea>
+                                        class="form-control font-monospace" rows="6"><?= $credential ? htmlspecialchars(trim($credential)) : '' ?></textarea>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <a href="<?= base_url('youtube_oauth/login') ?>" class="btn btn-outline-danger btn-sm">

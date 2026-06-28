@@ -40,12 +40,30 @@
                                 <div class="mb-3">
                                     <label for="yt_credential_json" class="form-label fw-medium">Credential JSON</label>
                                     <textarea id="yt_credential_json" name="credential_json"
-                                        class="form-control font-monospace" rows="6"><?= $credential ? htmlspecialchars(trim($credential)) : '' ?></textarea>
+                                        class="form-control font-monospace"
+                                        rows="6"><?= $credential ? htmlspecialchars(trim($credential)) : '' ?></textarea>
                                 </div>
+                                <?php
+                                $cred_data = $credential ? json_decode($credential, true) : [];
+                                $is_connected = !empty($cred_data['access_token']) && !empty($cred_data['refresh_token']);
+                                ?>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <a href="<?= base_url('youtube_oauth/login') ?>" class="btn btn-outline-danger btn-sm">
-                                        <i class="bi bi-google me-1"></i> Authenticate with Google
-                                    </a>
+                                    <?php if ($is_connected): ?>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge text-bg-success d-flex align-items-center gap-1 py-2 px-3">
+                                                <i class="bi bi-check-circle-fill"></i> Connected
+                                            </span>
+                                            <a href="<?= base_url('youtube_oauth/login') ?>"
+                                                class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-arrow-clockwise me-1"></i> Re-authenticate
+                                            </a>
+                                        </div>
+                                    <?php else: ?>
+                                        <a href="<?= base_url('youtube_oauth/login') ?>"
+                                            class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-google me-1"></i> Authenticate with Google
+                                        </a>
+                                    <?php endif; ?>
                                     <button type="submit" class="btn btn-primary btn-sm">
                                         <i class="bi bi-check-lg me-1"></i> Save
                                     </button>

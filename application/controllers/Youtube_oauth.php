@@ -15,7 +15,9 @@ class Youtube_oauth extends MY_Controller
         $cred = $this->Platform_credential_model->get_by_platform('youtube');
 
         if (empty($cred['client_id']) || empty($cred['client_secret'])) {
-            show_error("YouTube client_id and client_secret are not set in the database.", 500);
+            $this->session->set_flashdata('errors', "YouTube client_id and client_secret are not set in the database.");
+            redirect('config/platforms/youtube');
+            return;
         }
 
         $redirect_uri = site_url('youtube_oauth/callback');
@@ -33,37 +35,29 @@ class Youtube_oauth extends MY_Controller
         redirect($url);
     }
 
-    private function _render_view($status, $message)
-    {
-        $data['title'] = 'YouTube OAuth';
-        $data['status'] = $status;
-        $data['message'] = $message;
-        $data['current_account'] = $this->current_account;
-
-        $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar', $data);
-        $this->load->view('templates/topbar', $data);
-        $this->load->view('platforms/youtube_oauth_result', $data);
-        $this->load->view('templates/footer');
-    }
-
     public function callback()
     {
         $code = $this->input->get('code');
         $error = $this->input->get('error');
 
         if ($error) {
-            return $this->_render_view('error', "OAuth Error: " . htmlspecialchars($error));
+            $this->session->set_flashdata('errors', "OAuth Error: " . htmlspecialchars($error));
+            redirect('config/platforms/youtube');
+            return;
         }
 
         if (!$code) {
-            return $this->_render_view('error', "No authorization code provided.");
+            $this->session->set_flashdata('errors', "No authorization code provided.");
+            redirect('config/platforms/youtube');
+            return;
         }
 
         $cred = $this->Platform_credential_model->get_by_platform('youtube');
 
         if (empty($cred['client_id']) || empty($cred['client_secret'])) {
-            return $this->_render_view('error', "YouTube client_id and client_secret are missing in the database.");
+            $this->session->set_flashdata('errors', "YouTube client_id and client_secret are missing in the database.");
+            redirect('config/platforms/youtube');
+            return;
         }
 
         $redirect_uri = site_url('youtube_oauth/callback');
@@ -93,12 +87,14 @@ class Youtube_oauth extends MY_Controller
 
                 $this->Platform_credential_model->update('youtube', $cred);
 
-                return $this->_render_view('success', "Otentikasi berhasil! Token akses dan refresh token telah didapatkan.");
+                $this->session->set_flashdata('success', "Authentication successful! Access token and refresh token have been retrieved.");
             } else {
-                return $this->_render_view('error', "Gagal menukar token akses dengan Google.");
+                $this->session->set_flashdata('errors', "Failed to exchange access token with Google.");
             }
         } catch (\Exception $e) {
-            return $this->_render_view('error', "Token exchange failed: " . htmlspecialchars($e->getMessage()));
+            $this->session->set_flashdata('errors', "Token exchange failed: " . htmlspecialchars($e->getMessage()));
         }
+
+        redirect('config/platforms/youtube');
     }
 }

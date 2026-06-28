@@ -63,6 +63,10 @@ class Campaign_model extends CI_Model
             $this->db->where('contracts.client_id', $filters['client_id']);
         }
 
+        if (!empty($filters['ae_id'])) {
+            $this->db->where('clients.ae_id', $filters['ae_id']);
+        }
+
         if (isset($filters['status']) && $filters['status'] !== '') {
             $this->db->where('campaigns.is_active', $filters['status']);
         }
@@ -121,17 +125,27 @@ class Campaign_model extends CI_Model
         return $this->db->count_all_results('ad_contents') > 0;
     }
 
-    public function count_running()
+    public function count_running($client_id = null, $ae_id = null)
     {
-        $this->db->where('deleted_at', NULL);
-        $this->db->where('end_date >=', date('Y-m-d'));
+        $this->db->where('campaigns.deleted_at', NULL);
+        $this->db->where('campaigns.end_date >=', date('Y-m-d'));
+        if ($client_id || $ae_id) {
+            $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
+            if ($client_id) {
+                $this->db->where('contracts.client_id', $client_id);
+            }
+            if ($ae_id) {
+                $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
+                $this->db->where('clients.ae_id', $ae_id);
+            }
+        }
         return $this->db->count_all_results($this->table);
     }
 
     public function get_campaign_with_ads_and_metrics($campaign_id)
     {
         // get campaign details with contract and client info
-        $this->db->select('camp.*, cont.contract_number, cont.value as contract_value, c.company_name as client_name, c.pic_name as client_pic');
+        $this->db->select('camp.*, cont.contract_number, cont.value as contract_value, c.company_name as client_name, c.pic_name as client_pic, cont.client_id, c.ae_id');
         $this->db->from($this->table . ' camp');
         $this->db->join('contracts cont', 'cont.id = camp.contract_id', 'left');
         $this->db->join('clients c', 'c.id = cont.client_id', 'left');

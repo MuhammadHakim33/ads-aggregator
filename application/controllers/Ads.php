@@ -6,6 +6,7 @@ class Ads extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->require_role('ae', 'manajemen');
         $this->load->model('Ad_model');
         $this->load->model('Client_model');
         $this->load->library('Platform_registry');
@@ -35,6 +36,14 @@ class Ads extends MY_Controller
                     $ad_id = (int) $ad_id;
                     $campaign_id = (int) ($campaign_map[$ad_id] ?? 0);
                     if ($campaign_id > 0) {
+                        // verify campaign belongs to the AE if logged in as AE
+                        if ($this->current_account['role'] === 'ae') {
+                            $campaign = $this->Campaign_model->get_campaign_with_ads_and_metrics($campaign_id);
+                            if (!$campaign || $campaign->ae_id != $this->current_account['id']) {
+                                continue;
+                            }
+                        }
+
                         $rows = $this->Ad_model->assign_campaign($ad_id, $campaign_id);
                         $saved += $rows;
                     }
@@ -61,11 +70,16 @@ class Ads extends MY_Controller
             'platform' => $this->input->get('platform')
         ];
 
+        $campaign_filters = [];
+        if ($this->current_account['role'] === 'ae') {
+            $campaign_filters['ae_id'] = $this->current_account['id'];
+        }
+
         $data = [
             'title' => 'Connect Ads',
             'active_menu' => 'ads',
             'filters' => $filters,
-            'campaigns' => $this->Campaign_model->get_all(),
+            'campaigns' => $this->Campaign_model->get_all($campaign_filters),
             'unconnected' => $this->Ad_model->get_unconnected_ads($filters),
             'platform_labels' => $platform_labels
         ];

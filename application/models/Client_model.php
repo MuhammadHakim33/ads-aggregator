@@ -25,12 +25,23 @@ class Client_model extends CI_Model
             $this->db->where('clients.is_active', $filters['status']);
         }
 
+        if (!empty($filters['ae_id'])) {
+            $this->db->where('clients.ae_id', $filters['ae_id']);
+        }
+
         return $this->db->get()->result();
     }
 
     public function get_by_id($id)
     {
         $this->db->where('id', $id);
+        $this->db->where('deleted_at', NULL);
+        return $this->db->get($this->table)->row();
+    }
+
+    public function get_by_account_id($account_id)
+    {
+        $this->db->where('account_id', $account_id);
         $this->db->where('deleted_at', NULL);
         return $this->db->get($this->table)->row();
     }

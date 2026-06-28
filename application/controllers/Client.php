@@ -6,6 +6,7 @@ class Client extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->require_role('manajemen');
         $this->load->model('Client_model');
         $this->load->model('Account_model');
     }

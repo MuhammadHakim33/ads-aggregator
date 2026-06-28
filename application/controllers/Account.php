@@ -8,6 +8,10 @@ class Account extends MY_Controller
         parent::__construct();
         $this->load->model('Account_model');
         $this->load->model('Role_model');
+
+        if ($this->router->fetch_method() !== 'profile') {
+            $this->require_role('superadmin', 'manajemen');
+        }
     }
 
     public function index()

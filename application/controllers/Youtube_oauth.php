@@ -6,6 +6,7 @@ class Youtube_oauth extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->require_superadmin();
         $this->load->model('Platform_credential_model');
         $this->load->library('request');
     }

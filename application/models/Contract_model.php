@@ -41,6 +41,10 @@ class Contract_model extends CI_Model
             $this->db->where('contracts.client_id', $filters['client_id']);
         }
 
+        if (!empty($filters['ae_id'])) {
+            $this->db->where('clients.ae_id', $filters['ae_id']);
+        }
+
         $this->db->order_by('contracts.created_at', 'DESC');
         return $this->db->get()->result();
     }
@@ -108,10 +112,17 @@ class Contract_model extends CI_Model
         return $this->db->count_all_results($this->table) === 0;
     }
 
-    public function count_active()
+    public function count_active($client_id = null, $ae_id = null)
     {
-        $this->db->where('deleted_at', NULL);
-        $this->db->where('terminated_at', NULL);
+        $this->db->where('contracts.deleted_at', NULL);
+        $this->db->where('contracts.terminated_at', NULL);
+        if ($client_id) {
+            $this->db->where('contracts.client_id', $client_id);
+        }
+        if ($ae_id) {
+            $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
+            $this->db->where('clients.ae_id', $ae_id);
+        }
         return $this->db->count_all_results($this->table);
     }
 

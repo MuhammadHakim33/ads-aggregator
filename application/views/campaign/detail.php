@@ -57,10 +57,12 @@ $ads = $campaign->ads ?? [];
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">Campaign Information</h6>
-                            <a href="<?= base_url('campaign/edit/' . $campaign->id) ?>"
-                                class="btn btn-sm btn-outline-secondary" title="Edit Campaign">
-                                <i class="bi bi-pencil me-1"></i> Edit
-                            </a>
+                            <?php if ($this->session->userdata('role') === 'manajemen'): ?>
+                                <a href="<?= base_url('campaign/edit/' . $campaign->id) ?>"
+                                    class="btn btn-sm btn-outline-secondary" title="Edit Campaign">
+                                    <i class="bi bi-pencil me-1"></i> Edit
+                                </a>
+                            <?php endif; ?>
                         </div>
                         <div class="card-body">
                             <div class="mb-4">
@@ -209,17 +211,19 @@ $ads = $campaign->ads ?? [];
                                                             <i class="bi bi-box-arrow-up-right"></i>
                                                         </a>
                                                     <?php endif; ?>
-                                                    <form
-                                                        action="<?= base_url('campaign/unconnect_ad/' . $campaign->id . '/' . $ad->id) ?>"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Are you sure you want to disconnect this ad from the campaign?');">
-                                                        <button type="submit"
-                                                            class="btn btn-outline-danger btn-sm px-2 py-1 w-100"
-                                                            title="Unconnect Ad" style="font-size: 0.7rem;">
-                                                            Unconnect
-                                                        </button>
-                                                    </form>
-                                                </div>
+                                                     <?php if ($this->session->userdata('role') === 'ae' || $this->session->userdata('role') === 'manajemen'): ?>
+                                                         <form
+                                                             action="<?= base_url('campaign/unconnect_ad/' . $campaign->id . '/' . $ad->id) ?>"
+                                                             method="POST"
+                                                             onsubmit="return confirm('Are you sure you want to disconnect this ad from the campaign?');">
+                                                             <button type="submit"
+                                                                 class="btn btn-outline-danger btn-sm px-2 py-1 w-100"
+                                                                 title="Unconnect Ad" style="font-size: 0.7rem;">
+                                                                 Unconnect
+                                                             </button>
+                                                         </form>
+                                                     <?php endif; ?>
+                                                 </div>
                                             </div>
                                         </div>
                                     </div>

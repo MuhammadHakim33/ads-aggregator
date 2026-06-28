@@ -14,9 +14,17 @@ class MY_Controller extends CI_Controller
         }
 
         $this->current_account = [
+            'id' => $this->session->userdata('id'),
             'name' => $this->session->userdata('name'),
             'role' => $this->session->userdata('role'),
         ];
+    }
+
+    protected function require_role(...$roles)
+    {
+        if (!in_array($this->current_account['role'], $roles)) {
+            show_error('Unauthorized', 403);
+        }
     }
 
     protected function require_superadmin()

@@ -8,6 +8,7 @@ class Campaign extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->require_role('manajemen', 'client', 'ae');
         $this->load->model('Campaign_model');
         $this->load->model('Contract_model');
         $this->load->model('Client_model');
@@ -21,12 +22,29 @@ class Campaign extends MY_Controller
             'status' => $this->input->get('status')
         ];
 
+        if ($this->current_account['role'] === 'client') {
+            $client = $this->Client_model->get_by_account_id($this->current_account['id']);
+            $filters['client_id'] = $client ? $client->id : -1;
+        } elseif ($this->current_account['role'] === 'ae') {
+            $filters['ae_id'] = $this->current_account['id'];
+        }
+
+        // clients dropdown filter options
+        $client_options_filters = [];
+        if ($this->current_account['role'] !== 'client') {
+            $client_filters = [];
+            if ($this->current_account['role'] === 'ae') {
+                $client_filters['ae_id'] = $this->current_account['id'];
+            }
+            $client_options_filters = $this->Client_model->get_all($client_filters);
+        }
+
         $data = [
             'title' => 'Campaigns',
             'active_menu' => 'campaign',
             'filters' => $filters,
             'campaigns' => $this->Campaign_model->get_all($filters),
-            'clients' => $this->Client_model->get_all()
+            'clients' => $client_options_filters
         ];
 
         $this->render('campaign/index', $data);
@@ -34,6 +52,7 @@ class Campaign extends MY_Controller
 
     public function create()
     {
+        $this->require_role('manajemen');
         if ($this->input->method() === 'post') {
             $this->form_validation->set_rules([
                 [
@@ -94,6 +113,7 @@ class Campaign extends MY_Controller
 
     public function edit($id)
     {
+        $this->require_role('manajemen');
         $campaign = $this->Campaign_model->get_by_id($id);
         if (!$campaign) {
             $this->session->set_flashdata('errors', 'Campaign not found.');
@@ -166,6 +186,20 @@ class Campaign extends MY_Controller
             return;
         }
 
+        if ($this->current_account['role'] === 'client') {
+            $client = $this->Client_model->get_by_account_id($this->current_account['id']);
+            $client_id = $client ? $client->id : -1;
+            if ($campaign->client_id != $client_id) {
+                show_error('Unauthorized', 403);
+                return;
+            }
+        } elseif ($this->current_account['role'] === 'ae') {
+            if ($campaign->ae_id != $this->current_account['id']) {
+                show_error('Unauthorized', 403);
+                return;
+            }
+        }
+
         $data = [
             'title' => 'Campaign Detail',
             'active_menu' => 'campaign',
@@ -177,6 +211,7 @@ class Campaign extends MY_Controller
 
     public function delete($id)
     {
+        $this->require_role('manajemen');
         if ($this->input->method() !== 'post') {
             redirect('campaign');
             return;
@@ -297,6 +332,20 @@ class Campaign extends MY_Controller
             return;
         }
 
+        if ($this->current_account['role'] === 'client') {
+            $client = $this->Client_model->get_by_account_id($this->current_account['id']);
+            $client_id = $client ? $client->id : -1;
+            if ($campaign->client_id != $client_id) {
+                show_error('Unauthorized', 403);
+                return;
+            }
+        } elseif ($this->current_account['role'] === 'ae') {
+            if ($campaign->ae_id != $this->current_account['id']) {
+                show_error('Unauthorized', 403);
+                return;
+            }
+        }
+
         if (!$this->export_registry->has($format)) {
             show_error("Unknown export format: {$format}", 400);
             return;
@@ -317,9 +366,23 @@ class Campaign extends MY_Controller
 
     public function unconnect_ad($campaign_id, $ad_id)
     {
+        $this->require_role('manajemen', 'ae');
         if ($this->input->method() !== 'post') {
             show_404();
             return;
+        }
+
+        $campaign = $this->Campaign_model->get_campaign_with_ads_and_metrics($campaign_id);
+        if (!$campaign) {
+            show_404();
+            return;
+        }
+
+        if ($this->current_account['role'] === 'ae') {
+            if ($campaign->ae_id != $this->current_account['id']) {
+                show_error('Unauthorized', 403);
+                return;
+            }
         }
 
         $this->load->model('Ad_model');

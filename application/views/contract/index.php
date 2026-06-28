@@ -26,9 +26,11 @@
                                 class="bi bi-x-circle"></i></a>
                     <?php endif; ?>
                 </form>
-                <a href="<?= base_url('contract/create') ?>" class="btn btn-sm btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i> Create Contract
-                </a>
+                <?php if ($this->session->userdata('role') === 'manajemen'): ?>
+                    <a href="<?= base_url('contract/create') ?>" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i> Create Contract
+                    </a>
+                <?php endif; ?>
             </div>
 
             <!-- flash alerts -->
@@ -95,17 +97,19 @@
                                                 <i class="bi bi-file-earmark-arrow-down"></i>
                                             </a>
                                         <?php endif; ?>
-                                        <a href="<?= base_url('contract/edit/' . $contract->id) ?>"
-                                            class="btn btn-sm btn-outline-secondary ms-1" title="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Delete"
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                            data-id="<?= $contract->id ?>"
-                                            data-number="<?= htmlspecialchars($contract->contract_number) ?>"
-                                            data-client="<?= htmlspecialchars($contract->client_name) ?>">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        <?php if ($this->session->userdata('role') === 'manajemen'): ?>
+                                            <a href="<?= base_url('contract/edit/' . $contract->id) ?>"
+                                                class="btn btn-sm btn-outline-secondary ms-1" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Delete"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                data-id="<?= $contract->id ?>"
+                                                data-number="<?= htmlspecialchars($contract->contract_number) ?>"
+                                                data-client="<?= htmlspecialchars($contract->client_name) ?>">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

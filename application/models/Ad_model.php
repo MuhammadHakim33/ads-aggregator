@@ -127,8 +127,19 @@ class Ad_model extends CI_Model
         return $ad;
     }
 
-    public function count_all_ads()
+    public function count_all_ads($client_id = null, $ae_id = null)
     {
+        if ($client_id || $ae_id) {
+            $this->db->join('campaigns', 'campaigns.id = ad_contents.campaign_id', 'inner');
+            $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
+            if ($client_id) {
+                $this->db->where('contracts.client_id', $client_id);
+            }
+            if ($ae_id) {
+                $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
+                $this->db->where('clients.ae_id', $ae_id);
+            }
+        }
         return $this->db->count_all_results($this->table_contents);
     }
 

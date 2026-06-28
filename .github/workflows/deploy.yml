@@ -16,16 +16,23 @@ jobs:
 
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          # Pass github token to script as an environment variable
+          envs: GITHUB_TOKEN
           script: |
             # Masuk ke direktori aplikasi
             cd /var/www/ads-aggregator
             
             # Simpan sementara perubahan lokal di VPS (seperti config.php) agar git pull tidak error
             sudo git stash
+            
+            # Ubah remote origin ke HTTPS dengan otomatis menyisipkan akses token GitHub Actions
+            sudo git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
             
             # Tarik kode terbaru dari branch main
             sudo git pull origin main

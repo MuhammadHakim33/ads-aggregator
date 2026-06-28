@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  # Memungkinkan kamu menjalankan workflow secara manual dari tab Actions
   workflow_dispatch:
 
 jobs:
@@ -21,18 +20,23 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          # Menjalankan perintah di VPS
           script: |
             # Masuk ke direktori aplikasi
             cd /var/www/ads-aggregator
             
+            # Simpan sementara perubahan lokal di VPS (seperti config.php) agar git pull tidak error
+            sudo git stash
+            
             # Tarik kode terbaru dari branch main
-            git pull origin main
+            sudo git pull origin main
             
-            # Update dependencies composer (jika ada)
-            composer install --no-dev --optimize-autoloader
+            # Kembalikan perubahan lokal (config.php)
+            sudo git stash pop || true
             
-            # Pastikan permission folder tetap aman
-            chown -R www-data:www-data /var/www/ads-aggregator
-            chmod -R 755 /var/www/ads-aggregator
-            chmod -R 777 application/logs uploads
+            # Update dependencies composer tanpa menjalankan script post-install (menghindari error sed)
+            sudo composer install --no-dev --optimize-autoloader --no-scripts
+            
+            # Pastikan permission folder tetap aman menggunakan sudo
+            sudo chown -R www-data:www-data /var/www/ads-aggregator
+            sudo chmod -R 755 /var/www/ads-aggregator
+            sudo chmod -R 777 application/logs uploads

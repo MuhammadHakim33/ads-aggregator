@@ -8,9 +8,10 @@ class Client_model extends CI_Model
 
     public function get_all($filters = [])
     {
-        $this->db->select('clients.*, accounts.name as ae_name');
+        $this->db->select('clients.*, ae_acc.name as ae_name, cl_acc.email as client_email, cl_acc.name as client_username, cl_acc.is_active as client_account_active');
         $this->db->from($this->table);
-        $this->db->join('accounts', 'accounts.id = clients.ae_id', 'left');
+        $this->db->join('accounts ae_acc', 'ae_acc.id = clients.ae_id', 'left');
+        $this->db->join('accounts cl_acc', 'cl_acc.id = clients.account_id', 'left');
         $this->db->where('clients.deleted_at', NULL);
 
         if (!empty($filters['q'])) {

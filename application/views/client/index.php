@@ -58,6 +58,7 @@
                                 <th scope="col">Company Name</th>
                                 <th scope="col">PIC Name</th>
                                 <th scope="col">AE</th>
+                                <th scope="col">Account</th>
                                 <th scope="col">Status</th>
                                 <th scope="col" class="text-end"></th>
                             </tr>
@@ -68,6 +69,15 @@
                                     <td class="fw-medium"><?= ucwords($client->company_name) ?></td>
                                     <td><?= ucwords($client->pic_name ?? '-') ?></td>
                                     <td><?= ucwords($client->ae_name ?? '') ?></td>
+                                    <td>
+                                        <?php if (!empty($client->account_id)): ?>
+                                            <span class="badge text-bg-light border text-dark fw-medium" title="Login Email">
+                                                <?= htmlspecialchars($client->client_email) ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-muted small">No Account</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <?php if (!empty($client->is_active)): ?>
                                             <span class="badge bg-success bg-opacity-10 text-success">

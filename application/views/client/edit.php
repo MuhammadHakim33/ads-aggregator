@@ -68,6 +68,100 @@
                                     <?= form_error('is_active', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
+                                <?php if (!empty($client->account_id) && !empty($account)): ?>
+                                    <div class="border p-3 rounded mb-4 bg-light">
+                                        <h6 class="mb-3 border-bottom pb-2 text-primary">Linked Account Details</h6>
+                                        <input type="hidden" name="has_account" value="1">
+
+                                        <div class="mb-3">
+                                            <label for="username" class="form-label fw-medium">Username/Name <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="username" name="username"
+                                                value="<?= set_value('username', $account->name) ?>">
+                                            <?= form_error('username', '<div class="form-text text-danger">', '</div>'); ?>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label fw-medium">Email <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="email" class="form-control" id="email" name="email"
+                                                value="<?= set_value('email', $account->email) ?>">
+                                            <?= form_error('email', '<div class="form-text text-danger">', '</div>'); ?>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label fw-medium">Password</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="password" name="password">
+                                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                                    <i class="bi bi-eye" id="eyeIcon"></i>
+                                                </button>
+                                            </div>
+                                            <div class="form-text">Leave empty if you don't want to change the password.
+                                            </div>
+                                            <?= form_error('password', '<div class="form-text text-danger">', '</div>'); ?>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="account_active" class="form-label fw-medium">Account Status</label>
+                                            <select class="form-select" id="account_active" name="account_active">
+                                                <option value="1" <?= set_select('account_active', '1', (bool) $account->is_active) ?>>Active</option>
+                                                <option value="0" <?= set_select('account_active', '0', !(bool) $account->is_active) ?>>Inactive</option>
+                                            </select>
+                                            <?= form_error('account_active', '<div class="form-text text-danger">', '</div>'); ?>
+                                        </div>
+
+                                        <div class="text-end">
+                                            <button type="submit" name="action" value="unlink"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Are you sure you want to delete and unlink this login account?');">
+                                                <i class="bi bi-trash me-1"></i> Delete & Unlink Login Account
+                                            </button>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="create_account"
+                                            id="create_account" value="1" <?= set_checkbox('create_account', '1') ?>>
+                                        <label class="form-check-label fw-medium text-primary" for="create_account">
+                                            Create User Account for this Client
+                                        </label>
+                                    </div>
+
+                                    <div id="account_fields" class="d-none border p-3 rounded mb-4 bg-light">
+                                        <h6 class="mb-3 border-bottom pb-2 text-secondary">Account Details</h6>
+
+                                        <div class="mb-3">
+                                            <label for="username" class="form-label fw-medium">Username <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="username" name="username"
+                                                value="<?= set_value('username') ?>">
+                                            <?= form_error('username', '<div class="form-text text-danger">', '</div>'); ?>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label fw-medium">Email <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="email" class="form-control" id="email" name="email"
+                                                value="<?= set_value('email') ?>">
+                                            <?= form_error('email', '<div class="form-text text-danger">', '</div>'); ?>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label fw-medium">Password <span
+                                                    class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="password" name="password">
+                                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                                    <i class="bi bi-eye" id="eyeIcon"></i>
+                                                </button>
+                                            </div>
+                                            <div class="form-text">Minimum 6 characters.</div>
+                                            <?= form_error('password', '<div class="form-text text-danger">', '</div>'); ?>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
                                 <div class="d-flex gap-2 justify-content-end">
                                     <a href="<?= base_url('client') ?>" class="btn btn-outline-secondary">Cancel</a>
                                     <button type="submit" class="btn btn-primary">
@@ -82,5 +176,38 @@
         </div>
     </main>
 </div>
+
+<script>
+    const createAccountCheck = document.getElementById('create_account');
+    const accountFields = document.getElementById('account_fields');
+
+    if (createAccountCheck && accountFields) {
+        function toggleAccountFields() {
+            if (createAccountCheck.checked) {
+                accountFields.classList.remove('d-none');
+            } else {
+                accountFields.classList.add('d-none');
+            }
+        }
+        createAccountCheck.addEventListener('change', toggleAccountFields);
+        toggleAccountFields();
+    }
+
+    // show/hide password
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', function () {
+            const pwd = document.getElementById('password');
+            const icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                pwd.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        });
+    }
+</script>
 
 <?php $this->load->view('templates/footer'); ?>

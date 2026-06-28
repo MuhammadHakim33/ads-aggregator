@@ -29,7 +29,7 @@ class Account extends MY_Controller
 
         $roles = $this->Role_model->get_all();
         if ($this->current_account['role'] === 'manajemen') {
-            $roles = array_filter($roles, function($r) {
+            $roles = array_filter($roles, function ($r) {
                 return $r->name !== 'superadmin';
             });
         }
@@ -146,11 +146,15 @@ class Account extends MY_Controller
         }
 
         $roles = $this->Role_model->get_all();
-        if ($this->current_account['role'] === 'manajemen') {
-            $roles = array_filter($roles, function($r) {
-                return $r->name !== 'superadmin';
-            });
-        }
+        $roles = array_filter($roles, function ($r) {
+            if ($r->name === 'client') {
+                return FALSE;
+            }
+            if ($this->current_account['role'] === 'manajemen' && $r->name === 'superadmin') {
+                return FALSE;
+            }
+            return TRUE;
+        });
 
         $data = [
             'title' => 'Create Account',
@@ -210,11 +214,15 @@ class Account extends MY_Controller
         }
 
         $roles = $this->Role_model->get_all();
-        if ($this->current_account['role'] === 'manajemen') {
-            $roles = array_filter($roles, function($r) {
-                return $r->name !== 'superadmin';
-            });
-        }
+        $roles = array_filter($roles, function ($r) {
+            if ($r->name === 'client') {
+                return FALSE;
+            }
+            if ($this->current_account['role'] === 'manajemen' && $r->name === 'superadmin') {
+                return FALSE;
+            }
+            return TRUE;
+        });
 
         $data = [
             'title' => 'Edit Account',

@@ -12,6 +12,7 @@ class Contract extends MY_Controller
         $this->load->model('Contract_model');
         $this->load->model('Client_model');
         $this->load->model('Campaign_model');
+        $this->load->model('Product_model');
         $this->load->helper('download');
     }
 
@@ -61,19 +62,23 @@ class Contract extends MY_Controller
 
     public function create()
     {
-        $this->require_role('manajemen');
+        $this->require_role('manajemen', 'client');
+        
+        $role = $this->current_account['role'];
+        $client_id = null;
+        $client = null;
+        if ($role === 'client') {
+            $client = $this->Client_model->get_by_account_id($this->current_account['id']);
+            if (!$client) {
+                $this->session->set_flashdata('errors', 'Client profile not found.');
+                redirect('contract');
+                return;
+            }
+            $client_id = $client->id;
+        }
+
         if ($this->input->method() === 'post') {
             $this->form_validation->set_rules([
-                [
-                    'field' => 'client_id',
-                    'label' => 'Client',
-                    'rules' => 'trim|required|integer|callback_client_check'
-                ],
-                [
-                    'field' => 'value',
-                    'label' => 'Value',
-                    'rules' => 'trim|required|numeric|greater_than[0]'
-                ],
                 [
                     'field' => 'start_date',
                     'label' => 'Start Date',
@@ -86,12 +91,72 @@ class Contract extends MY_Controller
                 ]
             ]);
 
+            if ($role !== 'client') {
+                $this->form_validation->set_rules([
+                    [
+                        'field' => 'client_id',
+                        'label' => 'Client',
+                        'rules' => 'trim|required|integer|callback_client_check'
+                    ]
+                ]);
+            }
+
             if ($this->form_validation->run() === TRUE) {
-                $client = $this->Client_model->get_by_id($this->input->post('client_id'));
+                if ($role !== 'client') {
+                    $client_id = $this->input->post('client_id');
+                    $client = $this->Client_model->get_by_id($client_id);
+                }
+                
                 if (!$client) {
                     $this->session->set_flashdata('errors', 'Selected Client not found.');
                     redirect('contract/create');
                     return;
+                }
+
+                // Validate products
+                $product_ids = $this->input->post('product_id');
+                $quantities = $this->input->post('quantity');
+
+                if (empty($product_ids) || !is_array($product_ids) || count($product_ids) === 0) {
+                    $this->session->set_flashdata('errors', 'Please add at least one product.');
+                    redirect('contract/create');
+                    return;
+                }
+
+                $items_to_insert = [];
+                $total_value = 0;
+
+                for ($i = 0; $i < count($product_ids); $i++) {
+                    $prod_id = intval($product_ids[$i]);
+                    $qty = intval($quantities[$i]);
+
+                    if ($qty <= 0) {
+                        $this->session->set_flashdata('errors', 'Quantity must be greater than zero.');
+                        redirect('contract/create');
+                        return;
+                    }
+
+                    $product = $this->Product_model->get_by_id($prod_id);
+                    if (!$product) {
+                        $this->session->set_flashdata('errors', 'Selected product is invalid or inactive.');
+                        redirect('contract/create');
+                        return;
+                    }
+
+                    // Calculate subtotal
+                    if ($product->price_model === 'cpm') {
+                        $subtotal = ($qty / 1000) * $product->price;
+                    } else {
+                        $subtotal = $qty * $product->price;
+                    }
+
+                    $total_value += $subtotal;
+                    $items_to_insert[] = [
+                        'product_id' => $prod_id,
+                        'quantity' => $qty,
+                        'price' => $product->price,
+                        'subtotal' => $subtotal
+                    ];
                 }
 
                 // handle file upload if present
@@ -119,17 +184,32 @@ class Contract extends MY_Controller
                     $contract_number = $this->generate_contract_number($client->company_name);
                 } while (!$this->Contract_model->is_contract_number_unique($contract_number));
 
+                $status = ($role === 'client') ? 'pending' : 'approved';
+
+                $this->db->trans_start();
+
                 $insert_id = $this->Contract_model->insert([
-                    'client_id' => $this->input->post('client_id'),
+                    'client_id' => $client_id,
                     'contract_number' => $contract_number,
-                    'value' => $this->input->post('value'),
+                    'value' => $total_value,
                     'start_date' => $this->input->post('start_date'),
                     'end_date' => $this->input->post('end_date'),
-                    'document_path' => $document_path
+                    'document_path' => $document_path,
+                    'status' => $status
                 ]);
 
                 if ($insert_id) {
-                    $this->session->set_flashdata('success', 'Contract created successfully.');
+                    foreach ($items_to_insert as $item) {
+                        $item['contract_id'] = $insert_id;
+                        $this->Contract_model->insert_item($item);
+                    }
+                }
+
+                $this->db->trans_complete();
+
+                if ($this->db->trans_status() === TRUE && $insert_id) {
+                    $msg = ($status === 'pending') ? 'Contract submitted for approval.' : 'Contract created successfully.';
+                    $this->session->set_flashdata('success', $msg);
                     redirect('contract');
                     return;
                 } else {
@@ -138,10 +218,16 @@ class Contract extends MY_Controller
             }
         }
 
+        // Prepare view data
+        $clients_list = ($role === 'client') ? [] : $this->Client_model->get_all();
+        $products = $this->Product_model->get_all_active();
+
         $data = [
             'title' => 'Create Contract',
             'active_menu' => 'contract',
-            'clients' => $this->Client_model->get_all()
+            'clients' => $clients_list,
+            'products' => $products,
+            'client_company_name' => ($role === 'client') ? $client->company_name : ''
         ];
 
         $this->render('contract/create', $data);
@@ -149,7 +235,7 @@ class Contract extends MY_Controller
 
     public function edit($id)
     {
-        $this->require_role('manajemen');
+        $this->require_role('manajemen', 'client');
         $contract = $this->Contract_model->get_by_id($id);
         if (!$contract) {
             $this->session->set_flashdata('errors', 'Contract not found.');
@@ -157,20 +243,24 @@ class Contract extends MY_Controller
             return;
         }
 
+        $role = $this->current_account['role'];
+        if ($role === 'client') {
+            $client = $this->Client_model->get_by_account_id($this->current_account['id']);
+            $client_id = $client ? $client->id : -1;
+            if ($contract->client_id != $client_id) {
+                show_error('Unauthorized', 403);
+                return;
+            }
+            if (!in_array($contract->status, ['pending', 'rejected'])) {
+                show_error('You cannot edit an approved contract.', 403);
+                return;
+            }
+        }
+
         $this->editing_id = $id;
 
         if ($this->input->method() === 'post') {
             $this->form_validation->set_rules([
-                [
-                    'field' => 'client_id',
-                    'label' => 'Client',
-                    'rules' => 'trim|required|integer|callback_client_check'
-                ],
-                [
-                    'field' => 'value',
-                    'label' => 'Value',
-                    'rules' => 'trim|required|numeric|greater_than[0]'
-                ],
                 [
                     'field' => 'start_date',
                     'label' => 'Start Date',
@@ -180,33 +270,96 @@ class Contract extends MY_Controller
                     'field' => 'end_date',
                     'label' => 'End Date',
                     'rules' => 'trim|required|exact_length[10]|callback_valid_date|callback_date_range_check'
-                ],
-                [
-                    'field' => 'termination_reason',
-                    'label' => 'Termination Reason',
-                    'rules' => 'trim'
                 ]
             ]);
 
+            if ($role !== 'client') {
+                $this->form_validation->set_rules([
+                    [
+                        'field' => 'client_id',
+                        'label' => 'Client',
+                        'rules' => 'trim|required|integer|callback_client_check'
+                    ],
+                    [
+                        'field' => 'termination_reason',
+                        'label' => 'Termination Reason',
+                        'rules' => 'trim'
+                    ]
+                ]);
+            }
+
             if ($this->form_validation->run() === TRUE) {
+                // Validate products
+                $product_ids = $this->input->post('product_id');
+                $quantities = $this->input->post('quantity');
+
+                if (empty($product_ids) || !is_array($product_ids) || count($product_ids) === 0) {
+                    $this->session->set_flashdata('errors', 'Please add at least one product.');
+                    redirect('contract/edit/' . $id);
+                    return;
+                }
+
+                $items_to_insert = [];
+                $total_value = 0;
+
+                for ($i = 0; $i < count($product_ids); $i++) {
+                    $prod_id = intval($product_ids[$i]);
+                    $qty = intval($quantities[$i]);
+
+                    if ($qty <= 0) {
+                        $this->session->set_flashdata('errors', 'Quantity must be greater than zero.');
+                        redirect('contract/edit/' . $id);
+                        return;
+                    }
+
+                    $product = $this->Product_model->get_by_id($prod_id);
+                    if (!$product) {
+                        $this->session->set_flashdata('errors', 'Selected product is invalid or inactive.');
+                        redirect('contract/edit/' . $id);
+                        return;
+                    }
+
+                    if ($product->price_model === 'cpm') {
+                        $subtotal = ($qty / 1000) * $product->price;
+                    } else {
+                        $subtotal = $qty * $product->price;
+                    }
+
+                    $total_value += $subtotal;
+                    $items_to_insert[] = [
+                        'contract_id' => $id,
+                        'product_id' => $prod_id,
+                        'quantity' => $qty,
+                        'price' => $product->price,
+                        'subtotal' => $subtotal
+                    ];
+                }
+
                 $update_data = [
-                    'client_id' => $this->input->post('client_id'),
-                    'value' => $this->input->post('value'),
+                    'value' => $total_value,
                     'start_date' => $this->input->post('start_date'),
                     'end_date' => $this->input->post('end_date'),
                 ];
 
-                // check termination toggle
-                $is_terminated = $this->input->post('is_terminated');
-                if ($is_terminated) {
-                    $update_data['terminated_at'] = $this->input->post('terminated_at') ?: date('Y-m-d H:i:s');
-                    $update_data['termination_reason'] = $this->input->post('termination_reason');
-
-                    // Set all campaigns under this contract to inactive
-                    $this->Campaign_model->deactivate_by_contract($id);
+                if ($role === 'client') {
+                    if ($contract->status === 'rejected') {
+                        $update_data['status'] = 'pending';
+                        $update_data['rejection_reason'] = null;
+                        $update_data['approved_by'] = null;
+                        $update_data['approved_at'] = null;
+                    }
                 } else {
-                    $update_data['terminated_at'] = null;
-                    $update_data['termination_reason'] = null;
+                    $update_data['client_id'] = $this->input->post('client_id');
+                    
+                    $is_terminated = $this->input->post('is_terminated');
+                    if ($is_terminated) {
+                        $update_data['terminated_at'] = $this->input->post('terminated_at') ?: date('Y-m-d H:i:s');
+                        $update_data['termination_reason'] = $this->input->post('termination_reason');
+                        $this->Campaign_model->deactivate_by_contract($id);
+                    } else {
+                        $update_data['terminated_at'] = null;
+                        $update_data['termination_reason'] = null;
+                    }
                 }
 
                 // handle file upload if present
@@ -222,7 +375,7 @@ class Contract extends MY_Controller
                         $upload_data = $this->upload->data();
                         $update_data['document_path'] = 'uploads/contracts/' . $upload_data['file_name'];
 
-                        // optionally delete old file
+                        // delete old file
                         if ($contract->document_path && file_exists('./' . $contract->document_path)) {
                             unlink('./' . $contract->document_path);
                         }
@@ -233,11 +386,24 @@ class Contract extends MY_Controller
                     }
                 }
 
-                $updated = $this->Contract_model->update($id, $update_data);
+                $this->db->trans_start();
 
-                $this->session->set_flashdata('success', 'Contract updated successfully.');
-                redirect('contract');
-                return;
+                $this->Contract_model->update($id, $update_data);
+                $this->Contract_model->delete_items($id);
+                foreach ($items_to_insert as $item) {
+                    $this->Contract_model->insert_item($item);
+                }
+
+                $this->db->trans_complete();
+
+                if ($this->db->trans_status() === TRUE) {
+                    $msg = ($role === 'client' && $contract->status === 'rejected') ? 'Contract resubmitted for approval.' : 'Contract updated successfully.';
+                    $this->session->set_flashdata('success', $msg);
+                    redirect('contract');
+                    return;
+                } else {
+                    $this->session->set_flashdata('errors', 'Failed to update contract. Please try again.');
+                }
             }
         }
 
@@ -245,7 +411,9 @@ class Contract extends MY_Controller
             'title' => 'Edit Contract',
             'active_menu' => 'contract',
             'contract' => $contract,
-            'clients' => $this->Client_model->get_all()
+            'clients' => ($role === 'client') ? [] : $this->Client_model->get_all(),
+            'products' => $this->Product_model->get_all_active(),
+            'contract_items' => $this->Contract_model->get_items($id)
         ];
 
         $this->render('contract/edit', $data);
@@ -266,7 +434,6 @@ class Contract extends MY_Controller
             return;
         }
 
-        // check if contract has campaigns (optional check for security)
         if ($this->Contract_model->has_campaigns($id)) {
             $this->session->set_flashdata('errors', 'Cannot delete contract. It has active campaigns associated with it.');
             redirect('contract');
@@ -291,7 +458,8 @@ class Contract extends MY_Controller
             return;
         }
 
-        if ($this->current_account['role'] === 'client') {
+        $role = $this->current_account['role'];
+        if ($role === 'client') {
             $client = $this->Client_model->get_by_account_id($this->current_account['id']);
             $client_id = $client ? $client->id : -1;
             if ($contract->client_id != $client_id) {
@@ -306,6 +474,187 @@ class Contract extends MY_Controller
         } else {
             $this->session->set_flashdata('errors', 'Contract document file not found on server.');
             redirect('contract');
+        }
+    }
+
+    public function approve($id)
+    {
+        $this->require_role('manajemen');
+        if ($this->input->method() !== 'post') {
+            redirect('contract');
+            return;
+        }
+
+        $contract = $this->Contract_model->get_by_id($id);
+        if (!$contract) {
+            $this->session->set_flashdata('errors', 'Contract not found.');
+            redirect('contract');
+            return;
+        }
+
+        $updated = $this->Contract_model->update($id, [
+            'status' => 'approved',
+            'approved_by' => $this->current_account['id'],
+            'approved_at' => date('Y-m-d H:i:s'),
+            'rejection_reason' => null
+        ]);
+
+        if ($updated) {
+            $this->session->set_flashdata('success', 'Contract approved successfully.');
+        } else {
+            $this->session->set_flashdata('errors', 'Failed to approve contract.');
+        }
+
+        redirect('contract');
+    }
+
+    public function reject($id)
+    {
+        $this->require_role('manajemen');
+        if ($this->input->method() !== 'post') {
+            redirect('contract');
+            return;
+        }
+
+        $contract = $this->Contract_model->get_by_id($id);
+        if (!$contract) {
+            $this->session->set_flashdata('errors', 'Contract not found.');
+            redirect('contract');
+            return;
+        }
+
+        $reason = $this->input->post('rejection_reason');
+        if (empty($reason)) {
+            $this->session->set_flashdata('errors', 'Rejection reason is required.');
+            redirect('contract');
+            return;
+        }
+
+        $updated = $this->Contract_model->update($id, [
+            'status' => 'rejected',
+            'approved_by' => $this->current_account['id'],
+            'approved_at' => date('Y-m-d H:i:s'),
+            'rejection_reason' => $reason
+        ]);
+
+        if ($updated) {
+            $this->session->set_flashdata('success', 'Contract rejected successfully.');
+        } else {
+            $this->session->set_flashdata('errors', 'Failed to reject contract.');
+        }
+
+        redirect('contract');
+    }
+
+    public function get_product_json($id)
+    {
+        $this->require_role('manajemen', 'client');
+        $product = $this->Product_model->get_by_id($id);
+        if ($product) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode($product));
+        } else {
+            $this->output
+                ->set_status_header(404)
+                ->set_output(json_encode(['error' => 'Product not found']));
+        }
+    }
+
+    public function get_items_json($contract_id)
+    {
+        $this->require_role('manajemen', 'client');
+        $contract = $this->Contract_model->get_by_id($contract_id);
+        if (!$contract) {
+            $this->output->set_status_header(404)->set_output(json_encode(['error' => 'Contract not found']));
+            return;
+        }
+
+        $role = $this->current_account['role'];
+        if ($role === 'client') {
+            $client = $this->Client_model->get_by_account_id($this->current_account['id']);
+            $client_id = $client ? $client->id : -1;
+            if ($contract->client_id != $client_id) {
+                $this->output->set_status_header(403)->set_output(json_encode(['error' => 'Unauthorized']));
+                return;
+            }
+        }
+
+        $items = $this->Contract_model->get_items($contract_id);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'contract' => $contract,
+                'items' => $items
+            ]));
+    }
+
+    public function migrate()
+    {
+        if (ENVIRONMENT !== 'development' && $this->current_account['role'] !== 'superadmin') {
+            show_error('Unauthorized', 403);
+            return;
+        }
+
+        $this->db->trans_start();
+
+        if (!$this->db->field_exists('status', 'contracts')) {
+            $this->db->query("ALTER TABLE contracts 
+                ADD COLUMN status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'approved',
+                ADD COLUMN rejection_reason TEXT NULL,
+                ADD COLUMN approved_by INT NULL,
+                ADD COLUMN approved_at TIMESTAMP NULL,
+                ADD CONSTRAINT fk_contracts_approved_by FOREIGN KEY (approved_by) REFERENCES accounts(id)");
+            echo "Added status and approval columns to contracts.<br>";
+        }
+
+        if (!$this->db->table_exists('products')) {
+            $this->db->query("CREATE TABLE products (
+              id INT PRIMARY KEY AUTO_INCREMENT,
+              category ENUM('content_marketing', 'banner_ads', 'social_media') NOT NULL,
+              name VARCHAR(255) NOT NULL,
+              platform_type ENUM('desktop', 'mobile', 'social') NOT NULL,
+              price_model ENUM('cpm', 'per_day', 'per_week', 'fixed') NOT NULL,
+              price DECIMAL(15,2) NOT NULL,
+              is_active BOOLEAN DEFAULT TRUE,
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )");
+            echo "Created products table.<br>";
+
+            $this->db->query("INSERT INTO products (category, name, platform_type, price_model, price, is_active) VALUES
+                ('content_marketing', 'Content Partnership - Khas', 'desktop', 'fixed', 15000000.00, 1),
+                ('content_marketing', 'Content Partnership - Khas Korporasi & Kementerian', 'desktop', 'fixed', 25000000.00, 1),
+                ('banner_ads', 'Masthead Desktop', 'desktop', 'cpm', 50000.00, 1),
+                ('banner_ads', 'Leaderboard Desktop', 'desktop', 'cpm', 35000.00, 1),
+                ('banner_ads', 'Billboard Desktop', 'desktop', 'cpm', 40000.00, 1),
+                ('banner_ads', 'Masthead Mobile', 'mobile', 'cpm', 45000.00, 1),
+                ('banner_ads', 'Mid-article Mobile', 'mobile', 'cpm', 30000.00, 1),
+                ('social_media', 'Instagram Feed Post', 'social', 'fixed', 5000000.00, 1),
+                ('social_media', 'YouTube Video Integration', 'social', 'fixed', 12500000.00, 1)");
+            echo "Seeded products table.<br>";
+        }
+
+        if (!$this->db->table_exists('contract_items')) {
+            $this->db->query("CREATE TABLE contract_items (
+              id INT PRIMARY KEY AUTO_INCREMENT,
+              contract_id INT NOT NULL,
+              product_id INT NOT NULL,
+              quantity INT NOT NULL DEFAULT 1,
+              price DECIMAL(15,2) NOT NULL COMMENT 'Snapshot harga saat dibuat',
+              subtotal DECIMAL(15,2) NOT NULL,
+              
+              FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE,
+              FOREIGN KEY (product_id) REFERENCES products(id)
+            )");
+            echo "Created contract_items table.<br>";
+        }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            echo "Migration failed!";
+        } else {
+            echo "Migration completed successfully!";
         }
     }
 

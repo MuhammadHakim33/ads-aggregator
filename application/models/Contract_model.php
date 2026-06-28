@@ -24,9 +24,10 @@ class Contract_model extends CI_Model
 
     public function get_all($filters = [])
     {
-        $this->db->select('contracts.*, clients.company_name as client_name');
+        $this->db->select('contracts.*, clients.company_name as client_name, approver.name as approver_name');
         $this->db->from($this->table);
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
+        $this->db->join('accounts approver', 'approver.id = contracts.approved_by', 'left');
         $this->db->where('contracts.deleted_at', NULL);
 
         if (!empty($filters['q'])) {
@@ -55,6 +56,7 @@ class Contract_model extends CI_Model
         $this->db->from($this->table);
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
         $this->db->where('contracts.deleted_at', NULL);
+        $this->db->where('contracts.status', 'approved');
         $this->db->where('contracts.terminated_at', NULL);
         $this->db->where('contracts.end_date >=', date('Y-m-d'));
         $this->db->order_by('contracts.created_at', 'DESC');
@@ -63,9 +65,10 @@ class Contract_model extends CI_Model
 
     public function get_by_id($id)
     {
-        $this->db->select('contracts.*, clients.company_name as client_name');
+        $this->db->select('contracts.*, clients.company_name as client_name, approver.name as approver_name');
         $this->db->from($this->table);
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
+        $this->db->join('accounts approver', 'approver.id = contracts.approved_by', 'left');
         $this->db->where('contracts.id', $id);
         $this->db->where('contracts.deleted_at', NULL);
         return $this->db->get()->row();
@@ -116,6 +119,7 @@ class Contract_model extends CI_Model
     {
         $this->db->where('contracts.deleted_at', NULL);
         $this->db->where('contracts.terminated_at', NULL);
+        $this->db->where('contracts.status', 'approved');
         if ($client_id) {
             $this->db->where('contracts.client_id', $client_id);
         }
@@ -130,5 +134,25 @@ class Contract_model extends CI_Model
     {
         $this->db->where('deleted_at', NULL);
         return $this->db->count_all_results($this->table);
+    }
+
+    public function get_items($contract_id)
+    {
+        $this->db->select('contract_items.*, products.name as product_name, products.category as product_category, products.price_model as product_price_model');
+        $this->db->from('contract_items');
+        $this->db->join('products', 'products.id = contract_items.product_id', 'inner');
+        $this->db->where('contract_items.contract_id', $contract_id);
+        return $this->db->get()->result();
+    }
+
+    public function insert_item($data)
+    {
+        return $this->db->insert('contract_items', $data);
+    }
+
+    public function delete_items($contract_id)
+    {
+        $this->db->where('contract_id', $contract_id);
+        return $this->db->delete('contract_items');
     }
 }

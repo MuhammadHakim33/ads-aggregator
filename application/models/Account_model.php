@@ -27,6 +27,14 @@ class Account_model extends CI_Model
             $this->db->where("{$this->table}.is_active", $filters['status']);
         }
 
+        if (!empty($filters['exclude_id'])) {
+            $this->db->where("{$this->table}.id !=", $filters['exclude_id']);
+        }
+
+        if (!empty($filters['exclude_superadmin'])) {
+            $this->db->where("{$this->table_roles}.name !=", 'superadmin');
+        }
+
         return $this->db->get($this->table)->result();
     }
 

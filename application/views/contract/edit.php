@@ -139,47 +139,36 @@
 
                                     <hr class="my-4">
 
-                                    <!-- Products Section -->
-                                    <div class="card mb-4 border-primary bg-light bg-opacity-10">
-                                        <div
-                                            class="card-header bg-primary bg-opacity-10 d-flex justify-content-between align-items-center py-2">
-                                            <h6 class="mb-0 fw-semibold text-primary"><i
-                                                    class="bi bi-cart-check me-2"></i>Select Iklan Products / Rate Card
-                                            </h6>
-                                            <button type="button" class="btn btn-sm btn-primary" id="btn-add-item"
-                                                <?= ($this->session->userdata('role') === 'client' && $contract->status === 'approved') ? 'disabled' : '' ?>><i
-                                                    class="bi bi-plus-lg me-1"></i>Add Product</button>
+                                    <!-- Advertising Products Section -->
+                                    <div class="mb-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0 fw-semibold">Advertising Products</h6>
+                                            <div class="form-text mt-0">Select one or more ad placements from the rate
+                                                card.</div>
                                         </div>
-                                        <div class="card-body p-0">
-                                            <div class="table-responsive">
-                                                <table class="table table-align-middle mb-0" id="table-contract-items">
-                                                    <thead class="table-light">
-                                                        <tr>
-                                                            <th>Product <span class="text-danger">*</span></th>
-                                                            <th style="width: 160px;">Price</th>
-                                                            <th style="width: 120px;">Price Model</th>
-                                                            <th style="width: 160px;">Quantity <span
-                                                                    class="text-danger">*</span></th>
-                                                            <th style="width: 180px;" class="text-end">Subtotal</th>
-                                                            <th style="width: 50px;"></th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="items-container">
-                                                        <!-- Dynamic rows will be added here -->
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-item"
+                                            <?= ($this->session->userdata('role') === 'client' && $contract->status === 'approved') ? 'disabled' : '' ?>>
+                                            <i class="bi bi-plus-lg me-1"></i>Add Line Item
+                                        </button>
                                     </div>
 
+                                    <div id="items-container" class="d-flex flex-column gap-2 mb-3">
+                                        <!-- Dynamic item cards will be added here -->
+                                    </div>
+
+                                    <!-- Total Value Bar -->
                                     <div
-                                        class="mb-4 bg-dark bg-opacity-10 p-3 rounded d-flex justify-content-between align-items-center">
-                                        <span class="fs-6 fw-bold text-secondary">Total Contract Value:</span>
-                                        <div class="input-group" style="width: 250px;">
-                                            <span
-                                                class="input-group-text bg-white text-secondary font-monospace fw-bold">Rp</span>
+                                        class="border rounded p-3 mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                                        <div>
+                                            <div class="fw-semibold text-secondary small text-uppercase"
+                                                style="letter-spacing: 0.5px;">Total Contract Value</div>
+                                            <div class="form-text mt-0">Automatically calculated from line items above.
+                                            </div>
+                                        </div>
+                                        <div class="input-group" style="max-width: 240px;">
+                                            <span class="input-group-text bg-light fw-bold text-secondary">Rp</span>
                                             <input type="number" step="0.01"
-                                                class="form-control font-monospace fw-bold text-end" id="value"
+                                                class="form-control fw-bold text-end font-monospace fs-6" id="value"
                                                 name="value" value="<?= set_value('value', $contract->value) ?>"
                                                 readonly>
                                         </div>
@@ -244,180 +233,166 @@
 </div>
 
 <script>
-    // Local products array passed from PHP controller
     const products = <?php echo json_encode($products); ?>;
     const existingItems = <?php echo json_encode($contract_items); ?>;
 
-    // Group products by category
-    const categories = {
-        'content_marketing': 'Content Marketing',
-        'banner_ads': 'Banner Ads',
-        'social_media': 'Social Media'
+    const categoryLabels = {
+        content_marketing: 'Content Marketing',
+        banner_ads: 'Banner Ads',
+        social_media: 'Social Media'
     };
 
     const container = document.getElementById('items-container');
     const btnAdd = document.getElementById('btn-add-item');
     const valueInput = document.getElementById('value');
-
-    // Is form disabled
     const isFormDisabled = <?= ($this->session->userdata('role') === 'client' && $contract->status === 'approved') ? 'true' : 'false' ?>;
 
-    // Load existing items or add a blank one
-    if (existingItems && existingItems.length > 0) {
-        existingItems.forEach(item => {
-            addRow(item.product_id, item.quantity);
-        });
-    } else {
-        if (!isFormDisabled) {
-            addRow();
-        } else {
-            container.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No products selected.</td></tr>';
-        }
-    }
-
-    if (!isFormDisabled) {
-        btnAdd.addEventListener('click', function () {
-            addRow();
-        });
-    }
-
-    function addRow(selectedProductId = null, qtyValue = 1) {
-        const rowId = 'row-' + Date.now() + Math.random().toString(36).substr(2, 5);
-        const tr = document.createElement('tr');
-        tr.id = rowId;
-
-        let optionsHtml = '';
-        if (!selectedProductId) {
-            optionsHtml = '<option value="" disabled selected>Select Product</option>';
-        }
-
-        // Group options by category
+    function buildOptionsHtml(selectedId = null) {
+        let html = selectedId ? '' : '<option value="" disabled selected>Select a product...</option>';
         const grouped = {};
         products.forEach(p => {
             if (!grouped[p.category]) grouped[p.category] = [];
             grouped[p.category].push(p);
         });
-
         for (const catKey in grouped) {
-            let catLabel = categories[catKey] || catKey.replace('_', ' ').toUpperCase();
-            optionsHtml += `<optgroup label="${catLabel}">`;
+            const catLabel = categoryLabels[catKey] || catKey.replace(/_/g, ' ');
+            html += `<optgroup label="${catLabel}">`;
             grouped[catKey].forEach(p => {
-                let modelLabel = p.price_model === 'cpm' ? '/ CPM' : '/ fixed';
-                let priceFormatted = 'Rp ' + Number(p.price).toLocaleString('id-ID');
-                let selectedAttr = (selectedProductId && selectedProductId == p.id) ? 'selected' : '';
-                optionsHtml += `<option value="${p.id}" ${selectedAttr}>${p.name} (${priceFormatted} ${modelLabel})</option>`;
+                const modelLabel = p.price_model === 'cpm' ? 'CPM' : 'Fixed';
+                const priceFormatted = 'Rp ' + Number(p.price).toLocaleString('id-ID');
+                const sel = (selectedId && selectedId == p.id) ? 'selected' : '';
+                html += `<option value="${p.id}" ${sel}>${p.name} &mdash; ${priceFormatted} / ${modelLabel}</option>`;
             });
-            optionsHtml += `</optgroup>`;
+            html += '</optgroup>';
         }
+        return html;
+    }
 
-        const disabledAttr = isFormDisabled ? 'disabled' : '';
-
-        tr.innerHTML = `
-            <td>
-                <select class="form-select select-product" name="product_id[]" required ${disabledAttr}>
-                    ${optionsHtml}
-                </select>
-            </td>
-            <td>
-                <span class="span-price font-monospace text-secondary">-</span>
-            </td>
-            <td>
-                <span class="span-model text-secondary">-</span>
-            </td>
-            <td>
-                <input type="number" class="form-control input-qty text-end" name="quantity[]" min="1" value="${qtyValue}" required disabled ${disabledAttr}>
-                <div class="form-text text-muted input-qty-hint" style="font-size: 0.75rem; margin-top: 0.25rem;"></div>
-            </td>
-            <td class="text-end fw-semibold">
-                <span class="span-subtotal font-monospace text-dark">Rp 0</span>
-            </td>
-            <td class="text-center">
-                ${!isFormDisabled ? '<button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><i class="bi bi-trash"></i></button>' : ''}
-            </td>
-        `;
-
-        container.appendChild(tr);
-
-        // Bind events
-        const select = tr.querySelector('.select-product');
-        const qtyInput = tr.querySelector('.input-qty');
-
-        const setupRow = (pId) => {
-            const product = products.find(p => p.id == pId);
-            if (product) {
-                if (!isFormDisabled) qtyInput.disabled = false;
-                tr.querySelector('.span-price').textContent = 'Rp ' + Number(product.price).toLocaleString('id-ID');
-                tr.querySelector('.span-model').textContent = product.price_model.toUpperCase();
-
-                const hint = tr.querySelector('.input-qty-hint');
-                if (product.price_model === 'cpm') {
-                    hint.textContent = "Tayangan/Impresi (min. 1000)";
-                    qtyInput.placeholder = "e.g. 50000";
-                    qtyInput.min = "1000";
-                    qtyInput.step = "1000";
-                } else {
-                    hint.textContent = "Jumlah unit/posting";
-                    qtyInput.placeholder = "e.g. 1";
-                    qtyInput.min = "1";
-                    qtyInput.step = "1";
-                }
-
-                calculateRow(tr, product);
-            }
-        };
-
-        select.addEventListener('change', function () {
-            setupRow(this.value);
-        });
-
-        qtyInput.addEventListener('input', function () {
-            const pId = select.value;
-            const product = products.find(p => p.id == pId);
-            if (product) {
-                calculateRow(tr, product);
-            }
-        });
-
+    // Load existing items or add a blank one
+    if (existingItems && existingItems.length > 0) {
+        existingItems.forEach(ei => addRow(ei.product_id, ei.quantity));
+    } else {
         if (!isFormDisabled) {
-            const removeBtn = tr.querySelector('.btn-remove-row');
-            removeBtn.addEventListener('click', function () {
-                if (container.children.length > 1) {
-                    tr.remove();
-                    calculateTotal();
-                } else {
-                    alert("You must select at least one product.");
-                }
-            });
-        }
-
-        // Initialize if preselected
-        if (selectedProductId) {
-            setupRow(selectedProductId);
+            addRow();
+        } else {
+            container.innerHTML = '<p class="text-muted small mb-0">No products selected.</p>';
         }
     }
 
-    function calculateRow(tr, product) {
-        const qty = parseFloat(tr.querySelector('.input-qty').value) || 0;
-        let subtotal = 0;
+    if (!isFormDisabled) {
+        btnAdd.addEventListener('click', () => addRow());
+    }
 
-        if (product.price_model === 'cpm') {
-            subtotal = (qty / 1000) * product.price;
-        } else {
-            subtotal = qty * product.price;
+    function addRow(selectedProductId = null, qtyValue = null) {
+        const item = document.createElement('div');
+        item.className = 'border rounded p-3 bg-white item-row';
+        item.dataset.subtotal = '0';
+
+        const disabledAttr = isFormDisabled ? 'disabled' : '';
+        const removeBtn = isFormDisabled ? '' : `
+            <div class="col-auto d-flex align-items-start pt-4">
+                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-row" title="Remove">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>`;
+
+        item.innerHTML = `
+            <div class="row g-2 align-items-start">
+                <div class="col-12 col-sm">
+                    <label class="form-label form-label-sm text-muted mb-1">Product <span class="text-danger">*</span></label>
+                    <select class="form-select form-select-sm select-product" name="product_id[]" required ${disabledAttr}>
+                        ${buildOptionsHtml(selectedProductId)}
+                    </select>
+                </div>
+                <div class="col-6 col-sm-auto" style="min-width: 140px;">
+                    <label class="form-label form-label-sm text-muted mb-1">Quantity <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control form-control-sm input-qty text-end"
+                        name="quantity[]" min="1" value="${qtyValue ?? 1}" required disabled ${disabledAttr}>
+                    <div class="form-text input-qty-hint mt-1" style="min-height: 1rem;"></div>
+                </div>
+                <div class="col-6 col-sm-auto text-end" style="min-width: 130px;">
+                    <label class="form-label form-label-sm text-muted mb-1">Subtotal</label>
+                    <div class="fw-semibold font-monospace pt-1 span-subtotal">Rp 0</div>
+                    <div class="form-text span-price-hint mt-1" style="min-height: 1rem;"></div>
+                </div>
+                ${removeBtn}
+            </div>
+        `;
+
+        container.appendChild(item);
+
+        const select = item.querySelector('.select-product');
+        const qtyInput = item.querySelector('.input-qty');
+
+        const setupProduct = (pId) => {
+            const product = products.find(p => p.id == pId);
+            if (!product) return;
+
+            if (!isFormDisabled) qtyInput.disabled = false;
+
+            const hint = item.querySelector('.input-qty-hint');
+            const priceHint = item.querySelector('.span-price-hint');
+            priceHint.textContent = 'Rp ' + Number(product.price).toLocaleString('id-ID')
+                + (product.price_model === 'cpm' ? ' / 1,000 impr.' : ' / unit');
+
+            if (product.price_model === 'cpm') {
+                hint.textContent = 'Total impressions (min. 1,000)';
+                qtyInput.placeholder = 'e.g. 50000';
+                qtyInput.min = '1000';
+                qtyInput.step = '1000';
+                if (!qtyValue && (qtyInput.value == 1 || Number(qtyInput.value) < 1000)) qtyInput.value = 1000;
+            } else {
+                hint.textContent = 'Number of units / posts';
+                qtyInput.placeholder = 'e.g. 1';
+                qtyInput.min = '1';
+                qtyInput.step = '1';
+                if (!qtyValue && qtyInput.value == 1000) qtyInput.value = 1;
+            }
+
+            calculateRow(item, product);
+        };
+
+        select.addEventListener('change', function () {
+            setupProduct(this.value);
+        });
+
+        qtyInput.addEventListener('input', function () {
+            const product = products.find(p => p.id == select.value);
+            if (product) calculateRow(item, product);
+        });
+
+        if (!isFormDisabled) {
+            const removeBtnEl = item.querySelector('.btn-remove-row');
+            if (removeBtnEl) {
+                removeBtnEl.addEventListener('click', function () {
+                    if (container.children.length > 1) {
+                        item.remove();
+                        calculateTotal();
+                    } else {
+                        alert('At least one product line item is required.');
+                    }
+                });
+            }
         }
 
-        tr.querySelector('.span-subtotal').textContent = 'Rp ' + Number(subtotal).toLocaleString('id-ID');
-        tr.setAttribute('data-subtotal', subtotal);
+        if (selectedProductId) setupProduct(selectedProductId);
+    }
 
+    function calculateRow(item, product) {
+        const qty = parseFloat(item.querySelector('.input-qty').value) || 0;
+        const subtotal = product.price_model === 'cpm'
+            ? (qty / 1000) * product.price
+            : qty * product.price;
+
+        item.querySelector('.span-subtotal').textContent = 'Rp ' + Number(subtotal).toLocaleString('id-ID');
+        item.dataset.subtotal = subtotal;
         calculateTotal();
     }
 
     function calculateTotal() {
         let total = 0;
-        const rows = container.querySelectorAll('tr[data-subtotal]');
-        rows.forEach(tr => {
-            let sub = parseFloat(tr.getAttribute('data-subtotal')) || 0;
-            total += sub;
+        container.querySelectorAll('.item-row').forEach(item => {
+            total += parseFloat(item.dataset.subtotal) || 0;
         });
         valueInput.value = total.toFixed(2);
     }

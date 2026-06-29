@@ -5,23 +5,6 @@ class Contract_model extends CI_Model
 {
     public $table = 'contracts';
 
-    public function __construct()
-    {
-        parent::__construct();
-        // // Dynamically verify and add deleted_at if missing (safety check)
-        // if ($this->db->table_exists($this->table) && !$this->db->field_exists('deleted_at', $this->table)) {
-        //     $this->load->dbforge();
-        //     $fields = [
-        //         'deleted_at' => [
-        //             'type' => 'TIMESTAMP',
-        //             'null' => TRUE,
-        //             'default' => NULL
-        //         ]
-        //     ];
-        //     $this->dbforge->add_column($this->table, $fields);
-        // }
-    }
-
     public function get_all($filters = [])
     {
         $this->db->select('contracts.*, clients.company_name as client_name, approver.name as approver_name');

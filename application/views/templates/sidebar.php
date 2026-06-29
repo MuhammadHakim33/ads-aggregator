@@ -45,6 +45,15 @@
                 </li>
             <?php endif; ?>
 
+            <?php if ($role === 'manajemen'): ?>
+                <li class="nav-item">
+                    <a href="<?= base_url('product') ?>"
+                        class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'product' ? 'active text-white' : '' ?>">
+                        <i class="bi bi-grid me-2"></i> Products
+                    </a>
+                </li>
+            <?php endif; ?>
+
             <?php if ($role === 'manajemen' || $role === 'client'): ?>
                 <li class="nav-item">
                     <a href="<?= base_url('contract') ?>"

@@ -8,17 +8,16 @@ class Client_model extends CI_Model
 
     public function get_all($filters = [])
     {
-        $this->db->select('clients.*, ae_acc.name as ae_name, cl_acc.email as client_email, cl_acc.name as client_username, cl_acc.is_active as client_account_active');
+        $this->db->select('clients.*, ae_acc.name as ae_name, (SELECT COUNT(*) FROM client_pics WHERE client_pics.client_id = clients.id) as pic_count');
         $this->db->from($this->table);
         $this->db->join('accounts ae_acc', 'ae_acc.id = clients.ae_id', 'left');
-        $this->db->join('accounts cl_acc', 'cl_acc.id = clients.account_id', 'left');
         $this->db->where('clients.deleted_at', NULL);
 
         if (!empty($filters['q'])) {
             $q = $this->db->escape_like_str($filters['q']);
             $this->db->group_start();
             $this->db->like('clients.company_name', $q);
-            $this->db->or_like('clients.pic_name', $q);
+            $this->db->or_where("EXISTS (SELECT 1 FROM client_pics WHERE client_pics.client_id = clients.id AND client_pics.name LIKE '%" . $q . "%')");
             $this->db->group_end();
         }
 
@@ -42,9 +41,12 @@ class Client_model extends CI_Model
 
     public function get_by_account_id($account_id)
     {
-        $this->db->where('account_id', $account_id);
-        $this->db->where('deleted_at', NULL);
-        return $this->db->get($this->table)->row();
+        $this->db->select('clients.*');
+        $this->db->from($this->table);
+        $this->db->join('client_pics', 'client_pics.client_id = clients.id');
+        $this->db->where('client_pics.account_id', $account_id);
+        $this->db->where('clients.deleted_at', NULL);
+        return $this->db->get()->row();
     }
 
     public function insert($data)

@@ -30,16 +30,30 @@ CREATE TABLE accounts (
 CREATE TABLE clients (
   id INT AUTO_INCREMENT PRIMARY KEY,
   company_name VARCHAR(255) NOT NULL,
-  pic_name VARCHAR(255),
   ae_id INT NULL,
-  account_id INT NULL,
   is_active BOOLEAN DEFAULT TRUE,
   deleted_at TIMESTAMP NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
-  FOREIGN KEY (ae_id) REFERENCES accounts(id),
-  FOREIGN KEY (account_id) REFERENCES accounts(id)
+  FOREIGN KEY (ae_id) REFERENCES accounts(id)
 );
+
+-- =========================
+-- CLIENT PICS
+-- =========================
+CREATE TABLE client_pics (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  client_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  position VARCHAR(255) NULL,
+  account_id INT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+  FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE SET NULL
+);
+
 
 -- =========================
 -- CONTRACTS

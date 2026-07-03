@@ -1,12 +1,7 @@
--- =========================
--- MASTER TABEL
--- =========================
 CREATE TABLE roles (
   id INT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(50) UNIQUE NOT NULL COMMENT 'superadmin, ae, manajemen, client'
 );
-
-
 
 
 -- =========================
@@ -19,7 +14,6 @@ CREATE TABLE accounts (
   password VARCHAR(255) NOT NULL,
   role_id INT NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (role_id) REFERENCES roles(id)
 );
@@ -33,8 +27,7 @@ CREATE TABLE clients (
   ae_id INT NULL,
   is_active BOOLEAN DEFAULT TRUE,
   deleted_at TIMESTAMP NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  
+
   FOREIGN KEY (ae_id) REFERENCES accounts(id)
 );
 
@@ -48,12 +41,10 @@ CREATE TABLE client_pics (
   position VARCHAR(255) NULL,
   account_id INT NULL,
   is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
   FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE SET NULL
 );
-
 
 -- =========================
 -- CONTRACTS
@@ -87,7 +78,6 @@ CREATE TABLE products (
   id INT PRIMARY KEY AUTO_INCREMENT,
   category ENUM('content_marketing', 'banner_ads', 'social_media') NOT NULL,
   name VARCHAR(255) NOT NULL,
-  platform_type ENUM('desktop', 'mobile', 'social') NOT NULL,
   price_model ENUM('cpm', 'per_day', 'per_week', 'fixed') NOT NULL,
   price DECIMAL(15,2) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
@@ -102,7 +92,7 @@ CREATE TABLE contract_items (
   contract_id INT NOT NULL,
   product_id INT NOT NULL,
   quantity INT NOT NULL DEFAULT 1,
-  price DECIMAL(15,2) NOT NULL COMMENT 'Snapshot harga saat dibuat',
+  price DECIMAL(15,2) NOT NULL,
   subtotal DECIMAL(15,2) NOT NULL,
   
   FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE,
@@ -120,8 +110,6 @@ CREATE TABLE campaigns (
   description TEXT NULL,
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
-  -- status ENUM('draft', 'active', 'paused', 'completed', 'cancelled') NOT NULL DEFAULT 'draft',
-  is_active BOOLEAN DEFAULT TRUE,
   deleted_at TIMESTAMP NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -137,8 +125,7 @@ CREATE TABLE filter_keywords (
   platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
   type ENUM('html', 'keyword', 'hostname') NOT NULL,
   keyword VARCHAR(255) NOT NULL,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  is_active BOOLEAN DEFAULT TRUE
 );
 
 -- =========================
@@ -152,7 +139,6 @@ CREATE TABLE ad_contents (
   content_identifier VARCHAR(255) UNIQUE NOT NULL,
   published_at TIMESTAMP NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
   FOREIGN KEY (campaign_id) REFERENCES campaigns(id)
 );
 
@@ -193,10 +179,7 @@ CREATE TABLE complaints (
 CREATE TABLE platform_credentials (
   id INT PRIMARY KEY AUTO_INCREMENT,
   platform ENUM('meta', 'gam', 'ga4', 'youtube') UNIQUE NOT NULL,
-  credential_data LONGTEXT NOT NULL,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  credential_data LONGTEXT NOT NULL
 );
 
 -- =========================
@@ -205,11 +188,11 @@ CREATE TABLE platform_credentials (
 CREATE TABLE cron_logs (
   id INT PRIMARY KEY AUTO_INCREMENT,
   job_name VARCHAR(100) NOT NULL COMMENT 'fetch, sync',
-  platform VARCHAR(50) NOT NULL COMMENT 'facebook, instagram, gam, ga4, youtube',
+  platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
   status ENUM('success', 'failed', 'partial') NOT NULL,
-  rows_affected INT DEFAULT 0 COMMENT 'jumlah contents saved atau metrics upserted',
-  duration_ms INT DEFAULT 0 COMMENT 'durasi eksekusi dalam milidetik',
-  error_message TEXT NULL COMMENT 'pesan error jika status failed',
+  rows_affected INT DEFAULT 0,
+  duration_ms INT DEFAULT 0,
+  error_message TEXT NULL,
   started_at TIMESTAMP NOT NULL,
   finished_at TIMESTAMP NOT NULL
 );

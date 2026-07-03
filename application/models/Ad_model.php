@@ -96,13 +96,12 @@ class Ad_model extends CI_Model
                 a.title,
                 a.platform,
                 a.content_identifier,
-                a.is_active,
                 a.created_at,
                 camp.id        AS campaign_id,
                 camp.name      AS campaign_name,
                 c.id           AS client_id,
                 c.company_name,
-                c.pic_name
+                (SELECT name FROM client_pics WHERE client_id = c.id AND is_active = 1 LIMIT 1) AS pic_name
             FROM {$this->table_contents} a
             LEFT JOIN campaigns camp ON camp.id = a.campaign_id
             LEFT JOIN contracts cont ON cont.id = camp.contract_id
@@ -163,10 +162,6 @@ class Ad_model extends CI_Model
 
         if (!empty($filters['platform'])) {
             $this->db->where('a.platform', $filters['platform']);
-        }
-
-        if (isset($filters['status']) && $filters['status'] !== '') {
-            $this->db->where('a.is_active', $filters['status']);
         }
 
         if (isset($filters['has_campaign']) && $filters['has_campaign'] !== '') {
@@ -260,7 +255,6 @@ class Ad_model extends CI_Model
         $this->db->join('campaigns', 'campaigns.id = ad_contents.campaign_id', 'inner');
         $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
         $this->db->where('contracts.client_id', $client_id);
-        $this->db->where('ad_contents.is_active', 1);
         $this->db->order_by('campaigns.name', 'ASC');
         $this->db->order_by('ad_contents.title', 'ASC');
         return $this->db->get()->result();

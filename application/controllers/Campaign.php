@@ -89,7 +89,6 @@ class Campaign extends MY_Controller
                     'description' => $this->input->post('description') ?: null,
                     'start_date' => $this->input->post('start_date'),
                     'end_date' => $this->input->post('end_date'),
-                    'is_active' => TRUE
                 ]);
 
                 if ($insert_id) {

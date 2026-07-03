@@ -27,3 +27,13 @@ INSERT INTO clients (company_name, pic_name, ae_id, account_id, is_active, creat
 INSERT INTO filter_keywords (platform, type, keyword, is_active, created_at) VALUES
 ('facebook', 'keyword', 'Content partnership with', 1, NOW()),
 ('ga4', 'html', '<a href="https://grahajktskripsi.blogspot.com/search/label/Ekonomi" rel="tag">Ekonomi</a>', 1, NOW());
+
+-- =========================
+-- AD CONTENTS
+-- =========================
+INSERT INTO ad_contents (title, campaign_id, platform, content_identifier, published_at, created_at) VALUES
+('Kemerdekaan Promo - Facebook Ads', NULL, 'facebook', 'fb-promo-kemerdekaan-01', '2026-08-01 10:00:00', NOW()),
+('Akhir Tahun Sale - Instagram Reel', NULL, 'instagram', 'ig-akhir-tahun-02', '2026-12-01 12:00:00', NOW()),
+('Launching Product X - YouTube Pre-roll', NULL, 'youtube', 'yt-launch-product-03', '2026-07-15 08:30:00', NOW()),
+('Banner Ads - Google Ad Manager', NULL, 'gam', 'gam-banner-04', '2026-09-10 09:00:00', NOW()),
+('Article Feature - GA4', NULL, 'ga4', 'ga4-article-05', '2026-10-05 14:00:00', NOW());

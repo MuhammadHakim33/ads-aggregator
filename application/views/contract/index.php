@@ -93,11 +93,11 @@
                                     <td><?= date('d M Y', strtotime($contract->end_date)) ?></td>
                                     <td>
                                         <?php if ($contract->status === 'approved'): ?>
-                                            <span class="badge bg-success bg-opacity-10 text-success fw-normal">
+                                            <span class="badge bg-success bg-opacity-10 text-success">
                                                 <i class="bi bi-check-circle me-1"></i> Approved
                                             </span>
                                         <?php elseif ($contract->status === 'rejected'): ?>
-                                            <span class="badge bg-danger bg-opacity-10 text-danger fw-normal"
+                                            <span class="badge bg-danger bg-opacity-10 text-danger"
                                                 title="Click to view reason">
                                                 <i class="bi bi-x-circle me-1"></i> Rejected
                                             </span>
@@ -107,14 +107,14 @@
                                                 </div>
                                             <?php endif; ?>
                                         <?php else: ?>
-                                            <span class="badge bg-warning bg-opacity-10 text-warning-emphasis fw-normal">
+                                            <span class="badge bg-warning bg-opacity-10 text-warning-emphasis">
                                                 <i class="bi bi-clock-history me-1"></i> Pending Approval
                                             </span>
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-end">
                                         <!-- Detail Button -->
-                                        <button type="button" class="btn btn-sm btn-outline-info" title="View Details"
+                                        <button type="button" class="btn btn-sm btn-outline-primary" title="View Details"
                                             data-bs-toggle="modal" data-bs-target="#detailModal"
                                             data-id="<?= $contract->id ?>">
                                             <i class="bi bi-eye"></i>

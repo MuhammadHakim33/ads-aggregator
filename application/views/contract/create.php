@@ -74,42 +74,40 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="document" class="form-label fw-medium">
-                                        Contract Document File
-                                    </label>
-                                    <input class="form-control" type="file" id="document" name="document"
-                                        accept=".pdf,.doc,.docx">
-                                    <div class="form-text text-muted">
-                                        Only <strong>.pdf</strong>, <strong>.doc</strong>, and <strong>.docx</strong>
-                                        files are allowed. Max size: 5MB.
+                                <?php if ($this->session->userdata('role') != 'client'): ?>
+                                    <div class="mb-3">
+                                        <label for="document" class="form-label fw-medium">
+                                            Contract Document File
+                                        </label>
+                                        <input class="form-control" type="file" id="document" name="document"
+                                            accept=".pdf,.doc,.docx">
+                                        <div class="form-text text-muted">
+                                            Only <strong>.pdf</strong>, <strong>.doc</strong>, and <strong>.docx</strong>
+                                            files are allowed. Max size: 5MB.
+                                        </div>
+                                        <?= form_error('document', '<div class="form-text text-danger">', '</div>'); ?>
                                     </div>
-                                    <?= form_error('document', '<div class="form-text text-danger">', '</div>'); ?>
-                                </div>
+                                <?php endif; ?>
 
                                 <hr class="my-4">
 
-                                <!-- Advertising Products Section -->
+                                <!-- products -->
                                 <div class="mb-2 d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="mb-0 fw-semibold">Advertising Products</h6>
-                                        <div class="form-text mt-0">Select one or more ad placements from the rate card.</div>
+                                        <h6 class="mb-0 fw-semibold">Products</h6>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-item">
-                                        <i class="bi bi-plus-lg me-1"></i>Add Line Item
+                                        <i class="bi bi-plus-lg me-1"></i>Add Item
                                     </button>
                                 </div>
 
                                 <div id="items-container" class="d-flex flex-column gap-2 mb-3">
-                                    <!-- Dynamic item cards will be added here -->
+                                    <!-- dynamic item cards will be added here -->
                                 </div>
 
-                                <!-- Total Value Bar -->
+                                <!-- total value bar -->
                                 <div class="border rounded p-3 mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
-                                    <div>
-                                        <div class="fw-semibold text-secondary small text-uppercase" style="letter-spacing: 0.5px;">Total Contract Value</div>
-                                        <div class="form-text mt-0">Automatically calculated from line items above.</div>
-                                    </div>
+                                    <div class="fw-semibold text-secondary small text-uppercase" style="letter-spacing: 0.5px;">Total Contract Value</div>
                                     <div class="input-group" style="max-width: 240px;">
                                         <span class="input-group-text bg-light fw-bold text-secondary">Rp</span>
                                         <input type="number" step="0.01" class="form-control fw-bold text-end font-monospace fs-6" id="value" name="value"
@@ -145,7 +143,7 @@
     const btnAdd = document.getElementById('btn-add-item');
     const valueInput = document.getElementById('value');
 
-    // Build grouped <optgroup> HTML (shared)
+    // build grouped <optgroup> HTML (shared)
     function buildOptionsHtml(selectedId = null) {
         let html = selectedId ? '' : '<option value="" disabled selected>Select a product...</option>';
         const grouped = {};
@@ -217,7 +215,7 @@
             const hint = item.querySelector('.input-qty-hint');
             const priceHint = item.querySelector('.span-price-hint');
             priceHint.textContent = 'Rp ' + Number(product.price).toLocaleString('id-ID')
-                + (product.price_model === 'cpm' ? ' / 1,000 impr.' : ' / unit');
+                + (product.price_model === 'cpm' ? ' / 1,000 impr' : ' / unit');
 
             if (product.price_model === 'cpm') {
                 hint.textContent = 'Total impressions (min. 1,000)';
@@ -226,7 +224,7 @@
                 qtyInput.step = '1000';
                 if (!qtyValue && (qtyInput.value == 1 || Number(qtyInput.value) < 1000)) qtyInput.value = 1000;
             } else {
-                hint.textContent = 'Number of units / posts';
+                hint.textContent = 'Number of units/posts';
                 qtyInput.placeholder = 'e.g. 1';
                 qtyInput.min = '1';
                 qtyInput.step = '1';

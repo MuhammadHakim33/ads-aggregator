@@ -36,7 +36,9 @@
                                         <option value="" disabled selected>Select Ad Content</option>
                                         <?php foreach ($ads as $ad): ?>
                                             <option value="<?= $ad->id ?>" <?= set_select('ad_content_id', $ad->id) ?>>
-                                                <?= htmlspecialchars($ad->title ?: $ad->content_identifier) ?> [<?= ucfirst($ad->platform) ?>] - Campaign: <?= htmlspecialchars($ad->campaign_name) ?>
+                                                <?= htmlspecialchars($ad->title ?: $ad->content_identifier) ?>
+                                                [<?= ucfirst($ad->platform) ?>] - Campaign:
+                                                <?= htmlspecialchars($ad->campaign_name) ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -47,8 +49,7 @@
                                     <label for="subject" class="form-label fw-medium">
                                         Subject <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" name="subject" id="subject" class="form-control" 
-                                        placeholder="e.g. Ad metrics not updating, wrong graphic used..." 
+                                    <input type="text" name="subject" id="subject" class="form-control"
                                         value="<?= set_value('subject') ?>">
                                     <?= form_error('subject', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
@@ -57,14 +58,17 @@
                                     <label for="description" class="form-label fw-medium">
                                         Description <span class="text-danger">*</span>
                                     </label>
-                                    <textarea name="description" id="description" rows="6" class="form-control" 
-                                        placeholder="Provide detailed information about the issue you are facing with this ad..."><?= set_value('description') ?></textarea>
+                                    <textarea name="description" id="description" rows="6"
+                                        class="form-control"><?= set_value('description') ?></textarea>
                                     <?= form_error('description', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="d-flex gap-2 justify-content-end mt-4">
                                     <a href="<?= base_url('complaint') ?>" class="btn btn-outline-secondary">Cancel</a>
-                                    <button type="submit" class="btn btn-primary px-4">Submit Complaint</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-plus-lg me-1"></i>
+                                        Create Complaint
+                                    </button>
                                 </div>
                             </form>
                         </div>

@@ -64,13 +64,12 @@
                                 <div class="card bg-light border mb-4">
                                     <div class="card-body py-3 d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h6 class="mb-1 text-dark fw-semibold"><i
-                                                    class="bi bi-people me-2 text-primary"></i>PIC Management</h6>
-                                            <p class="mb-0 text-muted small">Manage contact persons and login accounts
-                                                for this client.</p>
+                                            <p class="mb-0 text-muted small">
+                                                Manage contact persons and login accounts for this client.
+                                            </p>
                                         </div>
                                         <a href="<?= base_url('pic?client_id=' . $client->id) ?>"
-                                            class="btn btn-sm btn-primary">
+                                            class="btn btn-sm btn-outline-primary">
                                             Manage PICs
                                         </a>
                                     </div>

@@ -26,7 +26,7 @@ class Pic extends MY_Controller
         $pics = $this->Client_pic_model->get_by_client_id($client_id);
 
         $data = [
-            'title' => 'Client PICs',
+            'title' => 'PIC - ' . $client->company_name,
             'active_menu' => 'client',
             'client' => $client,
             'pics' => $pics
@@ -122,7 +122,7 @@ class Pic extends MY_Controller
         }
 
         $data = [
-            'title' => 'Add Client PIC',
+            'title' => 'Create PIC - ' . $client->company_name,
             'active_menu' => 'client',
             'client' => $client
         ];
@@ -281,7 +281,7 @@ class Pic extends MY_Controller
         }
 
         $data = [
-            'title' => 'Edit Client PIC',
+            'title' => 'Edit PIC - ' . $client->company_name,
             'active_menu' => 'client',
             'pic' => $pic,
             'client' => $client,

@@ -10,12 +10,11 @@
             <div class="mb-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
                 <div>
                     <a href="<?= base_url('client') ?>" class="btn btn-sm btn-outline-secondary mb-2 mb-md-0">
-                        <i class="bi bi-arrow-left me-1"></i> Back to Clients
+                        <i class="bi bi-arrow-left me-1"></i> Back
                     </a>
-                    <h5 class="mb-0 mt-1">PICs for <span class="text-primary"><?= htmlspecialchars(ucwords($client->company_name)) ?></span></h5>
                 </div>
                 <a href="<?= base_url('pic/create?client_id=' . $client->id) ?>" class="btn btn-sm btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i> Add PIC
+                    <i class="bi bi-plus-lg me-1"></i> Create PIC
                 </a>
             </div>
 
@@ -41,9 +40,8 @@
                             <tr>
                                 <th scope="col">Name</th>
                                 <th scope="col">Position</th>
-                                <th scope="col">Login Account</th>
                                 <th scope="col">Status</th>
-                                <th scope="col" class="text-end">Actions</th>
+                                <th scope="col" class="text-end"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -51,18 +49,6 @@
                                 <tr>
                                     <td class="fw-medium"><?= htmlspecialchars(ucwords($pic->name)) ?></td>
                                     <td><?= !empty($pic->position) ? htmlspecialchars(ucwords($pic->position)) : '<span class="text-muted small">Not specified</span>' ?></td>
-                                    <td>
-                                        <?php if (!empty($pic->account_id)): ?>
-                                            <span class="badge text-bg-light border text-dark fw-medium" title="Login Email">
-                                                <i class="bi bi-envelope me-1"></i> <?= htmlspecialchars($pic->email) ?>
-                                            </span>
-                                            <?php if (empty($pic->account_active)): ?>
-                                                <span class="badge text-bg-danger ms-1" style="font-size: 0.7rem;">Disabled</span>
-                                            <?php endif; ?>
-                                        <?php else: ?>
-                                            <span class="text-muted small">No Login Access</span>
-                                        <?php endif; ?>
-                                    </td>
                                     <td>
                                         <?php if (!empty($pic->is_active)): ?>
                                             <span class="badge bg-success bg-opacity-10 text-success">

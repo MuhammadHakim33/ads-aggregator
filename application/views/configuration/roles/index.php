@@ -37,7 +37,6 @@
                     <table class="table table-hover table-bordered align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th scope="col" style="width: 10%;">ID</th>
                                 <th scope="col">Role Name</th>
                                 <th scope="col" class="text-end"></th>
                             </tr>
@@ -50,7 +49,6 @@
                             <?php else: ?>
                                 <?php foreach ($roles as $role): ?>
                                     <tr>
-                                        <td><?= $role->id ?></td>
                                         <td class="fw-medium"><?= htmlspecialchars($role->name) ?></td>
                                         <td class="text-end">
                                             <a href="<?= base_url('config/role/edit/' . $role->id) ?>"
@@ -71,7 +69,7 @@
                 </div>
                 <!-- footer status -->
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Showing <?= count($roles) ?> role(s)</small>
+                    <small class="text-muted">Showing <?= count($roles) ?> roles</small>
                 </div>
             </div>
 

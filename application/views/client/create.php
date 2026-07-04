@@ -50,12 +50,6 @@
                                     <?= form_error('ae_id', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
-                                <div class="alert alert-info py-2 mb-4 small">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    PICs and login accounts can be managed from the Client List page after the client is
-                                    successfully created.
-                                </div>
-
                                 <div class="d-flex gap-2 justify-content-end">
                                     <a href="<?= base_url('client') ?>" class="btn btn-outline-secondary">Cancel</a>
                                     <button type="submit" class="btn btn-primary">

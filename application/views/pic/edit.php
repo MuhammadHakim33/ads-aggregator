@@ -9,7 +9,7 @@
                 <!-- back button -->
                 <div class="mb-3">
                     <a href="<?= base_url('pic?client_id=' . $client->id) ?>" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Back to PIC List
+                        <i class="bi bi-arrow-left me-1"></i> Back
                     </a>
                 </div>
                 <!-- form card -->
@@ -30,9 +30,7 @@
 
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0">Edit PIC Information &mdash;
-                                <?= htmlspecialchars(ucwords($client->company_name)) ?>
-                            </h6>
+                            <h6 class="mb-0">PIC Information</h6>
                         </div>
                         <div class="card-body">
                             <form action="<?= base_url('pic/edit/' . $pic->id) ?>" method="POST">
@@ -41,17 +39,16 @@
                                         PIC Name <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" id="name" name="name"
-                                        value="<?= set_value('name', $pic->name) ?>" placeholder="e.g. John Doe">
+                                        value="<?= set_value('name', $pic->name) ?>">
                                     <?= form_error('name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="position" class="form-label fw-medium">
-                                        Position / Job Title
+                                        Position
                                     </label>
                                     <input type="text" class="form-control" id="position" name="position"
-                                        value="<?= set_value('position', $pic->position) ?>"
-                                        placeholder="e.g. Marketing Manager">
+                                        value="<?= set_value('position', $pic->position) ?>">
                                     <?= form_error('position', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
@@ -67,7 +64,6 @@
                                 </div>
 
                                 <?php if ($account): ?>
-                                    <!-- Existing Login Account details -->
                                     <input type="hidden" name="has_account" value="1">
                                     <div class="border p-3 rounded mb-4 bg-light">
                                         <div

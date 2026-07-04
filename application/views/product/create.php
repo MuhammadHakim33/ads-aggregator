@@ -34,7 +34,7 @@
                                         Product Name <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" id="name" name="name"
-                                        placeholder="e.g. Billboard Desktop" value="<?= set_value('name') ?>">
+                                        value="<?= set_value('name') ?>">
                                     <?= form_error('name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
@@ -69,7 +69,7 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label for="price" class="form-label fw-medium">
-                                            Price (IDR) <span class="text-danger">*</span>
+                                            Price <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light text-secondary">Rp</span>

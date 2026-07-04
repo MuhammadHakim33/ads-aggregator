@@ -66,7 +66,7 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label for="price" class="form-label fw-medium">
-                                            Price (IDR) <span class="text-danger">*</span>
+                                            Price <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light text-secondary">Rp</span>

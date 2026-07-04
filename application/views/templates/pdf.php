@@ -13,7 +13,7 @@
 
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 11px;
+            font-size: 12px;
             color: #2c2c2c;
             background: #ffffff;
         }
@@ -26,8 +26,9 @@
         }
 
         .page-header .report-label {
-            color: #a0aec0;
-            font-size: 9px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
             letter-spacing: 2px;
             text-transform: uppercase;
             margin-top: 6px;
@@ -44,7 +45,7 @@
             background-color: #f7fafc;
             border-bottom: 1px solid #e2e8f0;
             padding: 8px 14px;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
             color: #4a5568;
             letter-spacing: 0.5px;
@@ -65,13 +66,13 @@
 
         .info-grid .label {
             width: 30%;
-            color: #718096;
-            font-size: 10px;
+            color: #383f4aff;
+            font-size: 12px;
         }
 
         .info-grid .value {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 12px;
             color: #1a202c;
         }
 
@@ -83,7 +84,7 @@
             display: inline-block;
             padding: 2px 8px;
             border-radius: 10px;
-            font-size: 9px;
+            font-size: 12px;
             font-weight: bold;
         }
 
@@ -103,12 +104,12 @@
         }
 
         .metrics-section .section-title {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: #4a5568;
-            margin-bottom: 8px;
+            margin: 12px 0px;
             border-bottom: 2px solid #1a2332;
             padding-bottom: 4px;
         }
@@ -116,7 +117,7 @@
         .metrics-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 11px;
+            font-size: 12px;
         }
 
         .metrics-table thead tr {
@@ -127,7 +128,7 @@
         .metrics-table thead th {
             padding: 9px 12px;
             text-align: left;
-            font-size: 10px;
+            font-size: 12px;
             letter-spacing: 0.3px;
         }
 
@@ -158,7 +159,7 @@
 
         .metrics-table tbody td.metric-date {
             color: #718096;
-            font-size: 10px;
+            font-size: 12px;
         }
 
         .no-metrics {
@@ -173,7 +174,7 @@
             padding-top: 10px;
             border-top: 1px solid #e2e8f0;
             text-align: right;
-            font-size: 9px;
+            font-size: 12px;
             color: #a0aec0;
         }
     </style>
@@ -183,7 +184,7 @@
 
     <!-- header -->
     <div class="page-header">
-        <div class="report-label">Campaign Metrics Report</div>
+        <div class="report-label">Campaign Report</div>
     </div>
 
     <!-- card -->
@@ -220,15 +221,6 @@
                 </td>
             </tr>
             <tr>
-                <td class="label">Status</td>
-                <td class="value">
-                    <?php $active = (bool) ($campaign->is_active ?? false); ?>
-                    <span class="badge <?= $active ? 'badge-active' : 'badge-inactive' ?>">
-                        <?= $active ? 'Active' : 'Inactive' ?>
-                    </span>
-                </td>
-            </tr>
-            <tr>
                 <td class="label">Generated</td>
                 <td class="value" style="color:#718096; font-weight:normal;">
                     <?= date('d F Y, H:i') ?>
@@ -244,11 +236,16 @@
                 <div class="section-title">Ad: <?= $ad->title ?? '-' ?></div>
                 <table class="info-grid" style="margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
                     <tr>
-                        <td class="label" style="width: 20%; padding: 5px 10px;">Platform</td>
-                        <td class="value" style="width: 30%; padding: 5px 10px;"><?= ucfirst($ad->platform ?? '-') ?></td>
-                        <td class="label" style="width: 20%; padding: 5px 10px;">Content ID</td>
-                        <td class="value" style="width: 30%; padding: 5px 10px; font-family: monospace; font-size: 10px;">
-                            <?= $ad->content_identifier ?? '-' ?></td>
+                        <td class="label" style="width: 100px; padding: 5px 10px;">Platform:</td>
+                        <td class="value" style="width: 100%; padding: 5px 10px;">
+                            <?= ucfirst($ad->platform ?? '-') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label" style="width: 100px; padding: 5px 10px;">Content ID:</td>
+                        <td class="value" style="width: 100%; padding: 5px 10px; font-family: monospace; font-size: 12px;">
+                            <?= $ad->content_identifier ?? '-' ?>
+                        </td>
                     </tr>
                 </table>
 
@@ -266,7 +263,7 @@
                                 <tr>
                                     <td><?= ucwords(str_replace('_', ' ', $metric->metric_name)) ?></td>
                                     <td class="metric-value">
-                                        <?= number_format((float) $metric->metric_value, 2, ',', '.') ?>
+                                        <?= number_format((float) $metric->metric_value, 0, ',', '.') ?>
                                     </td>
                                     <td class="metric-date">
                                         <?= date('d M Y H:i', strtotime($metric->updated_at)) ?>

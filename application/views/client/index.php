@@ -2,7 +2,7 @@
 
 <div class="d-flex flex-nowrap min-vh-100">
     <?php $this->load->view('templates/sidebar'); ?>
-    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
+    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column min-w-0" id="main">
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
 
@@ -15,7 +15,7 @@
                         <option value="0" <?= (isset($filters['status']) && $filters['status'] === '0') ? 'selected' : '' ?>>Inactive</option>
                     </select>
 
-                    <div class="input-group input-group-sm" style="width: 250px;">
+                    <div class="input-group input-group-sm w-250">
                         <span class="input-group-text bg-white border-end-0"><i
                                 class="bi bi-search text-muted"></i></span>
                         <input type="text" name="q" class="form-control border-start-0 ps-0"
@@ -69,19 +69,18 @@
                                     <td><?= ucwords($client->ae_name ?? '') ?></td>
                                     <td>
                                         <a href="<?= base_url('pic?client_id=' . $client->id) ?>"
-                                            class="btn btn-sm btn-outline-primary"
-                                            style="padding: 0.15rem 0.5rem; font-size: 0.75rem;">
-                                            <i class="bi bi-people me-1"></i> Manage PICs (<?= $client->pic_count ?>)
+                                            class="btn btn-xs btn-outline-primary">
+                                            <i class="bi bi-people me-1"></i> Manage PIC (<?= $client->pic_count ?>)
                                         </a>
                                     </td>
                                     <td>
                                         <?php if (!empty($client->is_active)): ?>
                                             <span class="badge bg-success bg-opacity-10 text-success">
-                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Active
+                                                <i class="bi bi-circle-fill me-1 fs-xxs"></i> Active
                                             </span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary bg-opacity-10 text-secondary">
-                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Inactive
+                                                <i class="bi bi-circle-fill me-1 fs-xxs"></i> Inactive
                                             </span>
                                         <?php endif; ?>
                                     </td>
@@ -107,8 +106,7 @@
                     </table>
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Showing <?= count($clients) ?>
-                        client<?= count($clients) !== 1 ? 's' : '' ?></small>
+                    <small class="text-muted">Showing <?= count($clients) ?> clients</small>
                 </div>
             </div>
 

@@ -9,7 +9,7 @@
                 <!-- back button -->
                 <div class="mb-3">
                     <a href="<?= base_url('pic?client_id=' . $client->id) ?>" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Back to PIC List
+                        <i class="bi bi-arrow-left me-1"></i> Back
                     </a>
                 </div>
                 <!-- form card -->
@@ -24,9 +24,7 @@
 
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0">Add PIC Information &mdash;
-                                <?= htmlspecialchars(ucwords($client->company_name)) ?>
-                            </h6>
+                            <h6 class="mb-0">PIC Information</h6>
                         </div>
                         <div class="card-body">
                             <form action="<?= base_url('pic/create?client_id=' . $client->id) ?>" method="POST">
@@ -35,49 +33,49 @@
                                         PIC Name <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" id="name" name="name"
-                                        value="<?= set_value('name') ?>" placeholder="e.g. John Doe">
+                                        value="<?= set_value('name') ?>">
                                     <?= form_error('name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="mb-4">
                                     <label for="position" class="form-label fw-medium">
-                                        Position / Job Title
+                                        Position
                                     </label>
                                     <input type="text" class="form-control" id="position" name="position"
-                                        value="<?= set_value('position') ?>" placeholder="e.g. Marketing Manager">
+                                        value="<?= set_value('position') ?>">
                                     <?= form_error('position', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" name="create_account"
                                         id="create_account" value="1" <?= set_checkbox('create_account', '1') ?>>
-                                    <label class="form-check-label fw-medium text-primary" for="create_account">
-                                        Create User Account / Login Access for this PIC
-                                    </label>
+                                    <p class=" fs-6" for="create_account">
+                                        Create User Account
+                                    </p>
                                 </div>
 
                                 <div id="account_fields" class="d-none border p-3 rounded mb-4 bg-light">
                                     <h6 class="mb-3 border-bottom pb-2 text-secondary">Account Details</h6>
 
                                     <div class="mb-3">
-                                        <label for="username" class="form-label fw-medium">Username <span
-                                                class="text-danger">*</span></label>
+                                        <label for="username" class="form-label fw-medium">Username
+                                            <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="username" name="username"
-                                            value="<?= set_value('username') ?>" placeholder="Username or full name">
+                                            value="<?= set_value('username') ?>">
                                         <?= form_error('username', '<div class="form-text text-danger">', '</div>'); ?>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="email" class="form-label fw-medium">Email <span
-                                                class="text-danger">*</span></label>
+                                        <label for="email" class="form-label fw-medium">Email
+                                            <span class="text-danger">*</span></label>
                                         <input type="email" class="form-control" id="email" name="email"
-                                            value="<?= set_value('email') ?>" placeholder="email@example.com">
+                                            value="<?= set_value('email') ?>">
                                         <?= form_error('email', '<div class="form-text text-danger">', '</div>'); ?>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="password" class="form-label fw-medium">Password <span
-                                                class="text-danger">*</span></label>
+                                        <label for="password" class="form-label fw-medium">Password
+                                            <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <input type="password" class="form-control" id="password" name="password">
                                             <button class="btn btn-outline-secondary" type="button" id="togglePassword">

@@ -117,6 +117,19 @@ CREATE TABLE campaigns (
   FOREIGN KEY (contract_id) REFERENCES contracts(id)
 );
 
+-- =========================================
+-- CAMPAIGN REPORTED METRICS
+-- =========================================
+CREATE TABLE campaign_reported_metrics (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  campaign_id INT NOT NULL,
+  platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
+  metric_name VARCHAR(100) NOT NULL,
+  
+  FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_campaign_metric (campaign_id, platform, metric_name)
+);
+
 -- =========================
 -- FILTER KEYWORDS
 -- =========================

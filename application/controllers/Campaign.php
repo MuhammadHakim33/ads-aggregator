@@ -398,4 +398,73 @@ class Campaign extends MY_Controller
 
         redirect('campaign/detail/' . $campaign_id);
     }
+
+    public function configure_metrics($id)
+    {
+        $campaign = $this->Campaign_model->get_by_id($id);
+        if (!$campaign) {
+            $this->session->set_flashdata('errors', 'Campaign not found.');
+            redirect('campaign');
+            return;
+        }
+
+        // Authorization checks
+        if ($this->current_account['role'] === 'client') {
+            $client = $this->Client_model->get_by_account_id($this->current_account['id']);
+            $client_id = $client ? $client->id : -1;
+            if ($campaign->client_id != $client_id) {
+                show_error('Unauthorized', 403);
+                return;
+            }
+        } elseif ($this->current_account['role'] === 'ae') {
+            if ($campaign->ae_id != $this->current_account['id']) {
+                show_error('Unauthorized', 403);
+                return;
+            }
+        }
+
+        $this->load->library('Platform_registry');
+        $platforms = $this->platform_registry->configs();
+
+        if ($this->input->method() === 'post') {
+            $selected_metrics = $this->input->post('metrics') ?? [];
+            $filtered_metrics = [];
+
+            foreach ($selected_metrics as $platform => $metrics) {
+                if (isset($platforms[$platform]) && is_array($metrics)) {
+                    $allowed_metrics = $platforms[$platform]['metrics'] ?? [];
+                    if ($platform === 'instagram' && isset($platforms[$platform]['reels_metrics'])) {
+                        $allowed_metrics = array_merge($allowed_metrics, $platforms[$platform]['reels_metrics']);
+                    }
+
+                    foreach ($metrics as $metric) {
+                        if (in_array($metric, $allowed_metrics)) {
+                            $filtered_metrics[$platform][] = $metric;
+                        }
+                    }
+                }
+            }
+
+            $this->Campaign_model->save_reported_metrics($id, $filtered_metrics);
+            $this->session->set_flashdata('success', 'Report metrics configured successfully.');
+            redirect('campaign/detail/' . $id);
+            return;
+        }
+
+        $reported_metrics = $this->Campaign_model->get_reported_metrics($id);
+        $current_metrics = [];
+        foreach ($reported_metrics as $rm) {
+            $current_metrics[$rm->platform][$rm->metric_name] = true;
+        }
+
+        $data = [
+            'title' => 'Configure Report Metrics',
+            'active_menu' => 'campaign',
+            'campaign' => $campaign,
+            'platforms' => $platforms,
+            'current_metrics' => $current_metrics
+        ];
+
+        $this->render('campaign/configure_metrics', $data);
+    }
 }

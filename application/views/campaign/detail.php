@@ -132,7 +132,7 @@ $ads = $campaign->ads ?? [];
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer d-flex gap-2 flex-wrap">
+                        <div class="card-footer d-flex gap-2 flex-wrap align-items-center">
                             <a href="<?= base_url('campaign/export/pdf/' . $campaign->id) ?>"
                                 class="btn btn-sm btn-outline-danger" target="_blank">
                                 <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
@@ -140,6 +140,10 @@ $ads = $campaign->ads ?? [];
                             <a href="<?= base_url('campaign/export/excel/' . $campaign->id) ?>"
                                 class="btn btn-sm btn-outline-success">
                                 <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Excel
+                            </a>
+                            <a href="<?= base_url('campaign/configure_metrics/' . $campaign->id) ?>"
+                                class="btn btn-sm btn-outline-primary ms-sm-auto">
+                                <i class="bi bi-gear me-1"></i> Configure Report Metrics
                             </a>
                         </div>
                     </div>
@@ -152,6 +156,17 @@ $ads = $campaign->ads ?? [];
                                 <span class="badge bg-primary bg-opacity-10 text-primary ms-2"><?= count($ads) ?></span>
                             </h6>
                         </div>
+
+                        <?php if (!empty($ads) && !$campaign->has_reported_metrics): ?>
+                            <div class="alert alert-info border-0 rounded-0 border-bottom m-0 py-2 px-3 small d-flex align-items-center justify-content-between">
+                                <span>
+                                    <i class="bi bi-info-circle me-1"></i> All available metrics are shown. Configure custom report metrics to customize this view and downloads.
+                                </span>
+                                <a href="<?= base_url('campaign/configure_metrics/' . $campaign->id) ?>" class="btn btn-xs btn-link p-0 text-decoration-none fw-semibold">
+                                    Configure
+                                </a>
+                            </div>
+                        <?php endif; ?>
 
                         <?php if (empty($ads)): ?>
                             <div class="card-body text-center text-muted py-5">

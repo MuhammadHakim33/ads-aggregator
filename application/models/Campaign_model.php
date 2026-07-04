@@ -157,6 +157,9 @@ class Campaign_model extends CI_Model
             return null;
         }
 
+        // Initialize reported metrics flag
+        $campaign->has_reported_metrics = false;
+
         // get all ads associated with this campaign
         $this->db->select('ad.*');
         $this->db->from('ad_contents ad');
@@ -171,9 +174,34 @@ class Campaign_model extends CI_Model
             $this->db->order_by('metric_name', 'ASC');
             $metrics = $this->db->get('ad_metrics')->result();
 
+            // Create map of ad ID to its platform
+            $ad_platforms = [];
+            foreach ($ads as $ad) {
+                $ad_platforms[$ad->id] = $ad->platform;
+            }
+
+            // Fetch configured metrics if any
+            $this->db->where('campaign_id', $campaign_id);
+            $reported_metrics = $this->db->get('campaign_reported_metrics')->result();
+
+            $has_configured_metrics = !empty($reported_metrics);
+            $campaign->has_reported_metrics = $has_configured_metrics;
+            $reported_map = [];
+            if ($has_configured_metrics) {
+                foreach ($reported_metrics as $rm) {
+                    $reported_map[$rm->platform][$rm->metric_name] = true;
+                }
+            }
+
             // map metrics to ads
             $metrics_by_ad = [];
             foreach ($metrics as $m) {
+                $ad_platform = $ad_platforms[$m->ad_content_id] ?? null;
+                if ($has_configured_metrics && $ad_platform) {
+                    if (!isset($reported_map[$ad_platform][$m->metric_name])) {
+                        continue;
+                    }
+                }
                 $metrics_by_ad[$m->ad_content_id][] = $m;
             }
 
@@ -184,6 +212,44 @@ class Campaign_model extends CI_Model
 
         $campaign->ads = $ads;
         return $campaign;
+    }
+
+    public function get_reported_metrics($campaign_id)
+    {
+        $this->db->where('campaign_id', $campaign_id);
+        return $this->db->get('campaign_reported_metrics')->result();
+    }
+
+    public function save_reported_metrics($campaign_id, $selected_metrics)
+    {
+        $this->db->trans_start();
+
+        // Delete existing
+        $this->db->where('campaign_id', $campaign_id);
+        $this->db->delete('campaign_reported_metrics');
+
+        // Insert new
+        if (!empty($selected_metrics)) {
+            $insert_data = [];
+            foreach ($selected_metrics as $platform => $metrics) {
+                if (is_array($metrics)) {
+                    foreach ($metrics as $metric_name) {
+                        $insert_data[] = [
+                            'campaign_id' => $campaign_id,
+                            'platform' => $platform,
+                            'metric_name' => $metric_name
+                        ];
+                    }
+                }
+            }
+
+            if (!empty($insert_data)) {
+                $this->db->insert_batch('campaign_reported_metrics', $insert_data);
+            }
+        }
+
+        $this->db->trans_complete();
+        return $this->db->trans_status();
     }
 
     public function deactivate_by_contract($contract_id)

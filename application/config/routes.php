@@ -75,6 +75,7 @@ $route['campaign/detail/(:num)'] = 'campaign/detail/$1';
 $route['campaign/delete/(:num)'] = 'campaign/delete/$1';
 $route['campaign/export/(:any)/(:num)'] = 'campaign/export/$1/$2';
 $route['campaign/unconnect_ad/(:num)/(:num)'] = 'campaign/unconnect_ad/$1/$2';
+$route['campaign/configure_metrics/(:num)'] = 'campaign/configure_metrics/$1';
 $route['campaign'] = 'campaign/index';
 
 $route['ads'] = 'ads/index';

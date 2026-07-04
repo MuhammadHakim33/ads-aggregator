@@ -81,12 +81,14 @@
                 </li>
             <?php endif; ?>
 
-            <li class="nav-item">
-                <a href="<?= base_url('complaint') ?>"
-                    class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'complaint' ? 'active text-white' : '' ?>">
-                    <i class="bi bi-exclamation-octagon me-2"></i> Complaints
-                </a>
-            </li>
+            <?php if ($role === 'client' || $role === 'ae'): ?>
+                <li class="nav-item">
+                    <a href="<?= base_url('complaint') ?>"
+                        class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'complaint' ? 'active text-white' : '' ?>">
+                        <i class="bi bi-exclamation-octagon me-2"></i> Complaints
+                    </a>
+                </li>
+            <?php endif; ?>
 
             <?php if ($role === 'superadmin'): ?>
                 <!-- platforms section -->
@@ -127,6 +129,7 @@
                     </a>
                 </li>
             <?php endif; ?>
+
         </ul>
     </div>
 </aside>

@@ -6,6 +6,7 @@ class Complaint extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->require_role('client', 'ae');
         $this->load->model('Complaint_model');
         $this->load->model('Client_model');
         $this->load->model('Ad_model');
@@ -115,21 +116,18 @@ class Complaint extends MY_Controller
 
     public function update_status($id)
     {
-        $this->require_role('ae', 'manajemen');
+        $this->require_role('ae');
         $complaint = $this->Complaint_model->get_by_id($id);
         if (!$complaint) {
             show_404();
             return;
         }
 
-        // Authorization check for AE
-        $role = $this->current_account['role'];
+        // authorization check for associated AE
         $user_id = $this->current_account['id'];
-        if ($role === 'ae') {
-            if ($complaint->ae_id != $user_id) {
-                show_error('Unauthorized', 403);
-                return;
-            }
+        if ($complaint->ae_id != $user_id) {
+            show_error('Unauthorized', 403);
+            return;
         }
 
         if ($this->input->method() === 'post') {

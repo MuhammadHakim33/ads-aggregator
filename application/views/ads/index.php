@@ -5,33 +5,32 @@
     <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
+            <!-- action bar -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 mb-3">
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
-                    <form method="GET" action="<?= current_url() ?>"
-                        class="d-flex flex-wrap gap-2 align-items-center mb-0">
-                        <select name="platform" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                            <option value="">All Platforms</option>
-                            <?php foreach ($platform_labels as $key => $label): ?>
-                                <option value="<?= $key ?>" <?= (isset($filters['platform']) && $filters['platform'] == $key) ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                <form method="GET" action="<?= current_url() ?>" class="d-flex flex-wrap gap-2 align-items-center mb-0">
+                    <select name="platform" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <option value="">All Platforms</option>
+                        <?php foreach ($platform_labels as $key => $label): ?>
+                            <option value="<?= $key ?>" <?= (isset($filters['platform']) && $filters['platform'] == $key) ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
 
-                        <div class="input-group input-group-sm" style="width: 250px;">
-                            <span class="input-group-text bg-white border-end-0"><i
-                                    class="bi bi-search text-muted"></i></span>
-                            <input type="text" name="q" class="form-control border-start-0 ps-0"
-                                placeholder="Search ads..." value="<?= html_escape($filters['q'] ?? '') ?>">
-                        </div>
+                    <div class="input-group input-group-sm" style="width: 250px;">
+                        <span class="input-group-text bg-white border-end-0"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search ads..."
+                            value="<?= html_escape($filters['q'] ?? '') ?>">
+                    </div>
 
-                        <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+                    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
 
-                        <?php if (!empty($filters['q']) || !empty($filters['platform'])): ?>
-                            <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i
-                                    class="bi bi-x-circle"></i></a>
-                        <?php endif; ?>
-                    </form>
-                </div>
+                    <?php if (!empty($filters['q']) || !empty($filters['platform'])): ?>
+                        <a href="<?= current_url() ?>" class="btn btn-sm btn-outline-secondary" title="Clear Filters"><i
+                                class="bi bi-x-circle"></i></a>
+                    <?php endif; ?>
+                </form>
             </div>
+
             <!-- flash alerts -->
             <?php if ($this->session->flashdata('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -45,6 +44,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
+
+            <!-- data table card -->
             <div class="card">
                 <form action="<?= base_url('ads') ?>" method="post" id="mappingForm">
                     <div class="table-responsive">
@@ -55,7 +56,7 @@
                                         <input class="form-check-input" type="checkbox" id="checkAll">
                                     </th>
                                     <th scope="col">Published</th>
-                                    <th scope="col">Identifier/Title</th>
+                                    <th scope="col">Identifier / Title</th>
                                     <th scope="col">Platform</th>
                                     <th scope="col" class="text-center">Link</th>
                                     <th scope="col" style="width: 250px;">Campaign</th>
@@ -86,11 +87,8 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <div class="fw-medium">
-                                                    <?= $ad->title ?: '-' ?>
-                                                </div>
-                                                <small class="font-monospace text-muted"><?= $ad->content_identifier ?>
-                                                </small>
+                                                <div class="fw-medium"><?= $ad->title ?: '-' ?></div>
+                                                <small class="font-monospace text-muted"><?= $ad->content_identifier ?></small>
                                             </td>
                                             <td>
                                                 <span class="badge text-bg-light">
@@ -128,10 +126,14 @@
                             </tbody>
                         </table>
                     </div>
-                    <?php if (!empty($unconnected)): ?>
-                        <div
-                            class="card-footer bg-white py-3 d-flex justify-content-between align-items-center border-top-0">
-                            <span class="text-muted small"><span id="checkedCount">0</span> rows selected</span>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <?php if (!empty($unconnected)): ?>
+                                <span id="checkedCount">0</span> selected &mdash;
+                            <?php endif; ?>
+                            Showing <?= count($unconnected) ?> unconnected ad<?= count($unconnected) !== 1 ? 's' : '' ?>
+                        </small>
+                        <?php if (!empty($unconnected)): ?>
                             <div class="d-flex gap-2">
                                 <button type="submit" name="action" value="ignore"
                                     class="btn btn-outline-danger btn-sm px-4 action-btn" disabled formnovalidate
@@ -143,8 +145,8 @@
                                     <i class="bi bi-link-45deg"></i> Connect
                                 </button>
                             </div>
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
                 </form>
             </div>
 

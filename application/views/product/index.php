@@ -181,11 +181,13 @@
 </div>
 
 <script>
-    document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        document.getElementById('deleteProductName').textContent = btn.getAttribute('data-name');
-        document.getElementById('deleteForm').action = '<?= base_url('product/delete/') ?>' + btn.getAttribute('data-id');
+$(function () {
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        const $btn = $(event.relatedTarget);
+        $('#deleteProductName').text($btn.attr('data-name'));
+        $('#deleteForm').attr('action', '<?= base_url('product/delete/') ?>' + $btn.attr('data-id'));
     });
+});
 </script>
 
 <?php $this->load->view('templates/footer'); ?>

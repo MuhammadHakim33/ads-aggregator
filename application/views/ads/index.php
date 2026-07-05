@@ -155,50 +155,44 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const checkAll = document.getElementById('checkAll');
-        const rowChecks = document.querySelectorAll('.row-check');
-        const checkedCountEl = document.getElementById('checkedCount');
-        const actionBtns = document.querySelectorAll('.action-btn');
+$(function () {
+    const $checkAll = $('#checkAll');
+    const $rowChecks = $('.row-check');
+    const $checkedCountEl = $('#checkedCount');
+    const $actionBtns = $('.action-btn');
 
-        function updateState() {
-            let count = 0;
-            rowChecks.forEach(chk => {
-                const tr = chk.closest('tr');
-                const select = tr.querySelector('.campaign-select');
+    function updateState() {
+        let count = 0;
+        $rowChecks.each(function () {
+            const $tr = $(this).closest('tr');
+            const $select = $tr.find('.campaign-select');
 
-                if (chk.checked) {
-                    count++;
-                    tr.classList.add('table-primary');
-                    select.disabled = false;
-                    select.required = true;
-                } else {
-                    tr.classList.remove('table-primary');
-                    select.disabled = true;
-                    select.required = false;
-                }
-            });
-
-            if (checkedCountEl) checkedCountEl.textContent = count;
-
-            actionBtns.forEach(btn => {
-                btn.disabled = count === 0;
-            });
-
-            if (checkAll) checkAll.checked = (count > 0 && count === rowChecks.length);
-        }
-
-        if (checkAll) {
-            checkAll.addEventListener('change', function () {
-                rowChecks.forEach(chk => chk.checked = checkAll.checked);
-                updateState();
-            });
-        }
-
-        rowChecks.forEach(chk => {
-            chk.addEventListener('change', updateState);
+            if (this.checked) {
+                count++;
+                $tr.addClass('table-primary');
+                $select.prop('disabled', false).prop('required', true);
+            } else {
+                $tr.removeClass('table-primary');
+                $select.prop('disabled', true).prop('required', false);
+            }
         });
-    });
+
+        if ($checkedCountEl.length) $checkedCountEl.text(count);
+
+        $actionBtns.prop('disabled', count === 0);
+
+        if ($checkAll.length) $checkAll.prop('checked', count > 0 && count === $rowChecks.length);
+    }
+
+    if ($checkAll.length) {
+        $checkAll.on('change', function () {
+            $rowChecks.prop('checked', this.checked);
+            updateState();
+        });
+    }
+
+    $rowChecks.on('change', updateState);
+});
 </script>
 
 <?php $this->load->view('templates/footer'); ?>

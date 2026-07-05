@@ -343,96 +343,96 @@
 </div>
 
 <script>
+$(function () {
     // Delete Modal
-    document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        document.getElementById('deleteContractNumber').textContent = btn.getAttribute('data-number');
-        document.getElementById('deleteClientName').textContent = btn.getAttribute('data-client');
-        document.getElementById('deleteForm').action = '<?= base_url('contract/delete/') ?>' + btn.getAttribute('data-id');
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        const $btn = $(event.relatedTarget);
+        $('#deleteContractNumber').text($btn.attr('data-number'));
+        $('#deleteClientName').text($btn.attr('data-client'));
+        $('#deleteForm').attr('action', '<?= base_url('contract/delete/') ?>' + $btn.attr('data-id'));
     });
 
     // Detail Modal AJAX
-    document.getElementById('detailModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        const id = btn.getAttribute('data-id');
+    $('#detailModal').on('show.bs.modal', function (event) {
+        const $btn = $(event.relatedTarget);
+        const id = $btn.attr('data-id');
 
-        document.getElementById('detailContractNumber').textContent = 'Loading...';
-        document.getElementById('detailClientName').textContent = 'Loading...';
-        document.getElementById('detailStartDate').textContent = 'Loading...';
-        document.getElementById('detailEndDate').textContent = 'Loading...';
-        document.getElementById('detailStatus').innerHTML = '';
-        document.getElementById('detailValue').textContent = 'Loading...';
-        document.getElementById('detailItemsBody').innerHTML = '<tr><td colspan="5" class="text-center">Loading...</td></tr>';
-        document.getElementById('detailRejectRow').classList.add('d-none');
+        $('#detailContractNumber').text('Loading...');
+        $('#detailClientName').text('Loading...');
+        $('#detailStartDate').text('Loading...');
+        $('#detailEndDate').text('Loading...');
+        $('#detailStatus').html('');
+        $('#detailValue').text('Loading...');
+        $('#detailItemsBody').html('<tr><td colspan="5" class="text-center">Loading...</td></tr>');
+        $('#detailRejectRow').addClass('d-none');
 
-        fetch('<?= base_url('contract/get_items_json/') ?>' + id)
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                    return;
-                }
-                const c = data.contract;
-                const items = data.items;
+        $.getJSON('<?= base_url('contract/get_items_json/') ?>' + id, function (data) {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            const c = data.contract;
+            const items = data.items;
 
-                document.getElementById('detailContractNumber').textContent = c.contract_number;
-                document.getElementById('detailClientName').textContent = c.client_name;
-                document.getElementById('detailStartDate').textContent = new Date(c.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                document.getElementById('detailEndDate').textContent = new Date(c.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                document.getElementById('detailValue').textContent = 'Rp ' + Number(c.value).toLocaleString('id-ID');
+            $('#detailContractNumber').text(c.contract_number);
+            $('#detailClientName').text(c.client_name);
+            $('#detailStartDate').text(new Date(c.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }));
+            $('#detailEndDate').text(new Date(c.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }));
+            $('#detailValue').text('Rp ' + Number(c.value).toLocaleString('id-ID'));
 
-                let statusBadge = '';
-                if (c.status === 'approved') {
-                    statusBadge = '<span class="badge bg-success bg-opacity-10 text-success fw-normal"><i class="bi bi-check-circle me-1"></i> Approved</span>';
-                } else if (c.status === 'rejected') {
-                    statusBadge = '<span class="badge bg-danger bg-opacity-10 text-danger fw-normal"><i class="bi bi-x-circle me-1"></i> Rejected</span>';
-                    document.getElementById('detailRejectionReason').textContent = c.rejection_reason;
-                    document.getElementById('detailRejectRow').classList.remove('d-none');
-                } else {
-                    statusBadge = '<span class="badge bg-warning bg-opacity-10 text-warning-emphasis fw-normal"><i class="bi bi-clock-history me-1"></i> Pending Approval</span>';
-                }
-                document.getElementById('detailStatus').innerHTML = statusBadge;
+            let statusBadge = '';
+            if (c.status === 'approved') {
+                statusBadge = '<span class="badge bg-success bg-opacity-10 text-success fw-normal"><i class="bi bi-check-circle me-1"></i> Approved</span>';
+            } else if (c.status === 'rejected') {
+                statusBadge = '<span class="badge bg-danger bg-opacity-10 text-danger fw-normal"><i class="bi bi-x-circle me-1"></i> Rejected</span>';
+                $('#detailRejectionReason').text(c.rejection_reason);
+                $('#detailRejectRow').removeClass('d-none');
+            } else {
+                statusBadge = '<span class="badge bg-warning bg-opacity-10 text-warning-emphasis fw-normal"><i class="bi bi-clock-history me-1"></i> Pending Approval</span>';
+            }
+            $('#detailStatus').html(statusBadge);
 
-                let html = '';
-                if (items.length === 0) {
-                    html = '<tr><td colspan="5" class="text-center text-muted">No products selected.</td></tr>';
-                } else {
-                    items.forEach(item => {
-                        let catName = item.product_category.replace('_', ' ').toUpperCase();
-                        let priceFormatted = 'Rp ' + Number(item.price).toLocaleString('id-ID');
-                        let subtotalFormatted = 'Rp ' + Number(item.subtotal).toLocaleString('id-ID');
-                        let qtyDisplay = item.quantity;
-                        if (item.product_price_model === 'cpm') {
-                            qtyDisplay = Number(item.quantity).toLocaleString('id-ID') + ' Imp (CPM)';
-                        } else {
-                            qtyDisplay = item.quantity + ' Unit';
-                        }
-                        html += `<tr>
-                            <td class="fw-semibold text-dark">${item.product_name}</td>
-                            <td><span class="badge bg-light text-secondary">${catName}</span></td>
-                            <td>${qtyDisplay}</td>
-                            <td>${priceFormatted}</td>
-                            <td class="text-end fw-semibold text-dark">${subtotalFormatted}</td>
-                        </tr>`;
-                    });
-                }
-                document.getElementById('detailItemsBody').innerHTML = html;
-            });
+            let html = '';
+            if (items.length === 0) {
+                html = '<tr><td colspan="5" class="text-center text-muted">No products selected.</td></tr>';
+            } else {
+                items.forEach(item => {
+                    let catName = item.product_category.replace('_', ' ').toUpperCase();
+                    let priceFormatted = 'Rp ' + Number(item.price).toLocaleString('id-ID');
+                    let subtotalFormatted = 'Rp ' + Number(item.subtotal).toLocaleString('id-ID');
+                    let qtyDisplay = item.quantity;
+                    if (item.product_price_model === 'cpm') {
+                        qtyDisplay = Number(item.quantity).toLocaleString('id-ID') + ' Imp (CPM)';
+                    } else {
+                        qtyDisplay = item.quantity + ' Unit';
+                    }
+                    html += `<tr>
+                        <td class="fw-semibold text-dark">${item.product_name}</td>
+                        <td><span class="badge bg-light text-secondary">${catName}</span></td>
+                        <td>${qtyDisplay}</td>
+                        <td>${priceFormatted}</td>
+                        <td class="text-end fw-semibold text-dark">${subtotalFormatted}</td>
+                    </tr>`;
+                });
+            }
+            $('#detailItemsBody').html(html);
+        });
     });
 
     // Approve Modal
-    document.getElementById('approveModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        document.getElementById('approveContractNumber').textContent = btn.getAttribute('data-number');
-        document.getElementById('approveForm').action = '<?= base_url('contract/approve/') ?>' + btn.getAttribute('data-id');
+    $('#approveModal').on('show.bs.modal', function (event) {
+        const $btn = $(event.relatedTarget);
+        $('#approveContractNumber').text($btn.attr('data-number'));
+        $('#approveForm').attr('action', '<?= base_url('contract/approve/') ?>' + $btn.attr('data-id'));
     });
 
     // Reject Modal
-    document.getElementById('rejectModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        document.getElementById('rejectContractNumber').textContent = btn.getAttribute('data-number');
-        document.getElementById('rejectForm').action = '<?= base_url('contract/reject/') ?>' + btn.getAttribute('data-id');
+    $('#rejectModal').on('show.bs.modal', function (event) {
+        const $btn = $(event.relatedTarget);
+        $('#rejectContractNumber').text($btn.attr('data-number'));
+        $('#rejectForm').attr('action', '<?= base_url('contract/reject/') ?>' + $btn.attr('data-id'));
     });
+});
 </script>
 
 <?php $this->load->view('templates/footer'); ?>

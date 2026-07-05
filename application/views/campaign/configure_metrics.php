@@ -153,58 +153,53 @@
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        function updateRowHighlight(checkbox) {
-            const row = checkbox.closest('.metric-row');
-            if (!row) return;
-            if (checkbox.checked) {
-                row.classList.add('bg-primary', 'bg-opacity-10');
-            } else {
-                row.classList.remove('bg-primary', 'bg-opacity-10');
-            }
+$(function () {
+    function updateRowHighlight(checkbox) {
+        const $chk = $(checkbox);
+        const $row = $chk.closest('.metric-row');
+        if (checkbox.checked) {
+            $row.addClass('bg-primary bg-opacity-10');
+        } else {
+            $row.removeClass('bg-primary bg-opacity-10');
         }
+    }
 
-        function updateCounter(platform) {
-            const checkboxes = document.querySelectorAll(`.metric-checkbox[data-platform="${platform}"]`);
-            const total = checkboxes.length;
-            const checked = Array.from(checkboxes).filter(c => c.checked).length;
-            const badge = document.querySelector(`.platform-counter[data-platform="${platform}"]`);
-            if (badge) badge.textContent = checked + ' / ' + total;
+    function updateCounter(platform) {
+        const $checkboxes = $(`.metric-checkbox[data-platform="${platform}"]`);
+        const total = $checkboxes.length;
+        const checked = $checkboxes.filter(':checked').length;
+        const $badge = $(`.platform-counter[data-platform="${platform}"]`);
+        if ($badge.length) {
+            $badge.text(checked + ' / ' + total);
         }
+    }
 
-        // Select All
-        document.querySelectorAll('.select-all').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const platform = this.getAttribute('data-platform');
-                document.querySelectorAll(`.metric-checkbox[data-platform="${platform}"]`).forEach(chk => {
-                    chk.checked = true;
-                    updateRowHighlight(chk);
-                });
-                updateCounter(platform);
-            });
+    // Select All
+    $('.select-all').on('click', function () {
+        const platform = $(this).data('platform');
+        $(`.metric-checkbox[data-platform="${platform}"]`).each(function () {
+            this.checked = true;
+            updateRowHighlight(this);
         });
-
-        // Deselect All
-        document.querySelectorAll('.deselect-all').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const platform = this.getAttribute('data-platform');
-                document.querySelectorAll(`.metric-checkbox[data-platform="${platform}"]`).forEach(chk => {
-                    chk.checked = false;
-                    updateRowHighlight(chk);
-                });
-                updateCounter(platform);
-            });
-        });
-
-        // Per-checkbox change
-        document.querySelectorAll('.metric-checkbox').forEach(chk => {
-            chk.addEventListener('change', function () {
-                updateRowHighlight(this);
-                updateCounter(this.getAttribute('data-platform'));
-            });
-        });
+        updateCounter(platform);
     });
+
+    // Deselect All
+    $('.deselect-all').on('click', function () {
+        const platform = $(this).data('platform');
+        $(`.metric-checkbox[data-platform="${platform}"]`).each(function () {
+            this.checked = false;
+            updateRowHighlight(this);
+        });
+        updateCounter(platform);
+    });
+
+    // Per-checkbox change
+    $('.metric-checkbox').on('change', function () {
+        updateRowHighlight(this);
+        updateCounter($(this).data('platform'));
+    });
+});
 </script>
 
 <?php $this->load->view('templates/footer'); ?>

@@ -152,12 +152,14 @@
 </div>
 
 <script>
-    document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        document.getElementById('deleteCampaignName').textContent = btn.getAttribute('data-name');
-        document.getElementById('deleteClientName').textContent = btn.getAttribute('data-client');
-        document.getElementById('deleteForm').action = '<?= base_url('campaign/delete/') ?>' + btn.getAttribute('data-id');
+$(function () {
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        const $btn = $(event.relatedTarget);
+        $('#deleteCampaignName').text($btn.attr('data-name'));
+        $('#deleteClientName').text($btn.attr('data-client'));
+        $('#deleteForm').attr('action', '<?= base_url('campaign/delete/') ?>' + $btn.attr('data-id'));
     });
+});
 </script>
 
 <?php $this->load->view('templates/footer'); ?>

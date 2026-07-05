@@ -33,7 +33,7 @@ class ExportExcel implements Exporter
             ['PIC', $campaign->client_pic ?? '-'],
             ['Schedule', date('d M Y', strtotime($campaign->start_date)) . ' - ' . date('d M Y', strtotime($campaign->end_date))],
             ['Status', ($campaign->is_active ? 'Active' : 'Inactive')],
-            ['Generated',   date('d M Y H:i')],
+            ['Generated', date('d M Y H:i')],
         ];
 
         // populate info rows
@@ -130,6 +130,11 @@ class ExportExcel implements Exporter
         $sheet->getColumnDimension('D')->setWidth(28);
         $sheet->getColumnDimension('E')->setWidth(18);
         $sheet->getColumnDimension('F')->setWidth(22);
+
+        // clear any previous output or buffering to prevent file corruption
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '.xlsx"');

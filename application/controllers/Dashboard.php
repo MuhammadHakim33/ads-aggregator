@@ -33,8 +33,7 @@ class Dashboard extends MY_Controller
             'active_menu' => 'dashboard',
             'total_contracts_active' => $this->Contract_model->count_active($client_id, $ae_id),
             'total_campaigns_running' => $this->Campaign_model->count_running($client_id, $ae_id),
-            'total_ads' => $this->Ad_model->count_all_ads($client_id, $ae_id),
-            'total_unconnected_ads' => in_array($role, ['ae', 'manajemen', 'superadmin'])
+            'total_unconnected_ads' => in_array($role, ['ae', 'manajemen'])
                 ? $this->Ad_model->count_unconnected()
                 : 0,
         ];
@@ -44,28 +43,38 @@ class Dashboard extends MY_Controller
             $data['total_open_complaints'] = count(array_filter($complaints, function ($c) {
                 return $c->status === 'open';
             }));
-            $data['campaigns'] = $this->Campaign_model->get_all([
-                'client_id' => $client_id,
-            ]);
-            $data['contracts'] = $this->Contract_model->get_all([
-                'client_id' => $client_id,
-            ]);
+            $data['campaigns'] = $this->Campaign_model->get_all(['client_id' => $client_id]);
+            $data['contracts'] = $this->Contract_model->get_all(['client_id' => $client_id]);
+            $data['total_ads'] = $this->Ad_model->count_all_ads_by_client($client_id);
 
-            $this->render('dashboard', $data);
+            $this->render('dashboard/client', $data);
             return;
         }
 
-        if (in_array($role, ['superadmin', 'manajemen'])) {
+        if ($role === 'manajemen') {
             $data['total_clients_active'] = $this->Client_model->count_active();
             $data['total_clients'] = $this->Client_model->count_total();
+
+            $this->render('dashboard/manajemen', $data);
+            return;
         }
 
+        if ($role === 'ae') {
+            $data['total_clients_handled'] = $this->Client_model->count_active($ae_id);
+            $this->render('dashboard/ae', $data);
+            return;
+        }
         if ($role === 'superadmin') {
+            $data['total_clients_active'] = $this->Client_model->count_active();
+            $data['total_clients'] = $this->Client_model->count_total();
             $this->load->model('Cron_log_model');
             $data['cron_last_per_platform'] = $this->Cron_log_model->get_last_per_platform();
             $data['cron_recent'] = $this->Cron_log_model->get_latest(10);
+
+            $this->render('dashboard/superadmin', $data);
+            return;
         }
 
-        $this->render('dashboard', $data);
+        $this->render('dashboard/superadmin', $data);
     }
 }

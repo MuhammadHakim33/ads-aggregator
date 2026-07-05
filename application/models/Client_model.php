@@ -74,16 +74,22 @@ class Client_model extends CI_Model
         return $this->db->affected_rows();
     }
 
-    public function count_active()
+    public function count_active($ae_id = null)
     {
         $this->db->where('is_active', 1);
         $this->db->where('deleted_at', NULL);
+        if ($ae_id) {
+            $this->db->where('ae_id', $ae_id);
+        }
         return $this->db->count_all_results($this->table);
     }
 
-    public function count_total()
+    public function count_total($ae_id = null)
     {
         $this->db->where('deleted_at', NULL);
+        if ($ae_id) {
+            $this->db->where('ae_id', $ae_id);
+        }
         return $this->db->count_all_results($this->table);
     }
 }

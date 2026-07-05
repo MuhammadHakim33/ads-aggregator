@@ -199,4 +199,27 @@ $config['platforms'] = [
             "activeCheckoutUsers"
         ],
     ],
+    'gam' => [
+        'enabled' => true,
+        'label' => 'Google Ad Manager',
+        'driver_class' => 'GamDriver',
+        'driver_path' => APPPATH . 'modules/gam/GamDriver.php',
+        'metrics' => [
+            'ad_server_impressions',
+            'ad_server_clicks',
+            'ad_server_ctr',
+            'ad_server_revenue',
+            'ad_server_percent_impressions',
+            'ad_server_percent_revenue',
+            'ad_server_responses_served',
+            'ad_server_targeted_impressions',
+            'ad_server_targeted_clicks',
+            'ad_server_tracked_ads',
+        ],
+        'filters' => [
+            'keyword' => true,
+            'hostname' => false,
+            'html' => false,
+        ],
+    ],
 ];

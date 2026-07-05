@@ -112,7 +112,6 @@ class GamApiClient
                 'day' => (int) date('j', $until_time)
             ]
         ];
-
         // create report definition
         $report_url = $this->base_url . "networks/{$this->network_code}/reports";
         $report_body = [
@@ -125,7 +124,13 @@ class GamApiClient
                     'AD_SERVER_IMPRESSIONS',
                     'AD_SERVER_CLICKS',
                     'AD_SERVER_CTR',
-                    'AD_SERVER_REVENUE'
+                    'AD_SERVER_REVENUE',
+                    'AD_SERVER_PERCENT_IMPRESSIONS',
+                    'AD_SERVER_PERCENT_REVENUE',
+                    'AD_SERVER_RESPONSES_SERVED',
+                    'AD_SERVER_TARGETED_IMPRESSIONS',
+                    'AD_SERVER_TARGETED_CLICKS',
+                    'AD_SERVER_TRACKED_ADS'
                 ]
             ]
         ];
@@ -191,22 +196,45 @@ class GamApiClient
             // extract metrics from the first group
             $metric_values = $row['metricValueGroups'][0]['primaryValues'] ?? [];
 
-            $impressions = (int) ($metric_values[0]['intList']['values'][0] ?? 0);
-            $clicks = (int) ($metric_values[1]['intList']['values'][0] ?? 0);
-            $ctr = (float) ($metric_values[2]['doubleList']['values'][0] ?? 0.0);
-
-            // convert currency to float
-            $revenue_data = $metric_values[3]['moneyList']['values'][0] ?? null;
-            $revenue = $revenue_data ? (float) ($revenue_data['amount'] ?? 0.0) : 0.0;
+            $impressions = isset($metric_values[0]) ? $this->extract_metric_value($metric_values[0]) : 0;
+            $clicks = isset($metric_values[1]) ? $this->extract_metric_value($metric_values[1]) : 0;
+            $ctr = isset($metric_values[2]) ? $this->extract_metric_value($metric_values[2]) : 0.0;
+            $revenue = isset($metric_values[3]) ? $this->extract_metric_value($metric_values[3]) : 0.0;
+            $percent_impressions = isset($metric_values[4]) ? $this->extract_metric_value($metric_values[4]) : 0.0;
+            $percent_revenue = isset($metric_values[5]) ? $this->extract_metric_value($metric_values[5]) : 0.0;
+            $responses_served = isset($metric_values[6]) ? $this->extract_metric_value($metric_values[6]) : 0;
+            $targeted_impressions = isset($metric_values[7]) ? $this->extract_metric_value($metric_values[7]) : 0;
+            $targeted_clicks = isset($metric_values[8]) ? $this->extract_metric_value($metric_values[8]) : 0;
+            $tracked_ads = isset($metric_values[9]) ? $this->extract_metric_value($metric_values[9]) : 0;
 
             $formatted[$line_item_id] = [
                 'ad_server_impressions' => $impressions,
                 'ad_server_clicks' => $clicks,
-                'ad_server_ctr' => $ctr * 100,
-                'ad_server_revenue' => $revenue
+                'ad_server_ctr' => $ctr * 100, // convert ratio to percent
+                'ad_server_revenue' => $revenue,
+                'ad_server_percent_impressions' => $percent_impressions * 100, // convert ratio to percent
+                'ad_server_percent_revenue' => $percent_revenue * 100, // convert ratio to percent
+                'ad_server_responses_served' => $responses_served,
+                'ad_server_targeted_impressions' => $targeted_impressions,
+                'ad_server_targeted_clicks' => $targeted_clicks,
+                'ad_server_tracked_ads' => $tracked_ads,
             ];
         }
 
         return $formatted;
+    }
+
+    private function extract_metric_value($val)
+    {
+        if (isset($val['intList']['values'][0])) {
+            return (int) $val['intList']['values'][0];
+        }
+        if (isset($val['doubleList']['values'][0])) {
+            return (float) $val['doubleList']['values'][0];
+        }
+        if (isset($val['moneyList']['values'][0])) {
+            return (float) ($val['moneyList']['values'][0]['amount'] ?? 0.0);
+        }
+        return 0;
     }
 }

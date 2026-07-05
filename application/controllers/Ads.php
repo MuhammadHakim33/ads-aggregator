@@ -6,7 +6,7 @@ class Ads extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->require_role('ae', 'manajemen');
+        $this->require_role('ae');
         $this->load->model('Ad_model');
         $this->load->model('Client_model');
         $this->load->library('Platform_registry');

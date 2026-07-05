@@ -10,6 +10,7 @@ class Dashboard extends MY_Controller
         $this->load->model('Contract_model');
         $this->load->model('Campaign_model');
         $this->load->model('Ad_model');
+        $this->load->model('Complaint_model');
     }
 
     public function index()
@@ -33,8 +34,26 @@ class Dashboard extends MY_Controller
             'total_contracts_active' => $this->Contract_model->count_active($client_id, $ae_id),
             'total_campaigns_running' => $this->Campaign_model->count_running($client_id, $ae_id),
             'total_ads' => $this->Ad_model->count_all_ads($client_id, $ae_id),
-            'total_unconnected_ads' => in_array($role, ['ae', 'manajemen', 'superadmin']) ? $this->Ad_model->count_unconnected() : 0,
+            'total_unconnected_ads' => in_array($role, ['ae', 'manajemen', 'superadmin'])
+                ? $this->Ad_model->count_unconnected()
+                : 0,
         ];
+
+        if ($role === 'client') {
+            $complaints = $this->Complaint_model->get_all(['client_id' => $client_id]);
+            $data['total_open_complaints'] = count(array_filter($complaints, function ($c) {
+                return $c->status === 'open';
+            }));
+            $data['campaigns'] = $this->Campaign_model->get_all([
+                'client_id' => $client_id,
+            ]);
+            $data['contracts'] = $this->Contract_model->get_all([
+                'client_id' => $client_id,
+            ]);
+
+            $this->render('dashboard', $data);
+            return;
+        }
 
         if (in_array($role, ['superadmin', 'manajemen'])) {
             $data['total_clients_active'] = $this->Client_model->count_active();

@@ -235,7 +235,8 @@ class Ad_model extends CI_Model
 
     public function delete_ads($ids)
     {
-        if (empty($ids)) return 0;
+        if (empty($ids))
+            return 0;
 
         // Delete related metrics first
         $this->db->where_in('ad_content_id', $ids);

@@ -10,23 +10,27 @@ INSERT INTO roles (name) VALUES
 -- =========================
 -- ACCOUNTS
 -- =========================
-INSERT INTO accounts (name, email, password, role_id, is_active, created_at) VALUES
-('admin', 'admin@gmail.com', '$2y$12$WLrG.3kIy2nQH8iMwexlyehoM7uiDI3zaoYMKx6hAI5xtRue30u32', (SELECT id FROM roles WHERE name = 'superadmin'), 1, NOW()); -- Password: password123
+INSERT INTO accounts (name, email, password, role_id, is_active) VALUES
+('Superadmin', 'admin@gmail.com', '$2y$12$WLrG.3kIy2nQH8iMwexlyehoM7uiDI3zaoYMKx6hAI5xtRue30u32', (SELECT id FROM roles WHERE name = 'superadmin'), 1),
+('Account Executive', 'ae@gmail.com', '$2y$12$WLrG.3kIy2nQH8iMwexlyehoM7uiDI3zaoYMKx6hAI5xtRue30u32', (SELECT id FROM roles WHERE name = 'ae'), 1),
+('Manajemen', 'manajemen@gmail.com', '$2y$12$WLrG.3kIy2nQH8iMwexlyehoM7uiDI3zaoYMKx6hAI5xtRue30u32', (SELECT id FROM roles WHERE name = 'manajemen'), 1),
+('PIC Firdaus', 'pic@gmail.com', '$2y$12$WLrG.3kIy2nQH8iMwexlyehoM7uiDI3zaoYMKx6hAI5xtRue30u32', (SELECT id FROM roles WHERE name = 'client'), 1); -- Password untuk semua akun: password123
 
 -- =========================
 -- CLIENTS
 -- =========================
-INSERT INTO clients (company_name, pic_name, ae_id, account_id, is_active, created_at) VALUES
-('PT Weenie Hut Juniors', 'Firdaus', NULL, NULL, 1, NOW()),
-('PT Squidward Music School', 'Hendra Wira', NULL, NULL, 1, NOW()),
-('PT Salty Spitoon', 'Budi Irawan', NULL, NULL, 1, NOW());
+INSERT INTO clients (company_name, ae_id, is_active) VALUES
+('PT Weenie Hut Juniors', (SELECT id FROM accounts WHERE email = 'ae@gmail.com'), 1),
+('PT Squidward Music School', NULL, 1),
+('PT Salty Spitoon', NULL, 1);
 
 -- =========================
--- FILTER KEYWORDS
+-- CLIENT PICS
 -- =========================
-INSERT INTO filter_keywords (platform, type, keyword, is_active, created_at) VALUES
-('facebook', 'keyword', 'Content partnership with', 1, NOW()),
-('ga4', 'html', '<a href="https://grahajktskripsi.blogspot.com/search/label/Ekonomi" rel="tag">Ekonomi</a>', 1, NOW());
+INSERT INTO client_pics (client_id, name, position, account_id, is_active) VALUES
+((SELECT id FROM clients WHERE company_name = 'PT Weenie Hut Juniors'), 'Firdaus', 'Marketing Manager', (SELECT id FROM accounts WHERE email = 'pic@gmail.com'), 1),
+((SELECT id FROM clients WHERE company_name = 'PT Squidward Music School'), 'Hendra Wira', 'Director', NULL, 1),
+((SELECT id FROM clients WHERE company_name = 'PT Salty Spitoon'), 'Budi Irawan', 'CEO', NULL, 1);
 
 -- =========================
 -- AD CONTENTS

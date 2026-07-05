@@ -20,6 +20,8 @@ if (!function_exists('generate_ad_post_url')) {
                 return 'https://www.youtube.com/watch?v=' . $cid;
             case 'ga4':
                 return 'https://' . $cid;
+            case 'gam':
+                return 'https://admanager.google.com/' . $cid;
             default:
                 return '#';
         }

@@ -115,6 +115,12 @@
                         <i class="bi bi-youtube me-2"></i> YouTube
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="<?= base_url('config/platforms/gam') ?>"
+                        class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'platform_gam' ? 'active text-white' : '' ?>">
+                        <i class="bi bi-google me-2"></i> GAM
+                    </a>
+                </li>
 
                 <!-- master data section -->
                 <li class="nav-item mt-3 mb-1 px-3">

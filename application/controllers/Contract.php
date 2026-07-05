@@ -186,9 +186,7 @@ class Contract extends MY_Controller
 
                 $status = ($role === 'client') ? 'pending' : 'approved';
 
-                $this->db->trans_start();
-
-                $insert_id = $this->Contract_model->insert([
+                $contract_data = [
                     'client_id' => $client_id,
                     'contract_number' => $contract_number,
                     'value' => $total_value,
@@ -196,7 +194,16 @@ class Contract extends MY_Controller
                     'end_date' => $this->input->post('end_date'),
                     'document_path' => $document_path,
                     'status' => $status
-                ]);
+                ];
+
+                if ($status === 'approved') {
+                    $contract_data['approved_by'] = $this->current_account['id'];
+                    $contract_data['approved_at'] = date('Y-m-d H:i:s');
+                }
+
+                $this->db->trans_start();
+
+                $insert_id = $this->Contract_model->insert($contract_data);
 
                 if ($insert_id) {
                     foreach ($items_to_insert as $item) {

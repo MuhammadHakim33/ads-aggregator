@@ -77,7 +77,7 @@ class Campaign_model extends CI_Model
 
     public function get_by_id($id)
     {
-        $this->db->select('campaigns.*, contracts.contract_number, clients.company_name as client_name, contracts.start_date as contract_start, contracts.end_date as contract_end, contracts.terminated_at as contract_terminated');
+        $this->db->select('campaigns.*, contracts.contract_number, clients.company_name as client_name, contracts.start_date as contract_start, contracts.end_date as contract_end, contracts.terminated_at as contract_terminated, contracts.client_id, clients.ae_id');
         $this->db->from($this->table);
         $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');

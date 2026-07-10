@@ -31,12 +31,12 @@ $statusMap = [
             <!-- Filter Bar -->
             <form method="GET" action="<?= current_url() ?>" class="d-flex flex-wrap gap-2 align-items-end pb-2 mb-4">
                 <div>
-                    <label class="form-label small mb-1">Dari Tanggal</label>
+                    <label class="form-label small mb-1">From Date</label>
                     <input type="date" name="start_date" class="form-control form-control-sm"
                            value="<?= html_escape($filters['start_date']) ?>">
                 </div>
                 <div>
-                    <label class="form-label small mb-1">Sampai Tanggal</label>
+                    <label class="form-label small mb-1">To Date</label>
                     <input type="date" name="end_date" class="form-control form-control-sm"
                            value="<?= html_escape($filters['end_date']) ?>">
                 </div>
@@ -62,9 +62,9 @@ $statusMap = [
                     </select>
                 </div>
                 <div>
-                    <label class="form-label small mb-1">Cari</label>
+                    <label class="form-label small mb-1">Search</label>
                     <input type="text" name="q" class="form-control form-control-sm"
-                           placeholder="No. kontrak / client..." value="<?= html_escape($filters['q'] ?? '') ?>">
+                           placeholder="Contract No. / client..." value="<?= html_escape($filters['q'] ?? '') ?>">
                 </div>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-sm btn-primary">
@@ -140,7 +140,7 @@ $statusMap = [
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span class="fw-medium">
-                        <i class="bi bi-file-earmark-text me-2"></i>Daftar Kontrak
+                        <i class="bi bi-file-earmark-text me-2"></i>Contract List
                     </span>
                     <small class="text-muted">
                         <?= $filters['start_date'] ? date('d M Y', strtotime($filters['start_date'])) : '—' ?>
@@ -153,7 +153,7 @@ $statusMap = [
                     <div class="card-body text-center text-muted py-5">
                         <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
                         <div>No contracts found.</div>
-                        <div class="small mt-1">Coba ubah rentang tanggal atau filter lainnya.</div>
+                        <div class="small mt-1">Try changing the date range or other filters.</div>
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
@@ -162,7 +162,7 @@ $statusMap = [
                                 <tr>
                                     <th scope="col">Contract Number</th>
                                     <th scope="col">Client</th>
-                                    <th scope="col">Nilai Kontrak</th>
+                                    <th scope="col">Contract Value</th>
                                     <th scope="col">Start Date</th>
                                     <th scope="col">End Date</th>
                                     <th scope="col">Status</th>

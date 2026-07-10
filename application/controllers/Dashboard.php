@@ -11,6 +11,7 @@ class Dashboard extends MY_Controller
         $this->load->model('Campaign_model');
         $this->load->model('Ad_model');
         $this->load->model('Complaint_model');
+        $this->load->model('Report_model');
     }
 
     public function index()
@@ -51,8 +52,46 @@ class Dashboard extends MY_Controller
         }
 
         if ($role === 'manajemen') {
-            $data['total_clients_active'] = $this->Client_model->count_active();
-            $data['total_clients'] = $this->Client_model->count_total();
+            // Default filter: current month
+            $default_start = date('Y-m-01');
+            $default_end   = date('Y-m-t');
+
+            $filters = [
+                'start_date' => $this->input->get('start_date') ?: $default_start,
+                'end_date'   => $this->input->get('end_date')   ?: $default_end,
+                'client_id'  => $this->input->get('client_id'),
+                'status'     => $this->input->get('status'),
+                'q'          => $this->input->get('q'),
+            ];
+
+            $contract_list = $this->Report_model->get_contract_report_list($filters);
+
+            $total_contracts  = count($contract_list);
+            $total_value      = 0;
+            $total_approved   = 0;
+            $total_terminated = 0;
+            $total_pending    = 0;
+
+            foreach ($contract_list as $c) {
+                $total_value += (float) ($c->value ?? 0);
+                if (!empty($c->terminated_at)) {
+                    $total_terminated++;
+                } elseif ($c->status === 'approved') {
+                    $total_approved++;
+                } elseif ($c->status === 'pending') {
+                    $total_pending++;
+                }
+            }
+
+            $data['filters']          = $filters;
+            $data['clients']          = $this->Client_model->get_all();
+            $data['contract_list']    = $contract_list;
+            $data['total_contracts']  = $total_contracts;
+            $data['total_value']      = $total_value;
+            $data['total_approved']   = $total_approved;
+            $data['total_terminated'] = $total_terminated;
+            $data['total_pending']    = $total_pending;
+            $data['total_unconnected_ads'] = $this->Ad_model->count_unconnected();
 
             $this->render('dashboard/manajemen', $data);
             return;

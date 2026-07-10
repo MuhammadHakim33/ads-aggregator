@@ -138,4 +138,49 @@ class Contract_model extends CI_Model
         $this->db->where('contract_id', $contract_id);
         return $this->db->delete('contract_items');
     }
+
+    /**
+     * Get all contracts for a client with their campaigns nested inside.
+     */
+    public function get_all_with_campaigns($client_id)
+    {
+        // Fetch all contracts for this client
+        $this->db->select('contracts.*, clients.company_name as client_name, approver.name as approver_name');
+        $this->db->from($this->table);
+        $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
+        $this->db->join('accounts approver', 'approver.id = contracts.approved_by', 'left');
+        $this->db->where('contracts.deleted_at', NULL);
+        $this->db->where('contracts.client_id', $client_id);
+        $this->db->order_by('contracts.created_at', 'DESC');
+        $contracts = $this->db->get()->result();
+
+        if (empty($contracts)) {
+            return [];
+        }
+
+        // Collect contract IDs
+        $contract_ids = array_column($contracts, 'id');
+
+        // Fetch all campaigns belonging to these contracts
+        $this->db->select('campaigns.*, contracts.contract_number');
+        $this->db->from('campaigns');
+        $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
+        $this->db->where('campaigns.deleted_at', NULL);
+        $this->db->where_in('campaigns.contract_id', $contract_ids);
+        $this->db->order_by('campaigns.start_date', 'ASC');
+        $campaigns = $this->db->get()->result();
+
+        // Index campaigns by contract_id
+        $campaigns_map = [];
+        foreach ($campaigns as $c) {
+            $campaigns_map[$c->contract_id][] = $c;
+        }
+
+        // Attach campaigns to each contract
+        foreach ($contracts as &$contract) {
+            $contract->campaigns = $campaigns_map[$contract->id] ?? [];
+        }
+
+        return $contracts;
+    }
 }

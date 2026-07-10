@@ -43,8 +43,7 @@ class Dashboard extends MY_Controller
             $data['total_open_complaints'] = count(array_filter($complaints, function ($c) {
                 return $c->status === 'open';
             }));
-            $data['campaigns'] = $this->Campaign_model->get_all(['client_id' => $client_id]);
-            $data['contracts'] = $this->Contract_model->get_all(['client_id' => $client_id]);
+            $data['contracts_with_campaigns'] = $this->Contract_model->get_all_with_campaigns($client_id);
             $data['total_ads'] = $this->Ad_model->count_all_ads_by_client($client_id);
 
             $this->render('dashboard/client', $data);

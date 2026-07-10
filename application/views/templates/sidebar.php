@@ -72,6 +72,15 @@
                 </li>
             <?php endif; ?>
 
+            <?php if ($role === 'manajemen'): ?>
+                <li class="nav-item">
+                    <a href="<?= base_url('report') ?>"
+                        class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'report' ? 'active text-white' : '' ?>">
+                        <i class="bi bi-graph-up me-2"></i> Report
+                    </a>
+                </li>
+            <?php endif; ?>
+
             <?php if ($role === 'ae'): ?>
                 <li class="nav-item">
                     <a href="<?= base_url('ads') ?>"

@@ -104,6 +104,8 @@ $route['config/role/edit/(:num)'] = 'Config/role/edit/$1';
 $route['config/role/delete/(:num)'] = 'Config/role/delete/$1';
 $route['config/role'] = 'Config/role/index';
 
+$route['report'] = 'report/index';
+
 $route['auth/login'] = 'auth/login';
 $route['auth/logout'] = 'auth/logout';
 

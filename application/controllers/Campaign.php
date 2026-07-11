@@ -467,4 +467,33 @@ class Campaign extends MY_Controller
 
         $this->render('campaign/configure_metrics', $data);
     }
+
+    public function update_ad_source($campaign_id, $ad_id)
+    {
+        $this->require_role('manajemen', 'ae');
+        if ($this->input->method() !== 'post') {
+            redirect('campaign/detail/' . $campaign_id);
+            return;
+        }
+
+        $campaign = $this->Campaign_model->get_by_id($campaign_id);
+        if (!$campaign) {
+            $this->session->set_flashdata('errors', 'Campaign not found.');
+            redirect('campaign');
+            return;
+        }
+
+        if ($this->current_account['role'] === 'ae' && $campaign->ae_id != $this->current_account['id']) {
+            show_error('Unauthorized', 403);
+            return;
+        }
+
+        $source = $this->input->post('source', TRUE);
+        
+        $this->load->model('Ad_model');
+        $this->Ad_model->update_source($ad_id, empty($source) ? null : $source);
+
+        $this->session->set_flashdata('success', 'Ad link updated successfully.');
+        redirect('campaign/detail/' . $campaign_id);
+    }
 }

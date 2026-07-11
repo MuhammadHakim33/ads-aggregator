@@ -190,6 +190,17 @@ $ads = $campaign->ads ?? [];
                                                         </a>
                                                     <?php endif; ?>
                                                     <?php if ($this->session->userdata('role') === 'ae' || $this->session->userdata('role') === 'manajemen'): ?>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1"
+                                                            title="Edit Source Link"
+                                                            onclick="const url = prompt('Enter Source URL for this Ad:', '<?= htmlspecialchars($ad->source ?? '') ?>'); if(url !== null) { document.getElementById('source_form_<?= $ad->id ?>').elements['source'].value = url; document.getElementById('source_form_<?= $ad->id ?>').submit(); }">
+                                                            Edit Link
+                                                        </button>
+                                                        <form id="source_form_<?= $ad->id ?>"
+                                                            action="<?= base_url('campaign/update_ad_source/' . $campaign->id . '/' . $ad->id) ?>"
+                                                            method="POST" style="display:none;">
+                                                            <input type="hidden" name="source" value="">
+                                                        </form>
+
                                                         <form
                                                             action="<?= base_url('campaign/unconnect_ad/' . $campaign->id . '/' . $ad->id) ?>"
                                                             method="POST"

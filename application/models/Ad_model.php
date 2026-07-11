@@ -264,4 +264,11 @@ class Ad_model extends CI_Model
         $this->db->order_by('ad_contents.title', 'ASC');
         return $this->db->get()->result();
     }
+
+    public function update_source($ad_content_id, $source)
+    {
+        $this->db->where('id', $ad_content_id);
+        $this->db->update($this->table_contents, ['source' => $source]);
+        return $this->db->affected_rows();
+    }
 }

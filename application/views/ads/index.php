@@ -97,7 +97,7 @@
                                             </td>
                                             <td class="text-center">
                                                 <?php
-                                                $post_url = generate_ad_post_url($ad->platform, $ad->content_identifier);
+                                                $post_url = !empty($ad->source) ? $ad->source : generate_ad_post_url($ad->platform, $ad->content_identifier);
                                                 ?>
                                                 <?php if ($post_url !== '#'): ?>
                                                     <a href="<?= $post_url ?>" target="_blank"

@@ -42,6 +42,7 @@ class YoutubeDriver extends Platform_driver
                 'title' => mb_substr($p['snippet']['title'] ?? '', 0, 200),
                 'content_identifier' => $p['id'] ?? '',
                 'published_at' => isset($p['snippet']['publishedAt']) ? date('Y-m-d H:i:s', strtotime($p['snippet']['publishedAt'])) : null,
+                'source' => isset($p['id']) ? 'https://www.youtube.com/watch?v=' . $p['id'] : null,
                 'platform' => 'youtube',
             ];
         }, $raw);

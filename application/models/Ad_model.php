@@ -96,6 +96,7 @@ class Ad_model extends CI_Model
                 a.title,
                 a.platform,
                 a.content_identifier,
+                a.source,
                 a.created_at,
                 camp.id        AS campaign_id,
                 camp.name      AS campaign_name,

@@ -44,6 +44,7 @@ class Ga4Driver extends Platform_driver
             return [
                 'title' => mb_substr($article['page_title'] ?? '', 0, 200),
                 'content_identifier' => $article['page_path'],
+                'source' => isset($article['page_path']) ? 'https://' . ltrim($article['page_path'], '/') : null,
                 'platform' => 'ga4',
             ];
         }, $raw);

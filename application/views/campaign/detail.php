@@ -179,7 +179,7 @@ $ads = $campaign->ads ?? [];
                                                     </div>
                                                 </div>
                                                 <?php
-                                                $post_url = generate_ad_post_url($ad->platform ?? '', $ad->content_identifier ?? '');
+                                                $post_url = !empty($ad->source) ? $ad->source : generate_ad_post_url($ad->platform ?? '', $ad->content_identifier ?? '');
                                                 ?>
                                                 <div
                                                     class="d-flex gap-2 mt-1 justify-content-start justify-content-md-end w-100">

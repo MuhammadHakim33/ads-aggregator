@@ -38,6 +38,7 @@ class InstagramDriver extends Platform_driver
                 'title' => mb_substr($p['caption'] ?? 'No Caption', 0, 200),
                 'content_identifier' => $p['id'],
                 'published_at' => isset($p['timestamp']) ? date('Y-m-d H:i:s', strtotime($p['timestamp'])) : null,
+                'source' => $p['permalink'] ?? null,
             ];
         }, $raw);
     }

@@ -37,6 +37,7 @@ class FacebookDriver extends Platform_driver
                 'title' => mb_substr($p['message'] ?? 'No Caption', 0, 200),
                 'content_identifier' => $p['id'],
                 'published_at' => isset($p['created_time']) ? date('Y-m-d H:i:s', strtotime($p['created_time'])) : null,
+                'source' => $p['permalink_url'] ?? null,
                 'platform' => 'facebook',
             ];
         }, $raw);

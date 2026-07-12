@@ -91,6 +91,13 @@
             <?php endif; ?>
 
             <?php if ($role === 'superadmin'): ?>
+                <li class="nav-item">
+                    <a href="<?= base_url('config/role') ?>"
+                        class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'role' ? 'active text-white' : '' ?>">
+                        <i class="bi bi-shield-lock me-2"></i> Roles
+                    </a>
+                </li>
+
                 <!-- platforms section -->
                 <li class="nav-item mt-3 mb-1 px-3">
                     <span class="text-uppercase text-secondary fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
@@ -122,18 +129,6 @@
                     </a>
                 </li>
 
-                <!-- master data section -->
-                <li class="nav-item mt-3 mb-1 px-3">
-                    <span class="text-uppercase text-secondary fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
-                        Master data
-                    </span>
-                </li>
-                <li class="nav-item">
-                    <a href="<?= base_url('config/role') ?>"
-                        class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'role' ? 'active text-white' : '' ?>">
-                        <i class="bi bi-shield-lock me-2"></i> Roles
-                    </a>
-                </li>
             <?php endif; ?>
 
         </ul>

@@ -28,7 +28,7 @@
                             <strong>API Credential</strong>
                         </div>
                         <div class="card-body">
-                            <p class="text-muted small mb-2">Format JSON yang dibutuhkan:</p>
+                            <p class="text-muted small mb-2">Required JSON format:</p>
                             <pre class="bg-light rounded p-2 small mb-3">
 {
     "client_id": "...",
@@ -36,6 +36,47 @@
     "channel_id": "UCxxx..."
 }
 </pre>
+                            <div class="mb-3">
+                                <a class="small text-decoration-none text-muted d-inline-flex align-items-center gap-1"
+                                    data-bs-toggle="collapse" href="#youtubeCredentialGuide" role="button"
+                                    aria-expanded="false" aria-controls="youtubeCredentialGuide">
+                                    <i class="bi bi-question-circle"></i> How to get these credentials?
+                                </a>
+                                <div class="collapse mt-2" id="youtubeCredentialGuide">
+                                    <div class="border rounded p-2 bg-light">
+                                        <p class="small fw-medium mb-1">Google Cloud Console & YouTube Studio</p>
+                                        <table class="table table-sm table-borderless mb-0 small">
+                                            <tbody>
+                                                <tr class="align-top border-bottom">
+                                                    <td class="text-nowrap pe-3 py-2">
+                                                        <code>client_id</code><br><code>client_secret</code>
+                                                    </td>
+                                                    <td class="text-muted py-2">Go to the <strong>Google Cloud
+                                                            Console</strong> → <strong>APIs & Services</strong> →
+                                                        <strong>Credentials</strong>. Click <strong>Create
+                                                            Credentials</strong> → <strong>OAuth client ID</strong>.
+                                                        Choose <strong>Web application</strong> as the application type
+                                                        and set up your authorized redirect URIs if needed. Once
+                                                        created, copy the Client ID and Client Secret provided in the
+                                                        popup.
+                                                    </td>
+                                                </tr>
+                                                <tr class="align-top">
+                                                    <td class="text-nowrap pe-3 py-2"><code>channel_id</code></td>
+                                                    <td class="text-muted py-2">Open <strong>YouTube Studio</strong>. In
+                                                        the left menu, click <strong>Settings</strong> →
+                                                        <strong>Channel</strong> → <strong>Advanced settings</strong>.
+                                                        Scroll down and click <strong>Manage YouTube account</strong>,
+                                                        then select <strong>Advanced settings</strong> from the left
+                                                        menu. Your Channel ID (which typically starts with
+                                                        <code>UC</code>) will be displayed there.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                             <form method="POST" action="<?= base_url('config/platforms/save-credential/youtube') ?>">
                                 <div class="mb-3">
                                     <label for="yt_credential_json" class="form-label fw-medium">Credential JSON</label>

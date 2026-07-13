@@ -81,7 +81,7 @@
                 </li>
             <?php endif; ?>
 
-            <?php if ($role === 'client' || $role === 'ae'): ?>
+            <?php if ($role === 'manajemen' || $role === 'client' || $role === 'ae'): ?>
                 <li class="nav-item">
                     <a href="<?= base_url('complaint') ?>"
                         class="nav-link link-body-emphasis <?= ($active_menu ?? '') === 'complaint' ? 'active text-white' : '' ?>">

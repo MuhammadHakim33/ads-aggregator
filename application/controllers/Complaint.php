@@ -6,7 +6,7 @@ class Complaint extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->require_role('client', 'ae');
+        $this->require_role('client', 'ae', 'manajemen');
         $this->load->model('Complaint_model');
         $this->load->model('Client_model');
         $this->load->model('Ad_model');

@@ -9,7 +9,7 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 mb-3">
                 <form method="GET" action="<?= current_url() ?>" class="d-flex flex-wrap gap-2 align-items-center mb-0">
                     <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                        <option value="">All Statuses</option>
+                        <option value="">All Status</option>
                         <option value="waiting" <?= (isset($filters['status']) && $filters['status'] === 'waiting') ? 'selected' : '' ?>>Waiting</option>
                         <option value="in_progress" <?= (isset($filters['status']) && $filters['status'] === 'in_progress') ? 'selected' : '' ?>>In Progress</option>
                         <option value="resolved" <?= (isset($filters['status']) && $filters['status'] === 'resolved') ? 'selected' : '' ?>>Resolved</option>

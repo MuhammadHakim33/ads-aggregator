@@ -77,7 +77,7 @@ $config['platforms'] = [
             'viewCount',
             'likeCount',
             'commentCount',
-            
+
             // YouTube Analytics API metrics
             'views',
             'estimatedMinutesWatched',
@@ -210,10 +210,6 @@ $config['platforms'] = [
             'ad_server_ctr',
             'ad_server_revenue',
         ],
-        'filters' => [
-            'keyword' => true,
-            'hostname' => false,
-            'html' => false,
-        ],
+
     ],
 ];

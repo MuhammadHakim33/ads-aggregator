@@ -107,7 +107,7 @@ class Request
             CURLOPT_URL            => $url,
             CURLOPT_RETURNTRANSFER => TRUE,
             CURLOPT_TIMEOUT        => 30,
-            CURLOPT_SSL_VERIFYPEER => TRUE, // Wajib TRUE di production
+            CURLOPT_SSL_VERIFYPEER => TRUE,
             CURLOPT_SSL_VERIFYHOST => 2,
         ];
 

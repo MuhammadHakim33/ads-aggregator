@@ -2,9 +2,9 @@
 
 <?php
 $statusMap = [
-    'approved' => ['color' => 'success',   'label' => 'Approved',   'icon' => 'bi-check-circle'],
-    'pending'  => ['color' => 'warning',   'label' => 'Pending',    'icon' => 'bi-hourglass-split'],
-    'rejected' => ['color' => 'danger',    'label' => 'Rejected',   'icon' => 'bi-x-circle'],
+    'approved' => ['color' => 'success', 'label' => 'Approved', 'icon' => 'bi-check-circle'],
+    'pending' => ['color' => 'warning', 'label' => 'Pending', 'icon' => 'bi-hourglass-split'],
+    'rejected' => ['color' => 'danger', 'label' => 'Rejected', 'icon' => 'bi-x-circle'],
 ];
 ?>
 
@@ -14,9 +14,10 @@ $statusMap = [
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
 
-            <!-- Alert unconnected ads -->
+            <!-- alert unconnected ads -->
             <?php if ($total_unconnected_ads > 0): ?>
-                <div class="alert alert-warning alert-dismissible d-flex align-items-center justify-content-between gap-3 fade show mb-4" role="alert">
+                <div class="alert alert-warning alert-dismissible d-flex align-items-center justify-content-between gap-3 fade show mb-4"
+                    role="alert">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-exclamation-triangle-fill"></i>
                         <span>
@@ -28,17 +29,17 @@ $statusMap = [
                 </div>
             <?php endif; ?>
 
-            <!-- Filter Bar -->
+            <!-- filter bar -->
             <form method="GET" action="<?= current_url() ?>" class="d-flex flex-wrap gap-2 align-items-end pb-2 mb-4">
                 <div>
                     <label class="form-label small mb-1">From Date</label>
                     <input type="date" name="start_date" class="form-control form-control-sm"
-                           value="<?= html_escape($filters['start_date']) ?>">
+                        value="<?= html_escape($filters['start_date']) ?>">
                 </div>
                 <div>
                     <label class="form-label small mb-1">To Date</label>
                     <input type="date" name="end_date" class="form-control form-control-sm"
-                           value="<?= html_escape($filters['end_date']) ?>">
+                        value="<?= html_escape($filters['end_date']) ?>">
                 </div>
                 <div>
                     <label class="form-label small mb-1">Client</label>
@@ -55,30 +56,34 @@ $statusMap = [
                     <label class="form-label small mb-1">Status</label>
                     <select name="status" class="form-select form-select-sm">
                         <option value="">All Status</option>
-                        <option value="approved"   <?= $filters['status'] === 'approved'   ? 'selected' : '' ?>>Approved</option>
-                        <option value="pending"    <?= $filters['status'] === 'pending'    ? 'selected' : '' ?>>Pending</option>
-                        <option value="rejected"   <?= $filters['status'] === 'rejected'   ? 'selected' : '' ?>>Rejected</option>
-                        <option value="terminated" <?= $filters['status'] === 'terminated' ? 'selected' : '' ?>>Terminated</option>
+                        <option value="approved" <?= $filters['status'] === 'approved' ? 'selected' : '' ?>>Approved
+                        </option>
+                        <option value="pending" <?= $filters['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
+                        <option value="rejected" <?= $filters['status'] === 'rejected' ? 'selected' : '' ?>>Rejected
+                        </option>
+                        <option value="terminated" <?= $filters['status'] === 'terminated' ? 'selected' : '' ?>>Terminated
+                        </option>
                     </select>
                 </div>
                 <div>
                     <label class="form-label small mb-1">Search</label>
                     <input type="text" name="q" class="form-control form-control-sm"
-                           placeholder="Contract No. / client..." value="<?= html_escape($filters['q'] ?? '') ?>">
+                        placeholder="Contract No. / client..." value="<?= html_escape($filters['q'] ?? '') ?>">
                 </div>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-sm btn-primary">
                         <i class="bi bi-funnel me-1"></i>Filter
                     </button>
-                    <a href="<?= base_url('dashboard') ?>" class="btn btn-sm btn-outline-secondary" title="Reset Filter">
+                    <a href="<?= base_url('dashboard') ?>" class="btn btn-sm btn-outline-secondary"
+                        title="Reset Filter">
                         <i class="bi bi-x-circle"></i>
                     </a>
                 </div>
             </form>
 
-            <!-- Stat Cards -->
+            <!-- stat cards -->
             <div class="row g-3 mb-4">
-                <!-- Total Contracts -->
+                <!-- total contracts -->
                 <div class="col-6 col-md-3">
                     <div class="card border-1 h-100">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -92,7 +97,7 @@ $statusMap = [
                         </div>
                     </div>
                 </div>
-                <!-- Total Value -->
+                <!-- total value -->
                 <div class="col-6 col-md-3">
                     <div class="card border-1 h-100">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -106,7 +111,7 @@ $statusMap = [
                         </div>
                     </div>
                 </div>
-                <!-- Approved -->
+                <!-- approved -->
                 <div class="col-6 col-md-3">
                     <div class="card border-1 h-100">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -120,7 +125,7 @@ $statusMap = [
                         </div>
                     </div>
                 </div>
-                <!-- Pending -->
+                <!-- pending -->
                 <div class="col-6 col-md-3">
                     <div class="card border-1 h-100">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -136,7 +141,7 @@ $statusMap = [
                 </div>
             </div>
 
-            <!-- Contract List Table -->
+            <!-- contract list table -->
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span class="fw-medium">
@@ -193,7 +198,8 @@ $statusMap = [
                                         <td><?= date('d M Y', strtotime($contract->start_date)) ?></td>
                                         <td><?= date('d M Y', strtotime($contract->end_date)) ?></td>
                                         <td>
-                                            <span class="badge bg-<?= $badge['color'] ?> bg-opacity-10 text-<?= $badge['color'] ?> fw-normal">
+                                            <span
+                                                class="badge bg-<?= $badge['color'] ?> bg-opacity-10 text-<?= $badge['color'] ?> fw-normal">
                                                 <i class="bi <?= $badge['icon'] ?> me-1"></i><?= $badge['label'] ?>
                                             </span>
                                             <?php if ($contract->status === 'rejected' && !empty($contract->rejection_reason)): ?>

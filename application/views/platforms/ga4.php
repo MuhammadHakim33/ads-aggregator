@@ -28,7 +28,7 @@
                             <strong>API Credential</strong>
                         </div>
                         <div class="card-body">
-                            <p class="text-muted small mb-2">Format JSON yang dibutuhkan:</p>
+                            <p class="text-muted small mb-2">Required JSON format:</p>
                             <pre class="bg-light rounded p-2 small mb-3">
 {
     "property_id": "123456789",
@@ -41,6 +41,53 @@
     }
 }
 </pre>
+                            <div class="mb-3">
+                                <a class="small text-decoration-none text-muted d-inline-flex align-items-center gap-1"
+                                    data-bs-toggle="collapse" href="#ga4CredentialGuide" role="button"
+                                    aria-expanded="false" aria-controls="ga4CredentialGuide">
+                                    <i class="bi bi-question-circle"></i> How to get these credentials?
+                                </a>
+                                <div class="collapse mt-2" id="ga4CredentialGuide">
+                                    <div class="border rounded p-2 bg-light">
+                                        <p class="small fw-medium mb-1">Google Cloud Console & Google Analytics</p>
+                                        <table class="table table-sm table-borderless mb-0 small">
+                                            <tbody>
+                                                <tr class="align-top border-bottom">
+                                                    <td class="text-nowrap pe-3 py-2"><code>property_id</code></td>
+                                                    <td class="text-muted py-2">Open <strong>Google Analytics</strong>
+                                                        and click <strong>Admin</strong> (usually located at the bottom
+                                                        left of the screen). In the Admin area, look under your Property
+                                                        settings and click <strong>Property details</strong> (or
+                                                        Property Settings). You will find the numeric Property ID at the
+                                                        top right of that page.</td>
+                                                </tr>
+                                                <tr class="align-top">
+                                                    <td class="text-nowrap pe-3 py-2"><code>service_account</code></td>
+                                                    <td class="text-muted py-2">
+                                                        <strong>1. Create Service Account:</strong> Go to <a
+                                                            href="https://console.cloud.google.com"
+                                                            target="_blank">Google Cloud Console</a> → <strong>IAM &amp;
+                                                            Admin</strong> → <strong>Service Accounts</strong>. Click
+                                                        <strong>+ Create Service Account</strong>, fill in the details,
+                                                        and click Done. Click your new service account, go to the
+                                                        <strong>Keys</strong> tab, click <strong>Add Key</strong> →
+                                                        <strong>Create new key</strong> (JSON).<br>
+                                                        <strong>2. Grant Access:</strong> Open GA4
+                                                        <strong>Admin</strong>. Look under your Property settings and
+                                                        click <strong>Property access management</strong>. Click the
+                                                        <strong>+</strong> icon to add a user, paste the service
+                                                        account's email, and grant at least a <strong>Viewer</strong>
+                                                        role.<br>
+                                                        <strong>3. Paste JSON:</strong> Open the downloaded JSON file
+                                                        and paste the entire content into this form.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
                             <form method="POST" action="<?= base_url('config/platforms/save-credential/ga4') ?>">
                                 <div class="mb-3">
                                     <label for="ga4_credential_json" class="form-label fw-medium">Credential

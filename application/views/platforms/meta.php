@@ -28,7 +28,7 @@
                             <strong>API Credential</strong>
                         </div>
                         <div class="card-body">
-                            <p class="text-muted small mb-2">Format JSON yang dibutuhkan:</p>
+                            <p class="text-muted small mb-2">Required JSON format:</p>
                             <pre class="bg-light rounded p-2 small mb-3">
 {
     "system_user_token": "EAAB...",
@@ -36,6 +36,69 @@
     "ig_account_id": "9876543210"
 }
 </pre>
+                            <div class="mb-3">
+                                <a class="small text-decoration-none text-muted d-inline-flex align-items-center gap-1"
+                                    data-bs-toggle="collapse" href="#metaCredentialGuide" role="button"
+                                    aria-expanded="false" aria-controls="metaCredentialGuide">
+                                    <i class="bi bi-question-circle"></i> How to get these credentials?
+                                </a>
+                                <div class="collapse mt-2" id="metaCredentialGuide">
+                                    <div class="border rounded p-2 bg-light">
+                                        <p class="small fw-medium mb-1">Meta Business Suite</p>
+                                        <table class="table table-sm table-borderless mb-0 small">
+                                            <tbody>
+                                                <tr class="align-top border-bottom">
+                                                    <td class="text-nowrap pe-3 py-2"><code>system_user_token</code>
+                                                    </td>
+                                                    <td class="text-muted py-2">
+                                                        <strong>1. Create System User:</strong> Go to <a
+                                                            href="https://business.facebook.com/settings"
+                                                            target="_blank">Meta Business Settings</a> →
+                                                        <strong>Users</strong> → <strong>System Users</strong>. Click
+                                                        <strong>Add</strong>, give it a name, and set the role to
+                                                        <strong>Admin</strong>.<br>
+                                                        <strong>2. Assign Assets:</strong> Select the user, click
+                                                        <strong>Add Assets</strong>. First, select <strong>Apps</strong>
+                                                        and enable Manage App (Full Control). Then, click Add Assets
+                                                        again, select <strong>Pages</strong>, and choose the Facebook
+                                                        Page linked to your Instagram.<br>
+                                                        <strong>3. Generate Token:</strong> Click <strong>Generate New
+                                                            Token</strong>. Select your App and enable these
+                                                        permissions: <code>instagram_basic</code>,
+                                                        <code>pages_show_list</code>, and
+                                                        <code>pages_read_engagement</code>. Click Generate Token and
+                                                        copy the result immediately.
+                                                    </td>
+                                                </tr>
+                                                <tr class="align-top border-bottom">
+                                                    <td class="text-nowrap pe-3 py-2"><code>fb_page_id</code></td>
+                                                    <td class="text-muted py-2">
+                                                        Open <strong>Meta Business Suite</strong> on your desktop web
+                                                        browser. Select your business portfolio from the top-left menu.
+                                                        Click on the <strong>Settings</strong> gear icon in the
+                                                        bottom-left menu. Go to <strong>Business
+                                                            assets</strong></strong>. Click on your specific Facebook
+                                                        Page and a summary tab will appear on the right showing your
+                                                        numeric Facebook Page ID.
+                                                    </td>
+                                                </tr>
+                                                <tr class="align-top">
+                                                    <td class="text-nowrap pe-3 py-2"><code>ig_account_id</code></td>
+                                                    <td class="text-muted py-2">
+                                                        Open <strong>Meta Business Suite</strong> on your desktop web
+                                                        browser. Select your business portfolio from the top-left menu.
+                                                        Click on the <strong>Settings</strong> gear icon in the
+                                                        bottom-left menu. Go to <strong>Business assets</strong>. Click
+                                                        on your
+                                                        specific Instagram account and a summary tab will appear on the
+                                                        right showing your numeric Instagram Account ID.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                             <form method="POST" action="<?= base_url('config/platforms/save-credential/meta') ?>">
                                 <div class="mb-3">
                                     <label for="meta_credential_json" class="form-label fw-medium">Credential

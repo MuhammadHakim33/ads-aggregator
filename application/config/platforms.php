@@ -220,10 +220,6 @@ $config['platforms'] = [
             'ad_server_targeted_clicks',
             'ad_server_tracked_ads',
         ],
-        'filters' => [
-            'keyword' => true,
-            'hostname' => false,
-            'html' => false,
-        ],
+
     ],
 ];

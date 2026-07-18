@@ -9,7 +9,7 @@ class Platforms extends MY_Controller
         'meta' => ['facebook', 'instagram'],
         'ga4' => ['ga4'],
         'youtube' => ['youtube'],
-        'gam' => ['gam'],
+        'gam' => []
     ];
 
     private $keyword_types = ['html', 'keyword', 'hostname'];

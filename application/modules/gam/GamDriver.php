@@ -105,27 +105,12 @@ class GamDriver extends Platform_driver
         $response = $this->CI->request->get($url, $params, $headers);
         $raw = $response['lineItems'] ?? [];
 
-        $keywords = $filters['keywords'] ?? [];
         $filtered = [];
 
         foreach ($raw as $item) {
             $parts = explode('/', $item['name']);
             $id = end($parts);
             $displayName = $item['displayName'] ?? '';
-
-            // filter by keyword
-            if (!empty($keywords)) {
-                $match = false;
-                foreach ($keywords as $kw) {
-                    if (stripos($displayName, $kw) !== false) {
-                        $match = true;
-                        break;
-                    }
-                }
-                if (!$match) {
-                    continue;
-                }
-            }
 
             $filtered[] = [
                 'title' => mb_substr($displayName, 0, 200),

@@ -9,6 +9,13 @@ $config['platforms'] = [
         'driver_path' => APPPATH . 'modules/facebook/FacebookDriver.php',
         'fields' => 'id,message,created_time,permalink_url',
         'insight_fields' => 'comments.summary(true),likes.summary(true),shares,reactions.summary(true)',
+        'extra_metrics' => [
+            'total_comments',
+            'total_likes',
+            'total_shares',
+            'total_reactions',
+            'engagement_rate'
+        ],
         'metrics' => [
             'post_media_view',
             'post_total_media_view_unique',

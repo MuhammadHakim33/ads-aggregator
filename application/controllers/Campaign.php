@@ -364,6 +364,9 @@ class Campaign extends MY_Controller
                     if ($platform === 'instagram' && isset($platforms[$platform]['reels_metrics'])) {
                         $allowed_metrics = array_merge($allowed_metrics, $platforms[$platform]['reels_metrics']);
                     }
+                    if (isset($platforms[$platform]['extra_metrics'])) {
+                        $allowed_metrics = array_merge($allowed_metrics, $platforms[$platform]['extra_metrics']);
+                    }
 
                     foreach ($metrics as $metric) {
                         if (in_array($metric, $allowed_metrics)) {

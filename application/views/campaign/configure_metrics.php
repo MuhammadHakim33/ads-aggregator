@@ -57,6 +57,9 @@
                                             if ($name === 'instagram' && isset($conf['reels_metrics'])) {
                                                 $metrics = array_merge($metrics, $conf['reels_metrics']);
                                             }
+                                            if (isset($conf['extra_metrics'])) {
+                                                $metrics = array_merge($metrics, $conf['extra_metrics']);
+                                            }
                                             $checked_count = 0;
                                             foreach ($metrics as $m) {
                                                 if (isset($current_metrics[$name][$m])) $checked_count++;

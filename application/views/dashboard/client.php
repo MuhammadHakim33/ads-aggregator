@@ -2,8 +2,6 @@
 
 <?php
 $today = date('Y-m-d');
-$totalOpenComplaints = $total_open_complaints ?? 0;
-$contracts_with_campaigns = $contracts_with_campaigns ?? [];
 
 $cStatusMap = [
     'pending' => ['color' => 'warning', 'label' => 'Pending', 'icon' => 'bi-hourglass-split'],
@@ -19,7 +17,6 @@ $cStatusMap = [
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
 
-            <!-- Flash Alerts -->
             <?php if ($this->session->flashdata('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
                     <?= $this->session->flashdata('success') ?>
@@ -27,9 +24,7 @@ $cStatusMap = [
                 </div>
             <?php endif; ?>
 
-            <!-- ── Stat Cards ── -->
             <div class="row g-3 mb-4">
-                <!-- Active Contracts -->
                 <div class="col-6 col-md-3">
                     <a href="<?= base_url('contract') ?>" class="text-decoration-none">
                         <div class="card border-1 h-100">
@@ -45,7 +40,6 @@ $cStatusMap = [
                         </div>
                     </a>
                 </div>
-                <!-- Running Campaigns -->
                 <div class="col-6 col-md-3">
                     <a href="<?= base_url('campaign') ?>" class="text-decoration-none">
                         <div class="card border-1 h-100">
@@ -61,7 +55,6 @@ $cStatusMap = [
                         </div>
                     </a>
                 </div>
-                <!-- Total Ads -->
                 <div class="col-6 col-md-3">
                     <div class="card border-1 h-100">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -75,22 +68,21 @@ $cStatusMap = [
                         </div>
                     </div>
                 </div>
-                <!-- Open Complaints -->
                 <div class="col-6 col-md-3">
                     <a href="<?= base_url('complaint') ?>" class="text-decoration-none">
-                        <div class="card border-1 h-100 <?= $totalOpenComplaints > 0 ? 'border-warning' : '' ?>">
+                        <div class="card border-1 h-100 <?= $total_open_complaints > 0 ? 'border-warning' : '' ?>">
                             <div class="card-body d-flex align-items-center gap-3">
                                 <div
-                                    class="rounded-3 p-3 <?= $totalOpenComplaints > 0 ? 'bg-warning bg-opacity-10' : 'bg-secondary bg-opacity-10' ?>">
+                                    class="rounded-3 p-3 <?= $total_open_complaints > 0 ? 'bg-warning bg-opacity-10' : 'bg-secondary bg-opacity-10' ?>">
                                     <i
-                                        class="bi bi-exclamation-octagon fs-4 <?= $totalOpenComplaints > 0 ? 'text-warning' : 'text-secondary' ?>"></i>
+                                        class="bi bi-exclamation-octagon fs-4 <?= $total_open_complaints > 0 ? 'text-warning' : 'text-secondary' ?>"></i>
                                 </div>
                                 <div>
                                     <div
-                                        class="fs-2 fw-bold lh-1 <?= $totalOpenComplaints > 0 ? 'text-warning' : '' ?>">
-                                        <?= $totalOpenComplaints ?>
+                                        class="fs-2 fw-bold lh-1 <?= $total_open_complaints > 0 ? 'text-warning' : '' ?>">
+                                        <?= $total_open_complaints ?>
                                     </div>
-                                    <div class="text-muted small mt-1">Open Complaints</div>
+                                    <div class="text-muted small mt-1">In Progress Complaints</div>
                                 </div>
                             </div>
                         </div>
@@ -100,7 +92,7 @@ $cStatusMap = [
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="mb-0 fw-semibold">
-                    <i class="bi bi-file-earmark-text me-2"></i>Contracts &amp; Campaigns
+                    <i class="bi bi-file-earmark-text me-2"></i>Contracts & Campaigns
                 </h6>
                 <a href="<?= base_url('contract') ?>" class="btn btn-sm btn-outline-secondary">
                     View All <i class="bi bi-arrow-right ms-1"></i>
@@ -112,7 +104,6 @@ $cStatusMap = [
                     <div class="card-body text-center text-muted py-5">
                         <i class="bi bi-file-earmark fs-1 d-block mb-2 opacity-50"></i>
                         <div>No Contracts</div>
-                        <div class="small mt-1">Your contracts will appear here after being approved.</div>
                     </div>
                 </div>
             <?php else: ?>
@@ -126,14 +117,11 @@ $cStatusMap = [
                                 $running_count++;
                         }
                         $collapse_id = 'contract-collapse-' . $contract->id;
-                        $is_first = $idx === 0;
                         ?>
                         <div class="card">
-
-                            <!-- Contract Header (accordion toggle) -->
                             <div class="card-header d-flex flex-wrap gap-2 align-items-center justify-content-between"
                                 role="button" data-bs-toggle="collapse" data-bs-target="#<?= $collapse_id ?>"
-                                aria-expanded="<?= $is_first ? 'true' : 'false' ?>" aria-controls="<?= $collapse_id ?>">
+                                aria-controls="<?= $collapse_id ?>">
 
                                 <div class="d-flex align-items-center gap-3 flex-grow-1 overflow-hidden">
                                     <div>
@@ -153,7 +141,7 @@ $cStatusMap = [
                                         </div>
                                         <div class="text-muted small">
                                             <i class="bi bi-calendar3 me-1"></i>
-                                            <?= date('d M Y', strtotime($contract->start_date)) ?> &mdash;
+                                            <?= date('d M Y', strtotime($contract->start_date)) ?> -
                                             <?= date('d M Y', strtotime($contract->end_date)) ?>
                                             <?php if (!empty($contract->value)): ?>
                                                 &nbsp;&bull;&nbsp;
@@ -178,8 +166,7 @@ $cStatusMap = [
                                 </div>
                             </div>
 
-                            <!-- Collapse body: Campaign list -->
-                            <div class="collapse <?= $is_first ? 'show' : '' ?>" id="<?= $collapse_id ?>">
+                            <div class="collapse" id="<?= $collapse_id ?>">
                                 <?php if (empty($contract->campaigns)): ?>
                                     <div class="card-body text-center text-muted py-4">
                                         <i class="bi bi-megaphone fs-2 d-block mb-2 opacity-50"></i>
@@ -235,17 +222,14 @@ $cStatusMap = [
                                     <div class="card-footer">
                                         <small class="text-muted">
                                             Showing <?= $campaign_count ?> campaigns
-                                            &bull; <?= $running_count ?> running
                                         </small>
                                     </div>
                                 <?php endif; ?>
                             </div>
-
                         </div>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
-
         </div>
     </main>
 </div>

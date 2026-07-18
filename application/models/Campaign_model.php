@@ -3,49 +3,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Campaign_model extends CI_Model
 {
-    public $table = 'campaigns';
-
-    // public function __construct()
-    // {
-    //     parent::__construct();
-
-    //     // Safety check: Create the campaigns table if it doesn't exist
-    //     if (!$this->db->table_exists($this->table)) {
-    //         $sql = "CREATE TABLE IF NOT EXISTS campaigns (
-    //           id INT PRIMARY KEY AUTO_INCREMENT,
-    //           contract_id INT NOT NULL,
-    //           name VARCHAR(255) NOT NULL,
-    //           description TEXT NULL,
-    //           start_date DATE NOT NULL,
-    //           end_date DATE NOT NULL,
-    //           is_active BOOLEAN DEFAULT TRUE,
-    //           deleted_at TIMESTAMP NULL,
-    //           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    //           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    //           FOREIGN KEY (contract_id) REFERENCES contracts(id)
-    //         )";
-    //         $this->db->query($sql);
-    //     } else {
-    //         // Dynamically verify and add deleted_at if missing (safety check for option A)
-    //         if (!$this->db->field_exists('deleted_at', $this->table)) {
-    //             $this->load->dbforge();
-    //             $fields = [
-    //                 'deleted_at' => [
-    //                     'type' => 'TIMESTAMP',
-    //                     'null' => TRUE,
-    //                     'default' => NULL
-    //                 ]
-    //             ];
-    //             $this->dbforge->add_column($this->table, $fields);
-    //         }
-    //     }
-    // }
-
     public function get_all($filters = [])
     {
         $this->db->select('campaigns.*, contracts.contract_number, clients.company_name as client_name');
-        $this->db->from($this->table);
+        $this->db->from('campaigns');
         $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
         $this->db->where('campaigns.deleted_at', NULL);
@@ -63,12 +24,16 @@ class Campaign_model extends CI_Model
             $this->db->where('contracts.client_id', $filters['client_id']);
         }
 
-        if (!empty($filters['ae_id'])) {
-            $this->db->where('clients.ae_id', $filters['ae_id']);
-        }
-
         if (isset($filters['status']) && $filters['status'] !== '') {
-            $this->db->where('campaigns.is_active', $filters['status']);
+            if ($filters['status'] == '1') {
+                $this->db->where('campaigns.start_date <=', date('Y-m-d'));
+                $this->db->where('campaigns.end_date >=', date('Y-m-d'));
+            } else {
+                $this->db->group_start();
+                $this->db->where('campaigns.start_date >', date('Y-m-d'));
+                $this->db->or_where('campaigns.end_date <', date('Y-m-d'));
+                $this->db->group_end();
+            }
         }
 
         $this->db->order_by('campaigns.created_at', 'DESC');
@@ -78,7 +43,7 @@ class Campaign_model extends CI_Model
     public function get_by_id($id)
     {
         $this->db->select('campaigns.*, contracts.contract_number, clients.company_name as client_name, contracts.start_date as contract_start, contracts.end_date as contract_end, contracts.terminated_at as contract_terminated, contracts.client_id, clients.ae_id');
-        $this->db->from($this->table);
+        $this->db->from('campaigns');
         $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
         $this->db->where('campaigns.id', $id);
@@ -88,7 +53,7 @@ class Campaign_model extends CI_Model
 
     public function insert($data)
     {
-        $this->db->insert($this->table, $data);
+        $this->db->insert('campaigns', $data);
         return $this->db->insert_id();
     }
 
@@ -96,7 +61,7 @@ class Campaign_model extends CI_Model
     {
         $this->db->where('id', $id);
         $this->db->where('deleted_at', NULL);
-        $this->db->update($this->table, $data);
+        $this->db->update('campaigns', $data);
         return $this->db->affected_rows();
     }
 
@@ -106,7 +71,7 @@ class Campaign_model extends CI_Model
             'deleted_at' => date('Y-m-d H:i:s')
         ];
         $this->db->where('id', $id);
-        $this->db->update($this->table, $data);
+        $this->db->update('campaigns', $data);
         return $this->db->affected_rows();
     }
 
@@ -115,19 +80,19 @@ class Campaign_model extends CI_Model
         $this->db->where('contract_id', $contract_id);
         $this->db->where('deleted_at', NULL);
         $this->db->order_by('created_at', 'DESC');
-        return $this->db->get($this->table)->result();
+        return $this->db->get('campaigns')->result();
     }
 
     public function has_ads($id)
     {
         $this->db->where('campaign_id', $id);
-        $this->db->where('is_active', 1);
         return $this->db->count_all_results('ad_contents') > 0;
     }
 
     public function count_running($client_id = null, $ae_id = null)
     {
         $this->db->where('campaigns.deleted_at', NULL);
+        $this->db->where('campaigns.start_date <=', date('Y-m-d'));
         $this->db->where('campaigns.end_date >=', date('Y-m-d'));
         if ($client_id || $ae_id) {
             $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
@@ -139,14 +104,14 @@ class Campaign_model extends CI_Model
                 $this->db->where('clients.ae_id', $ae_id);
             }
         }
-        return $this->db->count_all_results($this->table);
+        return $this->db->count_all_results('campaigns');
     }
 
     public function get_campaign_with_ads_and_metrics($campaign_id)
     {
         // get campaign details with contract and client info
         $this->db->select('camp.*, cont.contract_number, cont.value as contract_value, c.company_name as client_name, (SELECT name FROM client_pics WHERE client_id = c.id AND is_active = 1 LIMIT 1) as client_pic, cont.client_id, c.ae_id');
-        $this->db->from($this->table . ' camp');
+        $this->db->from('campaigns' . ' camp');
         $this->db->join('contracts cont', 'cont.id = camp.contract_id', 'left');
         $this->db->join('clients c', 'c.id = cont.client_id', 'left');
         $this->db->where('camp.id', $campaign_id);
@@ -157,7 +122,7 @@ class Campaign_model extends CI_Model
             return null;
         }
 
-        // Initialize reported metrics flag
+        // initialize reported metrics flag
         $campaign->has_reported_metrics = false;
 
         // get all ads associated with this campaign
@@ -174,7 +139,7 @@ class Campaign_model extends CI_Model
             $this->db->order_by('metric_name', 'ASC');
             $metrics = $this->db->get('ad_metrics')->result();
 
-            // Create map of ad ID to its platform
+            // create map of ad ID to its platform
             $ad_platforms = [];
             foreach ($ads as $ad) {
                 $ad_platforms[$ad->id] = $ad->platform;
@@ -224,11 +189,11 @@ class Campaign_model extends CI_Model
     {
         $this->db->trans_start();
 
-        // Delete existing
+        // delete existing
         $this->db->where('campaign_id', $campaign_id);
         $this->db->delete('campaign_reported_metrics');
 
-        // Insert new
+        // insert new
         if (!empty($selected_metrics)) {
             $insert_data = [];
             foreach ($selected_metrics as $platform => $metrics) {
@@ -255,7 +220,8 @@ class Campaign_model extends CI_Model
     public function deactivate_by_contract($contract_id)
     {
         $this->db->where('contract_id', $contract_id);
-        $this->db->update($this->table, ['is_active' => 0]);
+        $this->db->where('end_date >=', date('Y-m-d'));
+        $this->db->update('campaigns', ['end_date' => date('Y-m-d')]);
         return $this->db->affected_rows();
     }
 }

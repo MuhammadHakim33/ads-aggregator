@@ -3,12 +3,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Contract_model extends CI_Model
 {
-    public $table = 'contracts';
-
     public function get_all($filters = [])
     {
         $this->db->select('contracts.*, clients.company_name as client_name, approver.name as approver_name');
-        $this->db->from($this->table);
+        $this->db->from('contracts');
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
         $this->db->join('accounts approver', 'approver.id = contracts.approved_by', 'left');
         $this->db->where('contracts.deleted_at', NULL);
@@ -36,7 +34,7 @@ class Contract_model extends CI_Model
     public function get_all_for_select()
     {
         $this->db->select('contracts.*, clients.company_name as client_name');
-        $this->db->from($this->table);
+        $this->db->from('contracts');
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
         $this->db->where('contracts.deleted_at', NULL);
         $this->db->where('contracts.status', 'approved');
@@ -49,7 +47,7 @@ class Contract_model extends CI_Model
     public function get_by_id($id)
     {
         $this->db->select('contracts.*, clients.company_name as client_name, approver.name as approver_name');
-        $this->db->from($this->table);
+        $this->db->from('contracts');
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
         $this->db->join('accounts approver', 'approver.id = contracts.approved_by', 'left');
         $this->db->where('contracts.id', $id);
@@ -59,7 +57,7 @@ class Contract_model extends CI_Model
 
     public function insert($data)
     {
-        $this->db->insert($this->table, $data);
+        $this->db->insert('contracts', $data);
         return $this->db->insert_id();
     }
 
@@ -67,7 +65,7 @@ class Contract_model extends CI_Model
     {
         $this->db->where('id', $id);
         $this->db->where('deleted_at', NULL);
-        $this->db->update($this->table, $data);
+        $this->db->update('contracts', $data);
         return $this->db->affected_rows();
     }
 
@@ -77,7 +75,7 @@ class Contract_model extends CI_Model
             'deleted_at' => date('Y-m-d H:i:s')
         ];
         $this->db->where('id', $id);
-        $this->db->update($this->table, $data);
+        $this->db->update('contracts', $data);
         return $this->db->affected_rows();
     }
 
@@ -95,7 +93,7 @@ class Contract_model extends CI_Model
             $this->db->where('id !=', $exclude_id);
         }
         $this->db->where('deleted_at', NULL);
-        return $this->db->count_all_results($this->table) === 0;
+        return $this->db->count_all_results('contracts') === 0;
     }
 
     public function count_active($client_id = null, $ae_id = null)
@@ -103,6 +101,8 @@ class Contract_model extends CI_Model
         $this->db->where('contracts.deleted_at', NULL);
         $this->db->where('contracts.terminated_at', NULL);
         $this->db->where('contracts.status', 'approved');
+        $this->db->where('contracts.start_date <=', date('Y-m-d'));
+        $this->db->where('contracts.end_date >=', date('Y-m-d'));
         if ($client_id) {
             $this->db->where('contracts.client_id', $client_id);
         }
@@ -110,13 +110,7 @@ class Contract_model extends CI_Model
             $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
             $this->db->where('clients.ae_id', $ae_id);
         }
-        return $this->db->count_all_results($this->table);
-    }
-
-    public function count_total()
-    {
-        $this->db->where('deleted_at', NULL);
-        return $this->db->count_all_results($this->table);
+        return $this->db->count_all_results('contracts');
     }
 
     public function get_items($contract_id)
@@ -139,29 +133,29 @@ class Contract_model extends CI_Model
         return $this->db->delete('contract_items');
     }
 
-    /**
-     * Get all contracts for a client with their campaigns nested inside.
-     */
-    public function get_all_with_campaigns($client_id)
+    public function get_all_with_campaigns($client_id, $limit = null)
     {
-        // Fetch all contracts for this client
+        // fetch all contracts for this client
         $this->db->select('contracts.*, clients.company_name as client_name, approver.name as approver_name');
-        $this->db->from($this->table);
+        $this->db->from('contracts');
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
         $this->db->join('accounts approver', 'approver.id = contracts.approved_by', 'left');
         $this->db->where('contracts.deleted_at', NULL);
         $this->db->where('contracts.client_id', $client_id);
         $this->db->order_by('contracts.created_at', 'DESC');
+        if ($limit !== null) {
+            $this->db->limit($limit);
+        }
         $contracts = $this->db->get()->result();
 
         if (empty($contracts)) {
             return [];
         }
 
-        // Collect contract IDs
+        // collect contract IDs
         $contract_ids = array_column($contracts, 'id');
 
-        // Fetch all campaigns belonging to these contracts
+        // fetch all campaigns belonging to these contracts
         $this->db->select('campaigns.*, contracts.contract_number');
         $this->db->from('campaigns');
         $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
@@ -170,13 +164,13 @@ class Contract_model extends CI_Model
         $this->db->order_by('campaigns.start_date', 'ASC');
         $campaigns = $this->db->get()->result();
 
-        // Index campaigns by contract_id
+        // index campaigns by contract_id
         $campaigns_map = [];
         foreach ($campaigns as $c) {
             $campaigns_map[$c->contract_id][] = $c;
         }
 
-        // Attach campaigns to each contract
+        // attach campaigns to each contract
         foreach ($contracts as &$contract) {
             $contract->campaigns = $campaigns_map[$contract->id] ?? [];
         }

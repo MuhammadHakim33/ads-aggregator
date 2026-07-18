@@ -14,12 +14,14 @@
                         <option value="0" <?= (isset($filters['status']) && $filters['status'] === '0') ? 'selected' : '' ?>>Inactive</option>
                     </select>
 
-                    <select name="client_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                        <option value="">All Clients</option>
-                        <?php foreach ($clients as $c): ?>
-                            <option value="<?= $c->id ?>" <?= (isset($filters['client_id']) && $filters['client_id'] == $c->id) ? 'selected' : '' ?>><?= htmlspecialchars($c->company_name) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <?php if ($this->session->userdata('role') === 'manajemen'): ?>
+                        <select name="client_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                            <option value="">All Clients</option>
+                            <?php foreach ($clients as $c): ?>
+                                <option value="<?= $c->id ?>" <?= (isset($filters['client_id']) && $filters['client_id'] == $c->id) ? 'selected' : '' ?>><?= htmlspecialchars($c->company_name) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php endif; ?>
 
                     <div class="input-group input-group-sm" style="width: 250px;">
                         <span class="input-group-text bg-white border-end-0"><i
@@ -152,14 +154,14 @@
 </div>
 
 <script>
-$(function () {
-    $('#deleteModal').on('show.bs.modal', function (event) {
-        const $btn = $(event.relatedTarget);
-        $('#deleteCampaignName').text($btn.attr('data-name'));
-        $('#deleteClientName').text($btn.attr('data-client'));
-        $('#deleteForm').attr('action', '<?= base_url('campaign/delete/') ?>' + $btn.attr('data-id'));
+    $(function () {
+        $('#deleteModal').on('show.bs.modal', function (event) {
+            const $btn = $(event.relatedTarget);
+            $('#deleteCampaignName').text($btn.attr('data-name'));
+            $('#deleteClientName').text($btn.attr('data-client'));
+            $('#deleteForm').attr('action', '<?= base_url('campaign/delete/') ?>' + $btn.attr('data-id'));
+        });
     });
-});
 </script>
 
 <?php $this->load->view('templates/footer'); ?>

@@ -6,7 +6,6 @@ class Complaint extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->require_role('client', 'ae', 'manajemen');
         $this->load->model('Complaint_model');
         $this->load->model('Client_model');
         $this->load->model('Ad_model');
@@ -15,6 +14,7 @@ class Complaint extends MY_Controller
 
     public function index()
     {
+        $this->require_role('client', 'ae', 'manajemen');
         $role = $this->current_account['role'];
         $user_id = $this->current_account['id'];
         $filters = [
@@ -24,7 +24,7 @@ class Complaint extends MY_Controller
 
         if ($role === 'client') {
             $client = $this->Client_model->get_by_account_id($user_id);
-            $filters['client_id'] = $client ? $client->id : -1;
+            $filters['client_id'] = $client->id;
         } elseif ($role === 'ae') {
             $filters['ae_id'] = $user_id;
         }
@@ -87,14 +87,12 @@ class Complaint extends MY_Controller
             return;
         }
 
-        // Authorization checks
         $role = $this->current_account['role'];
         $user_id = $this->current_account['id'];
 
         if ($role === 'client') {
             $client = $this->Client_model->get_by_account_id($user_id);
-            $client_id = $client ? $client->id : -1;
-            if ($complaint->client_id != $client_id) {
+            if ($complaint->client_id != $client->id) {
                 show_error('Unauthorized', 403);
                 return;
             }
@@ -148,7 +146,7 @@ class Complaint extends MY_Controller
         redirect('complaint/detail/' . $id);
     }
 
-    // Callback validation to check if the client owns the selected ad
+    // callback validation
     public function ad_ownership_check($ad_content_id, $client_id)
     {
         $ad = $this->Ad_model->get_ad_with_metrics($ad_content_id);

@@ -63,7 +63,7 @@ class Contract extends MY_Controller
     public function create()
     {
         $this->require_role('manajemen', 'client');
-        
+
         $role = $this->current_account['role'];
         $client_id = null;
         $client = null;
@@ -106,7 +106,7 @@ class Contract extends MY_Controller
                     $client_id = $this->input->post('client_id');
                     $client = $this->Client_model->get_by_id($client_id);
                 }
-                
+
                 if (!$client) {
                     $this->session->set_flashdata('errors', 'Selected Client not found.');
                     redirect('contract/create');
@@ -225,7 +225,6 @@ class Contract extends MY_Controller
             }
         }
 
-        // Prepare view data
         $clients_list = ($role === 'client') ? [] : $this->Client_model->get_all();
         $products = $this->Product_model->get_all_active();
 
@@ -357,7 +356,7 @@ class Contract extends MY_Controller
                     }
                 } else {
                     $update_data['client_id'] = $this->input->post('client_id');
-                    
+
                     $is_terminated = $this->input->post('is_terminated');
                     if ($is_terminated) {
                         $update_data['terminated_at'] = $this->input->post('terminated_at') ?: date('Y-m-d H:i:s');
@@ -468,8 +467,7 @@ class Contract extends MY_Controller
         $role = $this->current_account['role'];
         if ($role === 'client') {
             $client = $this->Client_model->get_by_account_id($this->current_account['id']);
-            $client_id = $client ? $client->id : -1;
-            if ($contract->client_id != $client_id) {
+            if ($contract->client_id !== $client->id) {
                 show_error('Unauthorized', 403);
                 return;
             }
@@ -553,22 +551,7 @@ class Contract extends MY_Controller
         redirect('contract');
     }
 
-    public function get_product_json($id)
-    {
-        $this->require_role('manajemen', 'client');
-        $product = $this->Product_model->get_by_id($id);
-        if ($product) {
-            $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode($product));
-        } else {
-            $this->output
-                ->set_status_header(404)
-                ->set_output(json_encode(['error' => 'Product not found']));
-        }
-    }
-
-    public function get_items_json($contract_id)
+    public function get_detail_json($contract_id)
     {
         $this->require_role('manajemen', 'client');
         $contract = $this->Contract_model->get_by_id($contract_id);
@@ -580,8 +563,7 @@ class Contract extends MY_Controller
         $role = $this->current_account['role'];
         if ($role === 'client') {
             $client = $this->Client_model->get_by_account_id($this->current_account['id']);
-            $client_id = $client ? $client->id : -1;
-            if ($contract->client_id != $client_id) {
+            if ($contract->client_id !== $client->id) {
                 $this->output->set_status_header(403)->set_output(json_encode(['error' => 'Unauthorized']));
                 return;
             }
@@ -596,94 +578,13 @@ class Contract extends MY_Controller
             ]));
     }
 
-    public function migrate()
-    {
-        if (ENVIRONMENT !== 'development' && $this->current_account['role'] !== 'superadmin') {
-            show_error('Unauthorized', 403);
-            return;
-        }
-
-        $this->db->trans_start();
-
-        if (!$this->db->field_exists('status', 'contracts')) {
-            $this->db->query("ALTER TABLE contracts 
-                ADD COLUMN status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'approved',
-                ADD COLUMN rejection_reason TEXT NULL,
-                ADD COLUMN approved_by INT NULL,
-                ADD COLUMN approved_at TIMESTAMP NULL,
-                ADD CONSTRAINT fk_contracts_approved_by FOREIGN KEY (approved_by) REFERENCES accounts(id)");
-            echo "Added status and approval columns to contracts.<br>";
-        }
-
-        if (!$this->db->table_exists('products')) {
-            $this->db->query("CREATE TABLE products (
-              id INT PRIMARY KEY AUTO_INCREMENT,
-              category ENUM('content_marketing', 'banner_ads', 'social_media') NOT NULL,
-              name VARCHAR(255) NOT NULL,
-              platform_type ENUM('desktop', 'mobile', 'social') NOT NULL,
-              price_model ENUM('cpm', 'per_day', 'per_week', 'fixed') NOT NULL,
-              price DECIMAL(15,2) NOT NULL,
-              is_active BOOLEAN DEFAULT TRUE,
-              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )");
-            echo "Created products table.<br>";
-
-            $this->db->query("INSERT INTO products (category, name, platform_type, price_model, price, is_active) VALUES
-                ('content_marketing', 'Content Partnership - Khas', 'desktop', 'fixed', 15000000.00, 1),
-                ('content_marketing', 'Content Partnership - Khas Korporasi & Kementerian', 'desktop', 'fixed', 25000000.00, 1),
-                ('banner_ads', 'Masthead Desktop', 'desktop', 'cpm', 50000.00, 1),
-                ('banner_ads', 'Leaderboard Desktop', 'desktop', 'cpm', 35000.00, 1),
-                ('banner_ads', 'Billboard Desktop', 'desktop', 'cpm', 40000.00, 1),
-                ('banner_ads', 'Masthead Mobile', 'mobile', 'cpm', 45000.00, 1),
-                ('banner_ads', 'Mid-article Mobile', 'mobile', 'cpm', 30000.00, 1),
-                ('social_media', 'Instagram Feed Post', 'social', 'fixed', 5000000.00, 1),
-                ('social_media', 'YouTube Video Integration', 'social', 'fixed', 12500000.00, 1)");
-            echo "Seeded products table.<br>";
-        }
-
-        if (!$this->db->table_exists('contract_items')) {
-            $this->db->query("CREATE TABLE contract_items (
-              id INT PRIMARY KEY AUTO_INCREMENT,
-              contract_id INT NOT NULL,
-              product_id INT NOT NULL,
-              quantity INT NOT NULL DEFAULT 1,
-              price DECIMAL(15,2) NOT NULL COMMENT 'Snapshot harga saat dibuat',
-              subtotal DECIMAL(15,2) NOT NULL,
-              
-              FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE,
-              FOREIGN KEY (product_id) REFERENCES products(id)
-            )");
-            echo "Created contract_items table.<br>";
-        }
-
-        $this->db->trans_complete();
-
-        if ($this->db->trans_status() === FALSE) {
-            echo "Migration failed!";
-        } else {
-            echo "Migration completed successfully!";
-        }
-    }
-
+    // custom validation
     public function client_check($client_id)
     {
         $client = $this->Client_model->get_by_id($client_id);
         if (!$client) {
             $this->form_validation->set_message([
                 'client_check' => 'The selected Client does not exist or is inactive.'
-            ]);
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-    public function contract_number_check($contract_number)
-    {
-        $is_unique = $this->Contract_model->is_contract_number_unique($contract_number, $this->editing_id);
-
-        if (!$is_unique) {
-            $this->form_validation->set_message([
-                'contract_number_check' => 'The Contract Number is already in use.'
             ]);
             return FALSE;
         }
@@ -714,6 +615,7 @@ class Contract extends MY_Controller
         return TRUE;
     }
 
+    // helper
     public function generate_contract_number($client_name)
     {
         $prefix = "KTN";

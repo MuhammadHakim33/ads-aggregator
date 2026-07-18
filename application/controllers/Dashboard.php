@@ -12,106 +12,132 @@ class Dashboard extends MY_Controller
         $this->load->model('Ad_model');
         $this->load->model('Complaint_model');
         $this->load->model('Report_model');
+        $this->load->model('Cron_log_model');
     }
 
     public function index()
     {
         $role = $this->current_account['role'];
-        $user_id = $this->current_account['id'];
-
-        $client_id = null;
-        $ae_id = null;
 
         if ($role === 'client') {
-            $client = $this->Client_model->get_by_account_id($user_id);
-            $client_id = $client ? $client->id : -1;
+            $this->client();
+        } elseif ($role === 'manajemen') {
+            $this->manajemen();
         } elseif ($role === 'ae') {
-            $ae_id = $user_id;
+            $this->ae();
+        } elseif ($role === 'superadmin') {
+            $this->superadmin();
+        } else {
+            $this->superadmin();
         }
+    }
+
+    private function client()
+    {
+        $user_id = $this->current_account['id'];
+        $client = $this->Client_model->get_by_account_id($user_id);
+        $client_id = $client->id;
+        $complaints = $this->Complaint_model->get_all(['client_id' => $client_id]);
 
         $data = [
             'title' => 'Dashboard',
             'active_menu' => 'dashboard',
-            'total_contracts_active' => $this->Contract_model->count_active($client_id, $ae_id),
-            'total_campaigns_running' => $this->Campaign_model->count_running($client_id, $ae_id),
-            'total_unconnected_ads' => in_array($role, ['ae', 'manajemen'])
-                ? $this->Ad_model->count_unconnected()
-                : 0,
+            'total_contracts_active' => $this->Contract_model->count_active($client_id, null),
+            'total_campaigns_running' => $this->Campaign_model->count_running($client_id, null),
+            'total_unconnected_ads' => 0,
+            'total_open_complaints' => count(array_filter($complaints, function ($c) {
+                return $c->status === 'in_progress';
+            })),
+            'contracts_with_campaigns' => $this->Contract_model->get_all_with_campaigns($client_id, 5),
+            'total_ads' => $this->Ad_model->count_all_ads_by_client($client_id),
         ];
 
-        if ($role === 'client') {
-            $complaints = $this->Complaint_model->get_all(['client_id' => $client_id]);
-            $data['total_open_complaints'] = count(array_filter($complaints, function ($c) {
-                return $c->status === 'open';
-            }));
-            $data['contracts_with_campaigns'] = $this->Contract_model->get_all_with_campaigns($client_id);
-            $data['total_ads'] = $this->Ad_model->count_all_ads_by_client($client_id);
+        $this->render('dashboard/client', $data);
+    }
 
-            $this->render('dashboard/client', $data);
-            return;
-        }
+    private function manajemen()
+    {
+        $data = [
+            'title' => 'Dashboard',
+            'active_menu' => 'dashboard',
+            'total_contracts_active' => $this->Contract_model->count_active(null, null),
+            'total_campaigns_running' => $this->Campaign_model->count_running(null, null),
+            'total_unconnected_ads' => $this->Ad_model->count_unconnected(),
+        ];
 
-        if ($role === 'manajemen') {
-            // Default filter: current month
-            $default_start = date('Y-m-01');
-            $default_end   = date('Y-m-t');
+        $default_start = date('Y-m-01');
+        $default_end = date('Y-m-t');
 
-            $filters = [
-                'start_date' => $this->input->get('start_date') ?: $default_start,
-                'end_date'   => $this->input->get('end_date')   ?: $default_end,
-                'client_id'  => $this->input->get('client_id'),
-                'status'     => $this->input->get('status'),
-                'q'          => $this->input->get('q'),
-            ];
+        $filters = [
+            'start_date' => $this->input->get('start_date') ?: $default_start,
+            'end_date' => $this->input->get('end_date') ?: $default_end,
+            'client_id' => $this->input->get('client_id'),
+            'status' => $this->input->get('status'),
+            'q' => $this->input->get('q'),
+        ];
 
-            $contract_list = $this->Report_model->get_contract_report_list($filters);
+        $contract_list = $this->Report_model->get_contract_report_list($filters);
 
-            $total_contracts  = count($contract_list);
-            $total_value      = 0;
-            $total_approved   = 0;
-            $total_terminated = 0;
-            $total_pending    = 0;
+        $total_contracts = count($contract_list);
+        $total_value = 0;
+        $total_approved = 0;
+        $total_terminated = 0;
+        $total_pending = 0;
 
-            foreach ($contract_list as $c) {
-                $total_value += (float) ($c->value ?? 0);
-                if (!empty($c->terminated_at)) {
-                    $total_terminated++;
-                } elseif ($c->status === 'approved') {
-                    $total_approved++;
-                } elseif ($c->status === 'pending') {
-                    $total_pending++;
-                }
+        foreach ($contract_list as $c) {
+            $total_value += (float) ($c->value ?? 0);
+            if (!empty($c->terminated_at)) {
+                $total_terminated++;
+            } elseif ($c->status === 'approved') {
+                $total_approved++;
+            } elseif ($c->status === 'pending') {
+                $total_pending++;
             }
-
-            $data['filters']          = $filters;
-            $data['clients']          = $this->Client_model->get_all();
-            $data['contract_list']    = $contract_list;
-            $data['total_contracts']  = $total_contracts;
-            $data['total_value']      = $total_value;
-            $data['total_approved']   = $total_approved;
-            $data['total_terminated'] = $total_terminated;
-            $data['total_pending']    = $total_pending;
-            $data['total_unconnected_ads'] = $this->Ad_model->count_unconnected();
-
-            $this->render('dashboard/manajemen', $data);
-            return;
         }
 
-        if ($role === 'ae') {
-            $data['total_clients_handled'] = $this->Client_model->count_active($ae_id);
-            $this->render('dashboard/ae', $data);
-            return;
-        }
-        if ($role === 'superadmin') {
-            $data['total_clients_active'] = $this->Client_model->count_active();
-            $data['total_clients'] = $this->Client_model->count_total();
-            $this->load->model('Cron_log_model');
-            $data['cron_last_per_platform'] = $this->Cron_log_model->get_last_per_platform();
-            $data['cron_recent'] = $this->Cron_log_model->get_latest(10);
+        $data['filters'] = $filters;
+        $data['clients'] = $this->Client_model->get_all();
+        $data['contract_list'] = $contract_list;
+        $data['total_contracts'] = $total_contracts;
+        $data['total_value'] = $total_value;
+        $data['total_approved'] = $total_approved;
+        $data['total_terminated'] = $total_terminated;
+        $data['total_pending'] = $total_pending;
 
-            $this->render('dashboard/superadmin', $data);
-            return;
-        }
+        $this->render('dashboard/manajemen', $data);
+    }
+
+    private function ae()
+    {
+        $user_id = $this->current_account['id'];
+        $ae_id = $user_id;
+
+        $data = [
+            'title' => 'Dashboard',
+            'active_menu' => 'dashboard',
+            'total_contracts_active' => $this->Contract_model->count_active(null, $ae_id),
+            'total_campaigns_running' => $this->Campaign_model->count_running(null, $ae_id),
+            'total_unconnected_ads' => $this->Ad_model->count_unconnected(),
+        ];
+
+        $data['total_clients_handled'] = $this->Client_model->count_active($ae_id);
+        $this->render('dashboard/ae', $data);
+    }
+
+    private function superadmin()
+    {
+        $data = [
+            'title' => 'Dashboard',
+            'active_menu' => 'dashboard',
+            'total_contracts_active' => $this->Contract_model->count_active(null, null),
+            'total_campaigns_running' => $this->Campaign_model->count_running(null, null),
+            'total_unconnected_ads' => 0,
+            'total_clients_active' => $this->Client_model->count_active(),
+            'total_clients' => $this->Client_model->count_total(),
+            'cron_last_per_platform' => $this->Cron_log_model->get_last_per_platform(),
+            'cron_recent' => $this->Cron_log_model->get_latest(10),
+        ];
+
 
         $this->render('dashboard/superadmin', $data);
     }

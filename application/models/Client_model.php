@@ -3,13 +3,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Client_model extends CI_Model
 {
-    public $table = 'clients';
-    // private $table_contents = 'ad_contents';
-
     public function get_all($filters = [])
     {
         $this->db->select('clients.*, ae_acc.name as ae_name, (SELECT COUNT(*) FROM client_pics WHERE client_pics.client_id = clients.id) as pic_count');
-        $this->db->from($this->table);
+        $this->db->from('clients');
         $this->db->join('accounts ae_acc', 'ae_acc.id = clients.ae_id', 'left');
         $this->db->where('clients.deleted_at', NULL);
 
@@ -36,13 +33,13 @@ class Client_model extends CI_Model
     {
         $this->db->where('id', $id);
         $this->db->where('deleted_at', NULL);
-        return $this->db->get($this->table)->row();
+        return $this->db->get('clients')->row();
     }
 
     public function get_by_account_id($account_id)
     {
         $this->db->select('clients.*');
-        $this->db->from($this->table);
+        $this->db->from('clients');
         $this->db->join('client_pics', 'client_pics.client_id = clients.id');
         $this->db->where('client_pics.account_id', $account_id);
         $this->db->where('clients.deleted_at', NULL);
@@ -51,7 +48,7 @@ class Client_model extends CI_Model
 
     public function insert($data)
     {
-        $this->db->insert($this->table, $data);
+        $this->db->insert('clients', $data);
         return $this->db->insert_id();
     }
 
@@ -59,7 +56,7 @@ class Client_model extends CI_Model
     {
         $this->db->where('id', $id);
         $this->db->where('deleted_at', NULL);
-        $this->db->update($this->table, $data);
+        $this->db->update('clients', $data);
         return $this->db->affected_rows();
     }
 
@@ -70,7 +67,7 @@ class Client_model extends CI_Model
             'deleted_at' => date('Y-m-d H:i:s')
         );
         $this->db->where('id', $id);
-        $this->db->update($this->table, $data);
+        $this->db->update('clients', $data);
         return $this->db->affected_rows();
     }
 
@@ -81,7 +78,7 @@ class Client_model extends CI_Model
         if ($ae_id) {
             $this->db->where('ae_id', $ae_id);
         }
-        return $this->db->count_all_results($this->table);
+        return $this->db->count_all_results('clients');
     }
 
     public function count_total($ae_id = null)
@@ -90,6 +87,6 @@ class Client_model extends CI_Model
         if ($ae_id) {
             $this->db->where('ae_id', $ae_id);
         }
-        return $this->db->count_all_results($this->table);
+        return $this->db->count_all_results('clients');
     }
 }

@@ -8,7 +8,6 @@ class Campaign extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->require_role('manajemen', 'client', 'ae');
         $this->load->model('Campaign_model');
         $this->load->model('Contract_model');
         $this->load->model('Client_model');
@@ -16,6 +15,7 @@ class Campaign extends MY_Controller
 
     public function index()
     {
+        $this->require_role('manajemen', 'client', 'ae');
         $filters = [
             'q' => $this->input->get('q'),
             'client_id' => $this->input->get('client_id'),
@@ -24,7 +24,7 @@ class Campaign extends MY_Controller
 
         if ($this->current_account['role'] === 'client') {
             $client = $this->Client_model->get_by_account_id($this->current_account['id']);
-            $filters['client_id'] = $client ? $client->id : -1;
+            $filters['client_id'] = $client->id;
         } elseif ($this->current_account['role'] === 'ae') {
             $filters['ae_id'] = $this->current_account['id'];
         }
@@ -187,8 +187,7 @@ class Campaign extends MY_Controller
 
         if ($this->current_account['role'] === 'client') {
             $client = $this->Client_model->get_by_account_id($this->current_account['id']);
-            $client_id = $client ? $client->id : -1;
-            if ($campaign->client_id != $client_id) {
+            if ($campaign->client_id != $client->id) {
                 show_error('Unauthorized', 403);
                 return;
             }
@@ -252,75 +251,6 @@ class Campaign extends MY_Controller
         return TRUE;
     }
 
-    public function contract_create_check($contract_id)
-    {
-        $contract = $this->Contract_model->get_by_id($contract_id);
-        if (!$contract) {
-            $this->form_validation->set_message([
-                'contract_create_check' => 'The selected Contract does not exist or is inactive.'
-            ]);
-            return FALSE;
-        }
-        if ($contract->terminated_at || strtotime($contract->end_date) < strtotime(date('Y-m-d'))) {
-            $this->form_validation->set_message([
-                'contract_create_check' => 'Cannot create campaign for an expired or terminated contract.'
-            ]);
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-    public function valid_date($date)
-    {
-        $d = DateTime::createFromFormat('Y-m-d', $date);
-        if ($d && $d->format('Y-m-d') === $date) {
-            return TRUE;
-        }
-
-        $this->form_validation->set_message([
-            'valid_date' => 'The {field} field must be in YYYY-MM-DD format.'
-        ]);
-
-        return FALSE;
-    }
-
-    public function date_range_check($end_date)
-    {
-        $start_date = $this->input->post('start_date');
-        $contract_id = $this->input->post('contract_id');
-
-        // check start_date <= end_date
-        if (strtotime($end_date) < strtotime($start_date)) {
-            $this->form_validation->set_message([
-                'date_range_check' => 'The End Date must be equal to or after the Start Date.'
-            ]);
-            return FALSE;
-        }
-
-        // check must fall within the parent contract dates
-        $contract = $this->Contract_model->get_by_id($contract_id);
-        if ($contract) {
-            // verify start date boundary
-            if (strtotime($start_date) < strtotime($contract->start_date)) {
-                $this->form_validation->set_message([
-                    'date_range_check' => "Campaign Start Date cannot be earlier than Contract Start Date ({$contract->start_date})."
-                ]);
-                return FALSE;
-            }
-
-            // verify end date boundary (taking into account early termination if it exists)
-            $contract_max_end = $contract->terminated_at ? date('Y-m-d', strtotime($contract->terminated_at)) : $contract->end_date;
-            if (strtotime($end_date) > strtotime($contract_max_end)) {
-                $this->form_validation->set_message([
-                    'date_range_check' => "Campaign End Date cannot exceed Contract End Date ({$contract_max_end})."
-                ]);
-                return FALSE;
-            }
-        }
-
-        return TRUE;
-    }
-
     public function export($format, $id)
     {
         $this->load->library('Export_registry');
@@ -333,8 +263,7 @@ class Campaign extends MY_Controller
 
         if ($this->current_account['role'] === 'client') {
             $client = $this->Client_model->get_by_account_id($this->current_account['id']);
-            $client_id = $client ? $client->id : -1;
-            if ($campaign->client_id != $client_id) {
+            if ($campaign->client_id != $client->id) {
                 show_error('Unauthorized', 403);
                 return;
             }
@@ -408,11 +337,10 @@ class Campaign extends MY_Controller
             return;
         }
 
-        // Authorization checks
+        // authorization checks
         if ($this->current_account['role'] === 'client') {
             $client = $this->Client_model->get_by_account_id($this->current_account['id']);
-            $client_id = $client ? $client->id : -1;
-            if ($campaign->client_id != $client_id) {
+            if ($campaign->client_id != $client->id) {
                 show_error('Unauthorized', 403);
                 return;
             }
@@ -489,11 +417,81 @@ class Campaign extends MY_Controller
         }
 
         $source = $this->input->post('source', TRUE);
-        
+
         $this->load->model('Ad_model');
         $this->Ad_model->update_source($ad_id, empty($source) ? null : $source);
 
         $this->session->set_flashdata('success', 'Ad link updated successfully.');
         redirect('campaign/detail/' . $campaign_id);
+    }
+
+    // custom validation
+    public function date_range_check($end_date)
+    {
+        $start_date = $this->input->post('start_date');
+        $contract_id = $this->input->post('contract_id');
+
+        // check start_date <= end_date
+        if (strtotime($end_date) < strtotime($start_date)) {
+            $this->form_validation->set_message([
+                'date_range_check' => 'The End Date must be equal to or after the Start Date.'
+            ]);
+            return FALSE;
+        }
+
+        // check must fall within the parent contract dates
+        $contract = $this->Contract_model->get_by_id($contract_id);
+        if ($contract) {
+            // verify start date boundary
+            if (strtotime($start_date) < strtotime($contract->start_date)) {
+                $this->form_validation->set_message([
+                    'date_range_check' => "Campaign Start Date cannot be earlier than Contract Start Date ({$contract->start_date})."
+                ]);
+                return FALSE;
+            }
+
+            // verify end date boundary (taking into account early termination if it exists)
+            $contract_max_end = $contract->terminated_at ? date('Y-m-d', strtotime($contract->terminated_at)) : $contract->end_date;
+            if (strtotime($end_date) > strtotime($contract_max_end)) {
+                $this->form_validation->set_message([
+                    'date_range_check' => "Campaign End Date cannot exceed Contract End Date ({$contract_max_end})."
+                ]);
+                return FALSE;
+            }
+        }
+
+        return TRUE;
+    }
+
+    public function valid_date($date)
+    {
+        $d = DateTime::createFromFormat('Y-m-d', $date);
+        if ($d && $d->format('Y-m-d') === $date) {
+            return TRUE;
+        }
+
+        $this->form_validation->set_message([
+            'valid_date' => 'The {field} field must be in YYYY-MM-DD format.'
+        ]);
+
+        return FALSE;
+    }
+
+    public function contract_create_check($contract_id)
+    {
+        $contract = $this->Contract_model->get_by_id($contract_id);
+        if (!$contract) {
+            $this->form_validation->set_message([
+                'contract_create_check' => 'The selected Contract does not exist or is inactive.'
+            ]);
+            return FALSE;
+        }
+        if ($contract->terminated_at || strtotime($contract->end_date) < strtotime(date('Y-m-d'))) {
+            $this->form_validation->set_message([
+                'contract_create_check' => 'Cannot create campaign for an expired or terminated contract.'
+            ]);
+            return FALSE;
+        }
+        return TRUE;
     }
 }

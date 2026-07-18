@@ -22,8 +22,8 @@ class Request
         $common_paths = [
             '/etc/ssl/certs/ca-certificates.crt',
             '/etc/pki/tls/certs/ca-bundle.crt',
-            '/usr/local/etc/openssl/cert.pem',  
-            '/etc/ssl/cert.pem',                
+            '/usr/local/etc/openssl/cert.pem',
+            '/etc/ssl/cert.pem',
         ];
         foreach ($common_paths as $path) {
             if (file_exists($path)) {
@@ -52,7 +52,7 @@ class Request
         }
 
         return $this->execute($url, [
-            CURLOPT_HTTPGET    => TRUE,
+            CURLOPT_HTTPGET => TRUE,
             CURLOPT_HTTPHEADER => array_merge(['Accept: application/json'], $headers),
         ]);
     }
@@ -64,7 +64,7 @@ class Request
         }
 
         return $this->execute($url, [
-            CURLOPT_POST       => TRUE,
+            CURLOPT_POST => TRUE,
             CURLOPT_POSTFIELDS => json_encode($body),
             CURLOPT_HTTPHEADER => array_merge([
                 'Accept: application/json',
@@ -80,7 +80,7 @@ class Request
         }
 
         return $this->execute($url, [
-            CURLOPT_POST       => TRUE,
+            CURLOPT_POST => TRUE,
             CURLOPT_POSTFIELDS => http_build_query($body),
             CURLOPT_HTTPHEADER => array_merge([
                 'Accept: application/json',
@@ -92,7 +92,7 @@ class Request
     public function report(string $url, array $body = [], string $token = ''): ?array
     {
         return $this->execute($url, [
-            CURLOPT_POST       => TRUE,
+            CURLOPT_POST => TRUE,
             CURLOPT_POSTFIELDS => json_encode($body),
             CURLOPT_HTTPHEADER => [
                 'Authorization: Bearer ' . $token,
@@ -106,21 +106,21 @@ class Request
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL            => $url,
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => TRUE,
             CURLOPT_FOLLOWLOCATION => TRUE,
-            CURLOPT_MAXREDIRS      => 5,
-            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_TIMEOUT => 15,
             CURLOPT_SSL_VERIFYPEER => TRUE,
             CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_CAINFO         => $this->ca_bundle_path,
-            CURLOPT_USERAGENT      => 'Mozilla/5.0 (compatible; GA4Bot/1.0)',
-            CURLOPT_HTTPHEADER     => ['Accept: text/html'],
+            CURLOPT_CAINFO => $this->ca_bundle_path,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; GA4Bot/1.0)',
+            CURLOPT_HTTPHEADER => ['Accept: text/html'],
         ]);
 
-        $html      = curl_exec($ch);
+        $html = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error     = curl_error($ch);
+        $error = curl_error($ch);
         curl_close($ch);
 
         if ($error || $http_code < 200 || $http_code >= 300 || empty($html)) {
@@ -135,16 +135,16 @@ class Request
         $ch = curl_init();
 
         curl_setopt_array($ch, $options + [
-            CURLOPT_URL            => $url,
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_SSL_VERIFYPEER => TRUE,
             CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_CAINFO         => $this->ca_bundle_path,
+            CURLOPT_CAINFO => $this->ca_bundle_path,
         ]);
 
-        $response   = curl_exec($ch);
-        $http_code  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curl_error = curl_error($ch);
         curl_close($ch);
 

@@ -23,21 +23,11 @@ class Filter_keyword_model extends CI_Model
         return $this->db->get('filter_keywords')->result();
     }
 
-    public function get_by_platform($platform)
+    public function get_by_platforms_admin($platforms)
     {
-        $this->db->where('platform', $platform);
-        $this->db->where('is_active', 1);
-        return $this->db->get('filter_keywords')->result();
-    }
-
-    public function get_by_platform_admin($platform)
-    {
-        $this->db->where('platform', $platform);
-        return $this->db->get('filter_keywords')->result();
-    }
-
-    public function get_by_platforms_admin(array $platforms)
-    {
+        if (empty($platforms)) {
+            return [];
+        }
         $this->db->where_in('platform', $platforms);
         return $this->db->get('filter_keywords')->result();
     }

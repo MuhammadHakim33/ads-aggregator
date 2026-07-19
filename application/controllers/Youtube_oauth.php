@@ -29,7 +29,7 @@ class Youtube_oauth extends MY_Controller
             'response_type' => 'code',
             'scope' => 'https://www.googleapis.com/auth/youtube.readonly',
             'access_type' => 'offline',
-            'prompt' => 'consent' // Forces Google to always return a refresh token
+            'prompt' => 'consent'
         ];
 
         $url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query($params);

@@ -3,12 +3,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Complaint_model extends CI_Model
 {
-    private $table = 'complaints';
-
     public function get_all($filters = [])
     {
         $this->db->select("c.*, ac.title AS ad_title, ac.platform, camp.name AS campaign_name, cl.company_name AS client_name");
-        $this->db->from($this->table . " c");
+        $this->db->from('complaints' . " c");
         $this->db->join("ad_contents ac", "ac.id = c.ad_content_id");
         $this->db->join("campaigns camp", "camp.id = ac.campaign_id");
         $this->db->join("contracts cont", "cont.id = camp.contract_id");
@@ -42,7 +40,7 @@ class Complaint_model extends CI_Model
     public function get_by_id($id)
     {
         $this->db->select("c.*, ac.title AS ad_title, ac.platform, ac.content_identifier, camp.id AS campaign_id, camp.name AS campaign_name, cl.id AS client_id, cl.company_name AS client_name, cl.ae_id");
-        $this->db->from($this->table . " c");
+        $this->db->from('complaints' . " c");
         $this->db->join("ad_contents ac", "ac.id = c.ad_content_id");
         $this->db->join("campaigns camp", "camp.id = ac.campaign_id");
         $this->db->join("contracts cont", "cont.id = camp.contract_id");
@@ -53,13 +51,13 @@ class Complaint_model extends CI_Model
 
     public function insert($data)
     {
-        $this->db->insert($this->table, $data);
+        $this->db->insert('complaints', $data);
         return $this->db->insert_id();
     }
 
     public function update($id, $data)
     {
         $this->db->where('id', $id);
-        return $this->db->update($this->table, $data);
+        return $this->db->update('complaints', $data);
     }
 }

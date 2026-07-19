@@ -3,42 +3,40 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Role_model extends CI_Model
 {
-    private $table = 'roles';
-
     public function get_all()
     {
-        return $this->db->get($this->table)->result();
+        return $this->db->get('roles')->result();
     }
 
     public function get_by_id($id)
     {
         $this->db->where('id', $id);
-        return $this->db->get($this->table)->row();
+        return $this->db->get('roles')->row();
     }
 
     public function insert($data)
     {
-        $this->db->insert($this->table, $data);
+        $this->db->insert('roles', $data);
         return $this->db->insert_id();
     }
 
     public function update($id, $data)
     {
         $this->db->where('id', $id);
-        $this->db->update($this->table, $data);
+        $this->db->update('roles', $data);
         return $this->db->affected_rows();
     }
 
     public function delete($id)
     {
         $this->db->where('id', $id);
-        $this->db->delete($this->table);
+        $this->db->delete('roles');
         return $this->db->affected_rows();
     }
 
     public function is_exist_by_id($id)
     {
         $this->db->where('id', $id);
-        return $this->db->get($this->table)->num_rows();
+        return $this->db->get('roles')->num_rows();
     }
 }

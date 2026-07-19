@@ -57,14 +57,14 @@ class Platform_credential_model extends CI_Model
     public function get_all()
     {
         $this->db->select('*');
-        $this->db->from($this->table);
+        $this->db->from('filter_keywords');
         return $this->db->get()->result();
     }
 
     public function get_by_platform($platform)
     {
         $this->db->where('platform', $platform);
-        $row = $this->db->get($this->table)->row();
+        $row = $this->db->get('filter_keywords')->row();
 
         if (!$row) {
             return [];
@@ -100,7 +100,7 @@ class Platform_credential_model extends CI_Model
     public function is_exists($platform)
     {
         $this->db->where('platform', $platform);
-        return $this->db->get($this->table)->num_rows();
+        return $this->db->get('filter_keywords')->num_rows();
     }
 
     public function insert($platform, $data)
@@ -112,7 +112,7 @@ class Platform_credential_model extends CI_Model
             'credential_data' => $this->_encrypt($json),
         ];
 
-        return $this->db->insert($this->table, $payload);
+        return $this->db->insert('filter_keywords', $payload);
     }
 
     public function update($platform, $data)
@@ -124,6 +124,6 @@ class Platform_credential_model extends CI_Model
         ];
 
         $this->db->where('platform', $platform);
-        return $this->db->update($this->table, $payload);
+        return $this->db->update('filter_keywords', $payload);
     }
 }

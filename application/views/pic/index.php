@@ -118,10 +118,10 @@
 </div>
 
 <script>
-    document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        document.getElementById('deletePicName').textContent = btn.getAttribute('data-name');
-        document.getElementById('deleteForm').action = '<?= base_url('pic/delete/') ?>' + btn.getAttribute('data-id');
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        const btn = $(event.relatedTarget);
+        $('#deletePicName').text(btn.data('name'));
+        $('#deleteForm').attr('action', '<?= base_url('pic/delete/') ?>' + btn.data('id'));
     });
 </script>
 

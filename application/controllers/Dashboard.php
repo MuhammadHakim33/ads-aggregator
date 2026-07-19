@@ -60,8 +60,6 @@ class Dashboard extends MY_Controller
         $data = [
             'title' => 'Dashboard',
             'active_menu' => 'dashboard',
-            'total_contracts_active' => $this->Contract_model->count_active(null, null),
-            'total_campaigns_running' => $this->Campaign_model->count_running(null, null),
             'total_unconnected_ads' => $this->Ad_model->count_unconnected(),
         ];
 
@@ -72,7 +70,6 @@ class Dashboard extends MY_Controller
             'start_date' => $this->input->get('start_date') ?: $default_start,
             'end_date' => $this->input->get('end_date') ?: $default_end,
             'client_id' => $this->input->get('client_id'),
-            'status' => $this->input->get('status'),
             'q' => $this->input->get('q'),
         ];
 
@@ -82,7 +79,6 @@ class Dashboard extends MY_Controller
         $total_value = 0;
         $total_approved = 0;
         $total_terminated = 0;
-        $total_pending = 0;
 
         foreach ($contract_list as $c) {
             $total_value += (float) ($c->value ?? 0);
@@ -101,8 +97,6 @@ class Dashboard extends MY_Controller
         $data['total_contracts'] = $total_contracts;
         $data['total_value'] = $total_value;
         $data['total_approved'] = $total_approved;
-        $data['total_terminated'] = $total_terminated;
-        $data['total_pending'] = $total_pending;
 
         $this->render('dashboard/manajemen', $data);
     }

@@ -64,21 +64,23 @@
                     </div>
 
                     <!-- resolution section -->
-                    <?php if ($complaint->resolution_note || $current_account['role'] === 'ae'): ?>
+                    <?php if ($complaint->resolution_note || $current_account['role'] === 'ae' || $current_account['role'] === 'manajemen'): ?>
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0">Actions</h6>
                             </div>
                             <div class="card-body">
-                                <?php if ($current_account['role'] === 'ae'): ?>
+                                <?php if ($current_account['role'] === 'ae' || $current_account['role'] === 'manajemen'): ?>
                                     <form action="<?= base_url('complaint/update_status/' . $complaint->id) ?>" method="POST">
                                         <div class="mb-3">
                                             <label for="status" class="form-label fw-medium">Update Status</label>
                                             <select name="status" id="status" class="form-select" required>
-                                                <option value="waiting" <?= $complaint->status === 'waiting' ? 'selected' : '' ?>>Waiting</option>
+                                                <option value="waiting" <?= $complaint->status === 'waiting' ? 'selected' : '' ?>>
+                                                    Waiting</option>
                                                 <option value="in_progress" <?= $complaint->status === 'in_progress' ? 'selected' : '' ?>>In Progress</option>
                                                 <option value="resolved" <?= $complaint->status === 'resolved' ? 'selected' : '' ?>>Resolved</option>
-                                                <option value="closed" <?= $complaint->status === 'closed' ? 'selected' : '' ?>>Closed</option>
+                                                <option value="closed" <?= $complaint->status === 'closed' ? 'selected' : '' ?>>
+                                                    Closed</option>
                                             </select>
                                         </div>
                                         <div class="mb-3">

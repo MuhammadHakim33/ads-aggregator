@@ -70,7 +70,7 @@ class Product extends MY_Controller
                     redirect('product');
                     return;
                 } else {
-                    $this->session->set_flashdata('errors', '<p>Failed to create product. Please try again.</p>');
+                    $this->session->set_flashdata('errors', 'Failed to create product. Please try again.');
                 }
             }
         }
@@ -87,7 +87,7 @@ class Product extends MY_Controller
     {
         $product = $this->Product_model->get_by_id($id);
         if (!$product) {
-            $this->session->set_flashdata('errors', '<p>Product not found.</p>');
+            $this->session->set_flashdata('errors', 'Product not found.');
             redirect('product');
             return;
         }
@@ -137,7 +137,7 @@ class Product extends MY_Controller
                     redirect('product');
                     return;
                 } else {
-                    $this->session->set_flashdata('errors', '<p>Failed to update product. Please try again.</p>');
+                    $this->session->set_flashdata('errors', 'Failed to update product. Please try again.');
                 }
             }
         }
@@ -159,15 +159,15 @@ class Product extends MY_Controller
 
         $product = $this->Product_model->get_by_id($id);
         if (!$product) {
-            $this->session->set_flashdata('errors', '<p>Product not found.</p>');
+            $this->session->set_flashdata('errors', 'Product not found.');
             redirect('product');
             return;
         }
 
-        // Check if product is used by any contract_items
+        // check if product is used by any contract_items
         $in_use = $this->db->where('product_id', $id)->count_all_results('contract_items');
         if ($in_use > 0) {
-            $this->session->set_flashdata('errors', '<p>Cannot delete product <strong>' . htmlspecialchars($product->name) . '</strong> because it is used in one or more contracts. Deactivate it instead.</p>');
+            $this->session->set_flashdata('errors', 'Cannot delete product <strong>' . htmlspecialchars($product->name) . '</strong> because it is used in one or more contracts. Deactivate it instead.');
             redirect('product');
             return;
         }
@@ -177,7 +177,7 @@ class Product extends MY_Controller
         if ($ok) {
             $this->session->set_flashdata('success', 'Product <strong>' . htmlspecialchars($product->name) . '</strong> deleted successfully.');
         } else {
-            $this->session->set_flashdata('errors', '<p>Failed to delete product. Please try again.</p>');
+            $this->session->set_flashdata('errors', 'Failed to delete product. Please try again.');
         }
 
         redirect('product');

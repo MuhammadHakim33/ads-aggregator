@@ -9,13 +9,15 @@ class Account extends MY_Controller
         $this->load->model('Account_model');
         $this->load->model('Role_model');
 
-        if ($this->router->fetch_method() !== 'profile') {
-            $this->require_role('superadmin', 'manajemen');
-        }
+        // if ($this->router->fetch_method() !== 'profile') {
+        //     $this->require_role('superadmin', 'manajemen');
+        // }
     }
 
     public function index()
     {
+        $this->require_role('superadmin', 'manajemen');
+
         $filters = [
             'q' => $this->input->get('q'),
             'role_id' => $this->input->get('role_id'),
@@ -266,7 +268,9 @@ class Account extends MY_Controller
 
         $deleted = $this->Account_model->delete($id);
 
-        if ($deleted) {
+        if ($deleted === 'constraint_error') {
+            $this->session->set_flashdata('errors', '<p>Cannot delete this account because it is currently linked to other records (e.g. clients). Please remove the associations first.</p>');
+        } elseif ($deleted) {
             $this->session->set_flashdata('success', 'Account deleted successfully.');
         } else {
             $this->session->set_flashdata('errors', '<p>Failed to delete account. Please try again.</p>');

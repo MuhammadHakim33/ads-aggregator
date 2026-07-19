@@ -36,6 +36,10 @@ class Campaign_model extends CI_Model
             }
         }
 
+        if (!empty($filters['ae_id'])) {
+            $this->db->where('clients.ae_id', $filters['ae_id']);
+        }
+
         $this->db->order_by('campaigns.created_at', 'DESC');
         return $this->db->get()->result();
     }
@@ -110,7 +114,7 @@ class Campaign_model extends CI_Model
     public function get_campaign_with_ads_and_metrics($campaign_id)
     {
         // get campaign details with contract and client info
-        $this->db->select('camp.*, cont.contract_number, cont.value as contract_value, c.company_name as client_name, (SELECT name FROM client_pics WHERE client_id = c.id AND is_active = 1 LIMIT 1) as client_pic, cont.client_id, c.ae_id');
+        $this->db->select('camp.*, cont.contract_number, cont.value as contract_value, c.company_name as client_name, cont.client_id, c.ae_id');
         $this->db->from('campaigns' . ' camp');
         $this->db->join('contracts cont', 'cont.id = camp.contract_id', 'left');
         $this->db->join('clients c', 'c.id = cont.client_id', 'left');

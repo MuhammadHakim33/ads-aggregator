@@ -3,18 +3,15 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Report_model extends CI_Model
 {
-    /**
-     * Get list of contracts with client info for the report page.
-     * Supports filters: start_date, end_date, client_id, status, q.
-     * Date filter uses contracts.start_date as the reference.
-     */
     public function get_contract_report_list($filters = [])
     {
-        $this->db->select('contracts.*, clients.company_name as client_name, approver.name as approver_name');
+        $this->db->select('contracts.*, clients.company_name as client_name');
         $this->db->from('contracts');
         $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
-        $this->db->join('accounts approver', 'approver.id = contracts.approved_by', 'left');
+        // $this->db->join('accounts approver', 'approver.id = contracts.approved_by', 'left');
         $this->db->where('contracts.deleted_at', NULL);
+        $this->db->where('contracts.terminated_at', NULL);
+        $this->db->where('contracts.status', 'approved');
 
         if (!empty($filters['start_date'])) {
             $this->db->where('contracts.start_date >=', $filters['start_date']);
@@ -28,14 +25,14 @@ class Report_model extends CI_Model
             $this->db->where('contracts.client_id', $filters['client_id']);
         }
 
-        if (!empty($filters['status'])) {
-            if ($filters['status'] === 'terminated') {
-                $this->db->where('contracts.terminated_at IS NOT NULL', NULL, FALSE);
-            } else {
-                $this->db->where('contracts.terminated_at', NULL);
-                $this->db->where('contracts.status', $filters['status']);
-            }
-        }
+        // if (!empty($filters['status'])) {
+        //     if ($filters['status'] === 'terminated') {
+        //         $this->db->where('contracts.terminated_at IS NOT NULL', NULL, FALSE);
+        //     } else {
+        //         $this->db->where('contracts.terminated_at', NULL);
+        //         $this->db->where('contracts.status', $filters['status']);
+        //     }
+        // }
 
         if (!empty($filters['q'])) {
             $q = $this->db->escape_like_str($filters['q']);

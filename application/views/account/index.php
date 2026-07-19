@@ -150,13 +150,13 @@
 </div>
 
 <script>
-    const deleteModal = document.getElementById('deleteModal');
-    deleteModal.addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        const id = btn.getAttribute('data-id');
-        const name = btn.getAttribute('data-name');
-        document.getElementById('deleteAccountName').textContent = name;
-        document.getElementById('deleteForm').action = '<?= base_url('account/delete/') ?>' + id;
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        const btn = $(event.relatedTarget);
+        const id = btn.data('id');
+        const name = btn.data('name');
+
+        $('#deleteAccountName').text(name);
+        $('#deleteForm').attr('action', '<?= base_url('account/delete/') ?>' + id);
     });
 </script>
 

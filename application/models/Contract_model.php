@@ -23,10 +23,6 @@ class Contract_model extends CI_Model
             $this->db->where('contracts.client_id', $filters['client_id']);
         }
 
-        if (!empty($filters['ae_id'])) {
-            $this->db->where('clients.ae_id', $filters['ae_id']);
-        }
-
         $this->db->order_by('contracts.created_at', 'DESC');
         return $this->db->get()->result();
     }

@@ -60,7 +60,7 @@ class Client extends MY_Controller
                     redirect('client');
                     return;
                 } else {
-                    $this->session->set_flashdata('errors', '<p>Failed to create client. Please try again.</p>');
+                    $this->session->set_flashdata('errors', 'Failed to create client. Please try again.');
                 }
             }
         }
@@ -76,10 +76,9 @@ class Client extends MY_Controller
 
     public function edit($id)
     {
-        // Load client data
         $client = $this->Client_model->get_by_id($id);
         if (!$client) {
-            $this->session->set_flashdata('errors', '<p>Client not found.</p>');
+            $this->session->set_flashdata('errors', 'Client not found.');
             redirect('client');
             return;
         }
@@ -138,14 +137,14 @@ class Client extends MY_Controller
 
         $client = $this->Client_model->get_by_id($id);
         if (!$client) {
-            $this->session->set_flashdata('errors', '<p>Client not found.</p>');
+            $this->session->set_flashdata('errors', 'Client not found.');
             redirect('client');
             return;
         }
 
         $this->db->trans_start();
 
-        // Get all PICs and deactivate their accounts + set PICs to inactive
+        // get all PICs and deactivate their accounts + set PICs to inactive
         $pics = $this->db->where('client_id', $id)->get('client_pics')->result();
         foreach ($pics as $pic) {
             if (!empty($pic->account_id)) {
@@ -161,7 +160,7 @@ class Client extends MY_Controller
         if ($this->db->trans_status() === TRUE) {
             $this->session->set_flashdata('success', 'Client and all associated PIC accounts deactivated successfully.');
         } else {
-            $this->session->set_flashdata('errors', '<p>Failed to delete client. Please try again.</p>');
+            $this->session->set_flashdata('errors', 'Failed to delete client. Please try again.');
         }
 
         redirect('client');

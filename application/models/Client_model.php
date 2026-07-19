@@ -14,7 +14,7 @@ class Client_model extends CI_Model
             $q = $this->db->escape_like_str($filters['q']);
             $this->db->group_start();
             $this->db->like('clients.company_name', $q);
-            $this->db->or_where("EXISTS (SELECT 1 FROM client_pics WHERE client_pics.client_id = clients.id AND client_pics.name LIKE '%" . $q . "%')");
+            // $this->db->or_where("EXISTS (SELECT 1 FROM client_pics WHERE client_pics.client_id = clients.id AND client_pics.name LIKE '%" . $q . "%')");
             $this->db->group_end();
         }
 

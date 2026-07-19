@@ -143,10 +143,10 @@
 </div>
 
 <script>
-    document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        document.getElementById('deleteClientName').textContent = btn.getAttribute('data-name');
-        document.getElementById('deleteForm').action = '<?= base_url('client/delete/') ?>' + btn.getAttribute('data-id');
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        const btn = $(event.relatedTarget);
+        $('#deleteClientName').text(btn.data('name'));
+        $('#deleteForm').attr('action', '<?= base_url('client/delete/') ?>' + btn.data('id'));
     });
 </script>
 

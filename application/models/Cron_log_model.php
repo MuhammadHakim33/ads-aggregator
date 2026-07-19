@@ -42,10 +42,10 @@ class Cron_log_model extends CI_Model
     {
         $sql = "
             SELECT cl.*
-            FROM {'cron_logs'} cl
+            FROM cron_logs cl
             INNER JOIN (
                 SELECT platform, job_name, MAX(id) as max_id
-                FROM {'cron_logs'}
+                FROM cron_logs
                 GROUP BY platform, job_name
             ) latest ON cl.id = latest.max_id
             ORDER BY cl.platform, cl.job_name

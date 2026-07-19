@@ -26,8 +26,6 @@ class Contract extends MY_Controller
         if ($this->current_account['role'] === 'client') {
             $client = $this->Client_model->get_by_account_id($this->current_account['id']);
             $filters['client_id'] = $client ? $client->id : -1;
-        } elseif ($this->current_account['role'] === 'ae') {
-            $filters['ae_id'] = $this->current_account['id'];
         }
 
         $contracts = $this->Contract_model->get_all($filters);
@@ -41,11 +39,7 @@ class Contract extends MY_Controller
         // clients dropdown filter options
         $client_options_filters = [];
         if ($this->current_account['role'] !== 'client') {
-            $client_filters = [];
-            if ($this->current_account['role'] === 'ae') {
-                $client_filters['ae_id'] = $this->current_account['id'];
-            }
-            $client_options_filters = $this->Client_model->get_all($client_filters);
+            $client_options_filters = $this->Client_model->get_all();
         }
 
         $data = [

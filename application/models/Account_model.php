@@ -76,8 +76,20 @@ class Account_model extends CI_Model
 
     public function delete($id)
     {
+        // check for dependencies before deleting to avoid foreign key constraint errors
+        $this->db->where('ae_id', $id);
+        $client_count = $this->db->count_all_results('clients');
+
+        $this->db->where('account_id', $id);
+        $pic_count = $this->db->count_all_results('client_pics');
+
+        if ($client_count > 0 || $pic_count > 0) {
+            return 'constraint_error';
+        }
+
         $this->db->where('id', $id);
         $this->db->delete("accounts");
+
         return $this->db->affected_rows();
     }
 

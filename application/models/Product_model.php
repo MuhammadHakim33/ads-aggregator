@@ -22,16 +22,12 @@ class Product_model extends CI_Model
             $this->db->where('is_active', $filters['is_active']);
         }
 
-        $this->db->order_by('category', 'ASC');
-        $this->db->order_by('name', 'ASC');
         return $this->db->get('products')->result();
     }
 
     public function get_all_active()
     {
         $this->db->where('is_active', 1);
-        $this->db->order_by('category', 'ASC');
-        $this->db->order_by('name', 'ASC');
         return $this->db->get('products')->result();
     }
 

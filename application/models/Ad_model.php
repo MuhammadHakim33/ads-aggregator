@@ -45,7 +45,7 @@ class Ad_model extends CI_Model
 
         $values = implode(', ', $placeholders);
 
-        $sql = "INSERT INTO {'ad_metrics'} (ad_content_id, metric_name, metric_value)
+        $sql = "INSERT INTO ad_metrics (ad_content_id, metric_name, metric_value)
                 VALUES {$values}
                 ON DUPLICATE KEY UPDATE
                     metric_value = VALUES(metric_value),
@@ -64,7 +64,7 @@ class Ad_model extends CI_Model
             SELECT ac.id, ac.content_identifier,
                    camp.start_date AS campaign_start_date,
                    camp.end_date   AS campaign_end_date
-            FROM {'ad_contents'} ac
+            FROM ad_contents ac
             LEFT JOIN campaigns camp ON camp.id = ac.campaign_id
             WHERE ac.platform = '{$platform}'
               AND (
@@ -100,7 +100,7 @@ class Ad_model extends CI_Model
                 c.id           AS client_id,
                 c.company_name,
                 (SELECT name FROM client_pics WHERE client_id = c.id AND is_active = 1 LIMIT 1) AS pic_name
-            FROM {'ad_contents'} a
+            FROM ad_contents a
             LEFT JOIN campaigns camp ON camp.id = a.campaign_id
             LEFT JOIN contracts cont ON cont.id = camp.contract_id
             LEFT JOIN clients c ON c.id = cont.client_id

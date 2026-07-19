@@ -53,19 +53,6 @@ $statusMap = [
                     </select>
                 </div>
                 <div>
-                    <label class="form-label small mb-1">Status</label>
-                    <select name="status" class="form-select form-select-sm">
-                        <option value="">All Status</option>
-                        <option value="approved" <?= $filters['status'] === 'approved' ? 'selected' : '' ?>>Approved
-                        </option>
-                        <option value="pending" <?= $filters['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
-                        <option value="rejected" <?= $filters['status'] === 'rejected' ? 'selected' : '' ?>>Rejected
-                        </option>
-                        <option value="terminated" <?= $filters['status'] === 'terminated' ? 'selected' : '' ?>>Terminated
-                        </option>
-                    </select>
-                </div>
-                <div>
                     <label class="form-label small mb-1">Search</label>
                     <input type="text" name="q" class="form-control form-control-sm"
                         placeholder="Contract No. / client..." value="<?= html_escape($filters['q'] ?? '') ?>">
@@ -125,20 +112,6 @@ $statusMap = [
                         </div>
                     </div>
                 </div>
-                <!-- pending -->
-                <div class="col-6 col-md-3">
-                    <div class="card border-1 h-100">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="rounded-3 bg-warning bg-opacity-10 p-3">
-                                <i class="bi bi-hourglass-split fs-4 text-warning"></i>
-                            </div>
-                            <div>
-                                <div class="fs-2 fw-bold lh-1"><?= $total_pending ?></div>
-                                <div class="text-muted small mt-1">Pending</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- contract list table -->
@@ -149,7 +122,7 @@ $statusMap = [
                     </span>
                     <small class="text-muted">
                         <?= $filters['start_date'] ? date('d M Y', strtotime($filters['start_date'])) : '—' ?>
-                        &mdash;
+                        -
                         <?= $filters['end_date'] ? date('d M Y', strtotime($filters['end_date'])) : '—' ?>
                     </small>
                 </div>

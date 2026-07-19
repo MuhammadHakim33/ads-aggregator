@@ -18,7 +18,7 @@ class Pic extends MY_Controller
         $client = $this->Client_model->get_by_id($client_id);
 
         if (!$client) {
-            $this->session->set_flashdata('errors', '<p>Client not found.</p>');
+            $this->session->set_flashdata('errors', 'Client not found.');
             redirect('client');
             return;
         }
@@ -41,7 +41,7 @@ class Pic extends MY_Controller
         $client = $this->Client_model->get_by_id($client_id);
 
         if (!$client) {
-            $this->session->set_flashdata('errors', '<p>Client not found.</p>');
+            $this->session->set_flashdata('errors', 'Client not found.');
             redirect('client');
             return;
         }
@@ -116,7 +116,7 @@ class Pic extends MY_Controller
                     redirect('pic?client_id=' . $client_id);
                     return;
                 } else {
-                    $this->session->set_flashdata('errors', '<p>Failed to create PIC. Please try again.</p>');
+                    $this->session->set_flashdata('errors', 'Failed to create PIC. Please try again.');
                 }
             }
         }
@@ -134,7 +134,7 @@ class Pic extends MY_Controller
     {
         $pic = $this->Client_pic_model->get_by_id($id);
         if (!$pic) {
-            $this->session->set_flashdata('errors', '<p>PIC not found.</p>');
+            $this->session->set_flashdata('errors', 'PIC not found.');
             redirect('client');
             return;
         }
@@ -146,7 +146,7 @@ class Pic extends MY_Controller
         }
 
         if ($this->input->method() === 'post') {
-            // Check if user requested to unlink the account
+            // check if user requested to unlink the account
             if ($this->input->post('action') === 'unlink') {
                 if ($account) {
                     $this->db->trans_start();
@@ -157,7 +157,7 @@ class Pic extends MY_Controller
                     if ($this->db->trans_status() === TRUE) {
                         $this->session->set_flashdata('success', 'Login account unlinked and deleted successfully.');
                     } else {
-                        $this->session->set_flashdata('errors', '<p>Failed to unlink account. Please try again.</p>');
+                        $this->session->set_flashdata('errors', 'Failed to unlink account. Please try again.');
                     }
                 }
                 redirect('pic/edit/' . $id);
@@ -275,7 +275,7 @@ class Pic extends MY_Controller
                     redirect('pic?client_id=' . $pic->client_id);
                     return;
                 } else {
-                    $this->session->set_flashdata('errors', '<p>Failed to update PIC. Please try again.</p>');
+                    $this->session->set_flashdata('errors', 'Failed to update PIC. Please try again.');
                 }
             }
         }
@@ -299,7 +299,7 @@ class Pic extends MY_Controller
 
         $pic = $this->Client_pic_model->get_by_id($id);
         if (!$pic) {
-            $this->session->set_flashdata('errors', '<p>PIC not found.</p>');
+            $this->session->set_flashdata('errors', 'PIC not found.');
             redirect('client');
             return;
         }
@@ -319,7 +319,7 @@ class Pic extends MY_Controller
         if ($this->db->trans_status() === TRUE) {
             $this->session->set_flashdata('success', 'PIC deleted successfully.');
         } else {
-            $this->session->set_flashdata('errors', '<p>Failed to delete PIC. Please try again.</p>');
+            $this->session->set_flashdata('errors', 'Failed to delete PIC. Please try again.');
         }
 
         redirect('pic?client_id=' . $client_id);

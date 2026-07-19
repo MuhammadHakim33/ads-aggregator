@@ -3,14 +3,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Client_pic_model extends CI_Model
 {
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     public function get_by_client_id($client_id)
     {
-        $this->db->select('client_pics.*, accounts.email, accounts.name as username, accounts.is_active as account_active');
+        $this->db->select('client_pics.*');
         $this->db->from('client_pics');
         $this->db->join('accounts', 'accounts.id = client_pics.account_id', 'left');
         $this->db->where('client_pics.client_id', $client_id);

@@ -114,7 +114,7 @@ class Complaint extends MY_Controller
 
     public function update_status($id)
     {
-        $this->require_role('ae');
+        $this->require_role('ae', 'manajemen');
         $complaint = $this->Complaint_model->get_by_id($id);
         if (!$complaint) {
             show_404();
@@ -123,9 +123,11 @@ class Complaint extends MY_Controller
 
         // authorization check for associated AE
         $user_id = $this->current_account['id'];
-        if ($complaint->ae_id != $user_id) {
-            show_error('Unauthorized', 403);
-            return;
+        if ($this->current_account['role'] === 'ae') {
+            if ($complaint->ae_id != $user_id) {
+                show_error('Unauthorized', 403);
+                return;
+            }
         }
 
         if ($this->input->method() === 'post') {

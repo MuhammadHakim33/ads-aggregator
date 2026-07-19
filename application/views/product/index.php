@@ -74,7 +74,7 @@
                         <tbody>
                             <?php
                             $category_labels = [
-                                'content_marketing' => ['label' => 'Content Marketing', 'badge' => 'bg-info bg-opacity-10 text-info'],
+                                'content_marketing' => ['label' => 'Content Marketing', 'badge' => 'bg-success bg-opacity-10 text-success'],
                                 'banner_ads' => ['label' => 'Banner Ads', 'badge' => 'bg-warning bg-opacity-10 text-warning-emphasis'],
                                 'social_media' => ['label' => 'Social Media', 'badge' => 'bg-purple bg-opacity-10 text-primary'],
                             ];
@@ -181,13 +181,13 @@
 </div>
 
 <script>
-$(function () {
-    $('#deleteModal').on('show.bs.modal', function (event) {
-        const $btn = $(event.relatedTarget);
-        $('#deleteProductName').text($btn.attr('data-name'));
-        $('#deleteForm').attr('action', '<?= base_url('product/delete/') ?>' + $btn.attr('data-id'));
+    $(function () {
+        $('#deleteModal').on('show.bs.modal', function (event) {
+            const $btn = $(event.relatedTarget);
+            $('#deleteProductName').text($btn.attr('data-name'));
+            $('#deleteForm').attr('action', '<?= base_url('product/delete/') ?>' + $btn.attr('data-id'));
+        });
     });
-});
 </script>
 
 <?php $this->load->view('templates/footer'); ?>

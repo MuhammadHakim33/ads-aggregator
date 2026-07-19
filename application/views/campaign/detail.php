@@ -99,10 +99,9 @@ $ads = $campaign->ads ?? [];
                             </div>
                             <div class="mb-3">
                                 <div class="text-muted small text-uppercase">Client</div>
-                                <div class="mt-1 fw-medium"><?= ucwords($campaign->client_name) ?></div>
-                                <?php if (isset($campaign->client_pic) && $campaign->client_pic): ?>
-                                    <div class="text-muted small"><?= $campaign->client_pic ?></div>
-                                <?php endif; ?>
+                                <div class="mt-1 fw-medium">
+                                    <?= ucwords($campaign->client_name) ?>
+                                </div>
                             </div>
                             <hr class="my-3">
                             <div class="row g-3">

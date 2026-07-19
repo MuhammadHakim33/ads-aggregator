@@ -16,11 +16,14 @@ class Ad_model extends CI_Model
             $platform = $this->db->escape($row['platform']);
             $content_identifier = $this->db->escape($row['content_identifier']);
             $published_at = isset($row['published_at']) ? $this->db->escape($row['published_at']) : 'NULL';
+            $source = isset($row['source']) ? $this->db->escape($row['source']) : 'NULL';
 
-            $placeholders[] = "({$title}, {$platform}, {$content_identifier}, {$published_at})";
+            $placeholders[] = "({$title}, {$platform}, {$content_identifier}, {$published_at}, {$source})";
         }
 
-        $sql = "INSERT IGNORE INTO " . 'ad_contents' . " (title, platform, content_identifier, published_at) VALUES " . implode(',', $placeholders);
+        $sql = "INSERT INTO ad_contents (title, platform, content_identifier, published_at, source) 
+                VALUES " . implode(',', $placeholders) . "
+                ON DUPLICATE KEY UPDATE source = VALUES(source), title = VALUES(title)";
 
         $this->db->query($sql);
 

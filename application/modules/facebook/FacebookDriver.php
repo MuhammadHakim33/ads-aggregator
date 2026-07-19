@@ -56,13 +56,26 @@ class FacebookDriver extends MetaPlatformDriver
 
         $params = [
             'fields' => $this->fields,
-            'since' => strtotime($since),
-            'until' => strtotime($until)
+            'since' => strtotime($since . ' 00:00:00'),
+            'until' => strtotime($until . ' 23:59:59'),
+            'limit' => 100
         ];
 
         // request facebook posts from meta graph api
-        $response = $this->make_request('get', $page_id . '/feed', $params, $pat);
+        $response = $this->make_request('get', $page_id . '/posts', $params, $pat);
         $raw = $response['data'] ?? [];
+
+        // handle pagination to get all posts
+        while (!empty($response['paging']['next'])) {
+            $next_url = $response['paging']['next'];
+            $response = $this->CI->request->get($next_url);
+
+            if (!empty($response['data'])) {
+                $raw = array_merge($raw, $response['data']);
+            } else {
+                break;
+            }
+        }
 
         // filter posts based on keyword
         if (!empty($keywords)) {

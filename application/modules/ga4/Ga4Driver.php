@@ -83,6 +83,10 @@ class Ga4Driver extends Platform_driver
 
     public function fetch_contents($since, $until, $filters = [])
     {
+        $today = date('Y-m-d');
+        if ($until > $today) $until = $today;
+        if ($since > $today) $since = $today;
+
         $hostnames = $filters['hostnames'] ?? [];
         $html_filter = $filters['html'] ?? [];
 
@@ -93,9 +97,9 @@ class Ga4Driver extends Platform_driver
                 ['name' => 'pagePath'],
                 ['name' => 'pageTitle'],
             ],
-            'metrics' => array_map(function ($k) {
-                return ['name' => $k];
-            }, $this->metric_keys),
+            'metrics' => [
+                ['name' => 'eventCount']
+            ],
             'limit' => 10000,
         ];
 
@@ -154,6 +158,10 @@ class Ga4Driver extends Platform_driver
         $since = $since ?? date('Y-m-d', strtotime('-30 days'));
         $until = $until ?? date('Y-m-d');
 
+        $today = date('Y-m-d');
+        if ($until > $today) $until = $today;
+        if ($since > $today) $since = $today;
+
         if (empty($identifiers)) {
             return [];
         }
@@ -165,40 +173,57 @@ class Ga4Driver extends Platform_driver
             $page_paths[] = $path;
         }
 
-        $body = [
-            'dateRanges' => [['startDate' => $since, 'endDate' => $until]],
-            'dimensions' => [
-                ['name' => 'hostName'],
-                ['name' => 'pagePath'],
-                ['name' => 'pageTitle'],
-            ],
-            'metrics' => array_map(function ($k) {
-                return ['name' => $k];
-            }, $this->metric_keys),
-            'dimensionFilter' => [
-                'filter' => [
-                    'fieldName' => 'pagePath',
-                    'inListFilter' => [
-                        'values' => $page_paths,
-                        'caseSensitive' => false,
-                    ],
-                ],
-            ],
-            'limit' => 10000,
-        ];
-
-        // request report from ga4 api
+        $formatted = [];
         $url = $this->url_report . $this->property_id . ':runReport';
         $token = $this->get_access_token();
-        $report = $this->CI->request->report($url, $body, $token);
 
-        // split report into ad_contents and ad_metrics
-        $result = $this->split_report_data($report['rows'] ?? []);
-        $ad_metrics = $result['ad_metrics'] ?? [];
+        // GA4 restricts requests to a maximum of 9 metrics per call for some nested reports
+        $metric_chunks = array_chunk($this->metric_keys, 9);
 
-        $formatted = [];
-        foreach ($ad_metrics as $item) {
-            $formatted[$item['page_path']] = $item['metrics'];
+        foreach ($metric_chunks as $chunk) {
+            $body = [
+                'dateRanges' => [['startDate' => $since, 'endDate' => $until]],
+                'dimensions' => [
+                    ['name' => 'hostName'],
+                    ['name' => 'pagePath'],
+                    ['name' => 'pageTitle'],
+                ],
+                'metrics' => array_map(function ($k) {
+                    return ['name' => $k];
+                }, $chunk),
+                'dimensionFilter' => [
+                    'filter' => [
+                        'fieldName' => 'pagePath',
+                        'inListFilter' => [
+                            'values' => $page_paths,
+                            'caseSensitive' => false,
+                        ],
+                    ],
+                ],
+                'limit' => 10000,
+            ];
+
+            // request report from ga4 api
+            $report = $this->CI->request->report($url, $body, $token);
+            $rows = $report['rows'] ?? [];
+
+            foreach ($rows as $row) {
+                $hostname = $row['dimensionValues'][0]['value'] ?? '';
+                $page_path = $row['dimensionValues'][1]['value'] ?? '';
+
+                if (empty($page_path) || $page_path === '(not set)' || $page_path === '/' || $page_path === '')
+                    continue;
+
+                $full_url = $hostname . $page_path;
+
+                if (!isset($formatted[$full_url])) {
+                    $formatted[$full_url] = [];
+                }
+
+                foreach ($chunk as $idx => $metric_key) {
+                    $formatted[$full_url][$metric_key] = (float) ($row['metricValues'][$idx]['value'] ?? 0);
+                }
+            }
         }
 
         return $formatted;

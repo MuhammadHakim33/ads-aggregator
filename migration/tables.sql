@@ -135,7 +135,7 @@ CREATE TABLE campaign_reported_metrics (
 -- =========================
 CREATE TABLE filter_keywords (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
+  platform ENUM('meta', 'gam', 'ga4', 'youtube') NOT NULL,
   type ENUM('html', 'keyword', 'hostname') NOT NULL,
   keyword VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE

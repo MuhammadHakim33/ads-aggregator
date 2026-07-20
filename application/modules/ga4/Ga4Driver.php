@@ -284,13 +284,16 @@ class Ga4Driver extends Platform_driver
             return false;
         }
 
+        // normalize html: remove all spaces, newlines, tabs, and convert to lowercase
+        $normalized_html = preg_replace('/\s+/', '', strtolower($html));
+        $normalized_html = str_replace(["'", '"'], '', $normalized_html);
+
         foreach ($filter as $snippet) {
-            // normalize single quote to double quote
-            $normalized_html = str_replace("='", '="', str_replace("'", '"', $html));
-            $normalized_snippet = str_replace("='", '="', str_replace("'", '"', $snippet));
+            $normalized_snippet = preg_replace('/\s+/', '', strtolower($snippet));
+            $normalized_snippet = str_replace(["'", '"'], '', $normalized_snippet);
 
             // check if html has element
-            if (stripos($normalized_html, $normalized_snippet) !== false) {
+            if (strpos($normalized_html, $normalized_snippet) !== false) {
                 return true;
             }
         }

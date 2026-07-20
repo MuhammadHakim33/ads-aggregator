@@ -30,7 +30,7 @@ class ExportExcel implements Exporter
             ['Campaign Name', ucwords($campaign->name ?? '-')],
             ['Contract Number', $campaign->contract_number ?? '-'],
             ['Client', ucwords($campaign->client_name ?? '-')],
-            ['PIC', $campaign->client_pic ?? '-'],
+            // ['PIC', $campaign->client_pic ?? '-'],
             ['Schedule', date('d M Y', strtotime($campaign->start_date)) . ' - ' . date('d M Y', strtotime($campaign->end_date))],
             ['Status', ($campaign->is_active ? 'Active' : 'Inactive')],
             ['Generated', date('d M Y H:i')],

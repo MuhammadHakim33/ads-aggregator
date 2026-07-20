@@ -16,9 +16,12 @@ class Filter_keyword_model extends CI_Model
         return $this->db->get('filter_keywords')->row();
     }
 
-    public function get_by_type($type)
+    public function get_by_type($type, $platform = null)
     {
         $this->db->where('type', $type);
+        if ($platform) {
+            $this->db->where('platform', $platform);
+        }
         $this->db->where('is_active', 1);
         return $this->db->get('filter_keywords')->result();
     }

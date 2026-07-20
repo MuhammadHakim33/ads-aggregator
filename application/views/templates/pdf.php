@@ -209,10 +209,10 @@
                 <td class="label">Client</td>
                 <td class="value"><?= ucwords($campaign->client_name ?? '-') ?></td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td class="label">PIC</td>
                 <td class="value"><?= $campaign->client_pic ?? '-' ?></td>
-            </tr>
+            </tr> -->
             <tr>
                 <td class="label">Campaign Schedule</td>
                 <td class="value">

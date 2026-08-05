@@ -1,5 +1,6 @@
 <?php
 require_once APPPATH . 'core/Platform_driver.php';
+require_once APPPATH . 'exceptions/PartialSuccessException.php';
 
 class Ga4Driver extends Platform_driver
 {
@@ -84,12 +85,16 @@ class Ga4Driver extends Platform_driver
     public function fetch_contents($since, $until, $filters = [])
     {
         $today = date('Y-m-d');
-        if ($until > $today) $until = $today;
-        if ($since > $today) $since = $today;
+        if ($until > $today)
+            $until = $today;
+        if ($since > $today)
+            $since = $today;
 
-        $hostnames = $filters['hostnames'] ?? [];
-        $html_filter = $filters['html'] ?? [];
+        // get access token
+        $token = $this->get_access_token();
 
+        // request API Google Analytic
+        $url = $this->url_report . $this->property_id . ':runReport';
         $body = [
             'dateRanges' => [['startDate' => $since, 'endDate' => $until]],
             'dimensions' => [
@@ -103,46 +108,45 @@ class Ga4Driver extends Platform_driver
             'limit' => 10000,
         ];
 
-        // send request to get report
-        $url = $this->url_report . $this->property_id . ':runReport';
-        $token = $this->get_access_token();
         $report = $this->CI->request->report($url, $body, $token);
         $rows = $report['rows'] ?? [];
 
-        // filter rows based on hostname match or html element scraping
-        $filtered_rows = [];
-        if (empty($hostnames) && empty($html_filter)) {
-            $filtered_rows = $rows;
-        } else {
-            // normalize hostnames to lowercase
-            $hostnames = array_map('strtolower', $hostnames);
+        log_message('info', '[fetch data ga4] ' . json_encode($rows));
 
-            foreach ($rows as $row) {
+        // filter hostname
+        $hostnames = array_map('strtolower', $filters['hostnames'] ?? []);
+        if (!empty($hostnames)) {
+            $rows = array_filter($rows, function ($row) use ($hostnames) {
+                $hostname = strtolower($row['dimensionValues'][0]['value'] ?? '');
+                return in_array($hostname, $hostnames, true);
+            });
+        }
+
+        // filter html
+        $html_filter = $filters['html'] ?? [];
+        if (!empty($html_filter)) {
+            $rows = array_filter($rows, function ($row) use ($html_filter) {
                 $hostname = strtolower($row['dimensionValues'][0]['value'] ?? '');
                 $page_path = $row['dimensionValues'][1]['value'] ?? '';
 
-                // filter 1: hostname match
-                if (!empty($hostnames) && in_array($hostname, $hostnames, true)) {
-                    $filtered_rows[] = $row;
-                    continue;
+                if (empty($page_path) || $page_path === '(not set)' || $page_path === '/') {
+                    return false;
                 }
 
-                // filter 2: html element scraping
-                if (!empty($html_filter)) {
-                    $full_url = 'https://' . $hostname . $page_path;
-                    $html = $this->CI->request->scrape($full_url);
-
-                    if ($html !== null && $this->html_has_element($html, $html_filter)) {
-                        $filtered_rows[] = $row;
-                    }
+                try {
+                    $html = $this->CI->request->scrape('https://' . $hostname . $page_path);
+                    return $this->html_has_element($html, $html_filter);
+                } catch (\Throwable $e) {
+                    log_message('error', "[Ga4Driver::fetch_contents] Scrape error: " . $e->getMessage());
+                    return false;
                 }
-            }
+            });
         }
 
-        $result = $this->split_report_data($filtered_rows);
+        // Map to ad_contents database schema
+        $result = $this->split_report_data($rows);
         $raw = $result['ad_contents'] ?? [];
 
-        // map to ad_contents database schema
         return array_map(function ($article) {
             return [
                 'title' => mb_substr($article['page_title'] ?? '', 0, 200),
@@ -159,8 +163,10 @@ class Ga4Driver extends Platform_driver
         $until = $until ?? date('Y-m-d');
 
         $today = date('Y-m-d');
-        if ($until > $today) $until = $today;
-        if ($since > $today) $since = $today;
+        if ($until > $today)
+            $until = $today;
+        if ($since > $today)
+            $since = $today;
 
         if (empty($identifiers)) {
             return [];

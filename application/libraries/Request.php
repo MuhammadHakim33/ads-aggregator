@@ -104,6 +104,12 @@ class Request
 
     public function scrape(string $url): ?string
     {
+        $cache = APPPATH . 'cache/scrape_' . md5($url) . '.cache';
+        if (is_file($cache) && time() - filemtime($cache) < 86400)
+            return @file_get_contents($cache);
+
+        usleep(500000);
+
         $ch = curl_init();
         curl_setopt_array($ch, [
             CURLOPT_URL => $url,
@@ -114,7 +120,7 @@ class Request
             CURLOPT_SSL_VERIFYPEER => TRUE,
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_CAINFO => $this->ca_bundle_path,
-            CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; GA4Bot/1.0)',
+            CURLOPT_USERAGENT => 'Mediapartners-Google',
             CURLOPT_HTTPHEADER => ['Accept: text/html'],
         ]);
 
@@ -124,9 +130,12 @@ class Request
         curl_close($ch);
 
         if ($error || $http_code < 200 || $http_code >= 300 || empty($html)) {
+            if (is_file($cache))
+                return @file_get_contents($cache);
             throw new \RuntimeException("Scrape Error ($url): HTTP $http_code - $error");
         }
 
+        @file_put_contents($cache, $html);
         return $html;
     }
 

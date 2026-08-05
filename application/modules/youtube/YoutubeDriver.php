@@ -100,6 +100,8 @@ class YoutubeDriver extends Platform_driver
         $url = $this->base_url . 'search';
         $res_videos = $this->make_api_request($url, $params);
 
+        log_message('info', "[YoutubeDriver::fetch_contents::res_video] " . json_encode($res_videos));
+
         // check if videos is empty
         if (empty($res_videos['items'])) {
             return [];
@@ -121,6 +123,8 @@ class YoutubeDriver extends Platform_driver
         $url = $this->base_url . 'videos';
         $res_details = $this->make_api_request($url, $params);
         $details = $res_details['items'] ?? [];
+
+        log_message('info', "[YoutubeDriver::fetch_contents::res_details] " . json_encode($details));
 
         // filter videos based on keyword
         if (!empty($keywords)) {
@@ -157,6 +161,8 @@ class YoutubeDriver extends Platform_driver
         $url = $this->base_url . 'videos';
         $response = $this->make_api_request($url, $params);
         $items = $response['items'] ?? [];
+
+        log_message('info', "[YoutubeDriver::fetch_insights::response] " . json_encode($response));
 
         // extract video stats
         $insights = [];

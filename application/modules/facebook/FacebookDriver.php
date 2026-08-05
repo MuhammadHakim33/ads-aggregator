@@ -65,10 +65,14 @@ class FacebookDriver extends MetaPlatformDriver
         $response = $this->make_request('get', $page_id . '/posts', $params, $pat);
         $raw = $response['data'] ?? [];
 
+        log_message('info', "[FacebookDriver::fetch_contents] " . json_encode($response));
+
         // handle pagination to get all posts
         while (!empty($response['paging']['next'])) {
             $next_url = $response['paging']['next'];
             $response = $this->CI->request->get($next_url);
+
+            log_message('info', "[FacebookDriver::fetch_contents] " . json_encode($response));
 
             if (!empty($response['data'])) {
                 $raw = array_merge($raw, $response['data']);
@@ -118,8 +122,12 @@ class FacebookDriver extends MetaPlatformDriver
             ];
         }
 
+        log_message('info', "[FacebookDriver::fetch_insights::batch_payload] " . json_encode($batch_insights));
+
         // request facebook posts insights
         $response_insights = $this->make_request('post', '', ['batch' => json_encode($batch_insights)], $pat);
+
+        log_message('info', "[FacebookDriver::fetch_insights::batch_response] " . json_encode($response_insights));
 
         foreach ($response_insights as $index => $res) {
             $id = $identifiers[$index];

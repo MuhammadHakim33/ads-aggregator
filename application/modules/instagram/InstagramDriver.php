@@ -47,10 +47,14 @@ class InstagramDriver extends MetaPlatformDriver
         $response = $this->make_request('get', $ig_id . '/media', $params);
         $raw = $response['data'] ?? [];
 
+        log_message('info', "[InstagramDriver::fetch_contents] " . json_encode($response));
+
         // handle pagination to get all media
         while (!empty($response['paging']['next'])) {
             $next_url = $response['paging']['next'];
             $response = $this->CI->request->get($next_url);
+
+            log_message('info', "[InstagramDriver::fetch_contents] " . json_encode($response));
 
             if (!empty($response['data'])) {
                 $raw = array_merge($raw, $response['data']);
@@ -98,8 +102,12 @@ class InstagramDriver extends MetaPlatformDriver
             ];
         }
 
+        log_message('info', "[InstagramDriver::fetch_insights::batch_payload] " . json_encode($batch));
+
         // request instagram media details and insights from meta graph api
         $response = $this->make_request('post', '', ['batch' => json_encode($batch)]);
+
+        log_message('info', "[InstagramDriver::fetch_insights::response] " . json_encode($response));
 
         $reels_ids = [];
         // normalize standard insights and identify reels posts

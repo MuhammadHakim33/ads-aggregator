@@ -35,3 +35,5 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 .vscode
 /uploads/contracts/*
 /logs/*
+
+/graphify-out

@@ -84,175 +84,142 @@ class GamDriver extends Platform_driver
         return $data_to_sign . '.' . $this->base64url_encode($signature);
     }
 
-    private function base64url_encode(string $data): string
+    private function base64url_encode(string $data)
     {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 
     public function fetch_contents($since, $until, $filters = [])
     {
-        $token = $this->get_access_token();
-        $url = $this->base_url . "networks/{$this->network_code}/lineItems";
-        $headers = [
-            'Authorization: Bearer ' . $token
-        ];
-
-        $params = [
-            'pageSize' => 1000,
-            'filter' => "status = 'DELIVERING' OR status = 'READY'"
-        ];
-
-        $response = $this->CI->request->get($url, $params, $headers);
-        $raw = $response['lineItems'] ?? [];
-
-        $filtered = [];
-
-        foreach ($raw as $item) {
-            $parts = explode('/', $item['name']);
-            $id = end($parts);
-            $displayName = $item['displayName'] ?? '';
-
-            $filtered[] = [
-                'title' => mb_substr($displayName, 0, 200),
-                'content_identifier' => $id,
-                'published_at' => isset($item['startTime']) ? date('Y-m-d H:i:s', strtotime($item['startTime'])) : null,
-                'platform' => 'gam',
-            ];
-        }
-
-        return $filtered;
-    }
-
-    public function fetch_insights($identifiers, $since = null, $until = null): array
-    {
         $since = $since ?? date('Y-m-d', strtotime('-30 days'));
         $until = $until ?? date('Y-m-d');
 
-        if (empty($identifiers)) {
-            return [];
-        }
-
         $token = $this->get_access_token();
+        $headers = ['Authorization: Bearer ' . $token];
 
-        // parse date ranges for reportdefinition
-        $since_time = strtotime($since);
-        $until_time = strtotime($until);
-
-        $dateRange = [
-            'startDate' => [
-                'year' => (int) date('Y', $since_time),
-                'month' => (int) date('n', $since_time),
-                'day' => (int) date('j', $since_time)
-            ],
-            'endDate' => [
-                'year' => (int) date('Y', $until_time),
-                'month' => (int) date('n', $until_time),
-                'day' => (int) date('j', $until_time)
-            ]
-        ];
-
-        // create report definition
+        // create report
         $report_url = $this->base_url . "networks/{$this->network_code}/reports";
         $report_body = [
             'reportDefinition' => [
                 'reportType' => 'HISTORICAL',
                 'dateRange' => 'CUSTOM_DATE_RANGE',
-                'customDateRange' => $dateRange,
-                'dimensions' => ['LINE_ITEM_ID'],
-                'metrics' => array_map('strtoupper', $this->metrics)
+                'customDateRange' => [
+                    'startDate' => $this->parse_date($since),
+                    'endDate' => $this->parse_date($until),
+                ],
+                'dimensions' => ['LINE_ITEM_ID', 'LINE_ITEM_NAME'],
+                'metrics' => array_map('strtoupper', $this->metrics),
             ]
         ];
 
         $report_response = $this->CI->request->report($report_url, $report_body, $token);
         $report_name = $report_response['name'] ?? null;
         if (!$report_name) {
-            throw new \RuntimeException('failed to create gam report definition.');
+            throw new \RuntimeException('failed to create gam report.');
         }
 
         // run report
-        $run_url = $this->base_url . $report_name . ':run';
-        $run_response = $this->CI->request->report($run_url, [], $token);
+        $run_response = $this->CI->request->report($this->base_url . $report_name . ':run', [], $token);
         $operation_name = $run_response['name'] ?? null;
         if (!$operation_name) {
-            throw new \RuntimeException('failed to initiate gam report run.');
+            throw new \RuntimeException('failed to run gam report.');
         }
 
         // poll report (max 15 attempts)
         $operation_url = $this->base_url . $operation_name;
-        $headers = [
-            'Authorization: Bearer ' . $token
-        ];
-
-        $attempts = 0;
-        $done = false;
         $report_result_name = null;
 
-        while ($attempts < 15) {
-            $status_response = $this->CI->request->get($operation_url, [], $headers);
-            if (isset($status_response['done']) && $status_response['done'] === true) {
-                $done = true;
-                $report_result_name = $status_response['response']['reportResult'] ?? null;
+        for ($i = 0; $i < 15; $i++) {
+            $status = $this->CI->request->get($operation_url, [], $headers);
+            if (!empty($status['done'])) {
+                $report_result_name = $status['response']['reportResult'] ?? null;
                 break;
             }
-            $attempts++;
             sleep(1);
         }
 
-        if (!$done || !$report_result_name) {
-            throw new \RuntimeException('gam report execution timed out or failed.');
+        if (!$report_result_name) {
+            throw new \RuntimeException('gam report timed out or failed.');
         }
 
-        // fetch report rows
-        $fetch_url = $this->base_url . $report_result_name . ':fetchRows';
-        $fetch_params = [
-            'pageSize' => 5000
-        ];
+        // fetch rows
+        $rows = $this->CI->request->get(
+            $this->base_url . $report_result_name . ':fetchRows',
+            ['pageSize' => 5000],
+            $headers
+        )['rows'] ?? [];
 
-        $rows_response = $this->CI->request->get($fetch_url, $fetch_params, $headers);
-        $rows = $rows_response['rows'] ?? [];
-
-        // map and return metrics matching line items
-        $formatted = [];
-        $line_item_ids = array_map('strval', $identifiers);
+        $filtered = [];
 
         foreach ($rows as $row) {
-            $line_item_id = $row['dimensionValues'][0]['stringList']['values'][0] ?? null;
-            if (!$line_item_id || !in_array($line_item_id, $line_item_ids, true)) {
+            // get id and name ads
+            $id = $row['dimensionValues'][0]['intValue'] ?? $row['dimensionValues'][0]['stringValue'] ?? null;
+            $name = $row['dimensionValues'][1]['stringValue'] ?? 'Untitled Line Item';
+
+            if (!$id)
                 continue;
-            }
 
-            // extract metrics from the first group
-            $metric_values = $row['metricValueGroups'][0]['primaryValues'] ?? [];
-
+            // get metric
             $item_metrics = [];
             foreach ($this->metrics as $index => $metric_name) {
-                $val = $metric_values[$index] ?? null;
-                $extracted = $val ? $this->extract_metric_value($val) : 0;
-                
-                // apply percent conversion if needed
-                if (stripos($metric_name, 'ctr') !== false || stripos($metric_name, 'percent') !== false) {
-                    $extracted = $extracted * 100;
-                }
-                
-                $item_metrics[$metric_name] = $extracted;
+                $raw_val = $row['metricValueGroups'][0]['primaryValues'][$index] ?? [];
+                $val = $this->extract_metric_value($raw_val);
+
+                // convert CTR to percent
+                $item_metrics[$metric_name] = (stripos($metric_name, 'ctr') !== false || stripos($metric_name, 'percent') !== false)
+                    ? ($val * 100)
+                    : $val;
             }
 
-            $formatted[$line_item_id] = $item_metrics;
+            // save filtered data
+            $filtered[] = [
+                'title' => mb_substr((string) $name, 0, 200),
+                'content_identifier' => (string) $id,
+                'published_at' => null,
+                'platform' => 'gam',
+                'metrics' => $item_metrics,
+            ];
+        }
+
+        return $filtered;
+    }
+
+    public function fetch_insights($since = null, $until = null)
+    {
+        $since = $since ?? date('Y-m-d', strtotime('-30 days'));
+        $until = $until ?? date('Y-m-d');
+
+        $contents = $this->fetch_contents($since, $until);
+        $formatted = [];
+
+        foreach ($contents as $item) {
+            $id = $item['content_identifier'];
+            $formatted[$id] = $item['metrics'] ?? [];
         }
 
         return $formatted;
     }
 
+    private function parse_date(string $date)
+    {
+        $t = strtotime($date);
+        return [
+            'year' => (int) date('Y', $t),
+            'month' => (int) date('n', $t),
+            'day' => (int) date('j', $t),
+        ];
+    }
+
     private function extract_metric_value($val)
     {
-        if (isset($val['intList']['values'][0])) {
-            return (int) $val['intList']['values'][0];
+        if (isset($val['intValue'])) {
+            return (int) $val['intValue'];
         }
-        if (isset($val['doubleList']['values'][0])) {
-            return (float) $val['doubleList']['values'][0];
+        if (isset($val['doubleValue'])) {
+            return (float) $val['doubleValue'];
         }
-        if (isset($val['moneyList']['values'][0])) {
-            return (float) ($val['moneyList']['values'][0]['amount'] ?? 0.0);
+        if (isset($val['stringValue'])) {
+            return (float) $val['stringValue'];
         }
         return 0;
     }

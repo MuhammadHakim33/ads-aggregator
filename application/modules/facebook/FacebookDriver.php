@@ -101,6 +101,8 @@ class FacebookDriver extends MetaPlatformDriver
                 'published_at' => isset($p['created_time']) ? date('Y-m-d H:i:s', strtotime($p['created_time'])) : null,
                 'source' => $p['permalink_url'] ?? null,
                 'platform' => 'facebook',
+                // full_picture is a CDN URL from Meta Graph API (may expire, refreshed on next cron run)
+                'thumbnail' => $p['full_picture'] ?? null,
             ];
         }, $raw);
     }

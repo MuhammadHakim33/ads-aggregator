@@ -28,6 +28,38 @@ if (!function_exists('generate_ad_post_url')) {
     }
 }
 
+if (!function_exists('get_ad_thumbnail_url')) {
+    /**
+     * Returns a thumbnail URL for an ad content row.
+     *
+     * - Facebook & Instagram: returns the CDN URL stored in `thumbnail` column (may expire between cron runs)
+     * - YouTube: generates a permanent public thumbnail URL from the video ID (no auth, no storage needed)
+     * - GA4 / GAM / other: returns null (no thumbnail available)
+     *
+     * @param object $ad  An ad_contents row object with properties: platform, content_identifier, thumbnail
+     * @return string|null
+     */
+    function get_ad_thumbnail_url($ad)
+    {
+        $platform = strtolower(trim($ad->platform ?? ''));
+        $cid = trim($ad->content_identifier ?? '');
+
+        switch ($platform) {
+            case 'youtube':
+                // YouTube thumbnails are public and permanent — no API key or auth required
+                return !empty($cid) ? 'https://i.ytimg.com/vi/' . $cid . '/hqdefault.jpg' : null;
+
+            case 'facebook':
+            case 'instagram':
+                // CDN URL stored during cron fetch (may expire, refreshed on next cron run)
+                return !empty($ad->thumbnail) ? $ad->thumbnail : null;
+
+            default:
+                return null;
+        }
+    }
+}
+
 if (!function_exists('send_email')) {
     /**
      * @param string|array $to Recipient email address(es)

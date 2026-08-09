@@ -7,7 +7,7 @@ $config['platforms'] = [
         'label' => 'Facebook',
         'driver_class' => 'FacebookDriver',
         'driver_path' => APPPATH . 'modules/facebook/FacebookDriver.php',
-        'fields' => 'id,message,created_time,permalink_url',
+        'fields' => 'id,message,created_time,permalink_url,full_picture',
         'insight_fields' => 'comments.summary(true),likes.summary(true),shares,reactions.summary(true)',
         'extra_metrics' => [
             'total_comments',
@@ -42,7 +42,7 @@ $config['platforms'] = [
         'label' => 'Instagram',
         'driver_class' => 'InstagramDriver',
         'driver_path' => APPPATH . 'modules/instagram/InstagramDriver.php',
-        'fields' => 'id,caption,timestamp,permalink',
+        'fields' => 'id,caption,timestamp,permalink,thumbnail_url,media_url',
         'insight_fields' => 'media_product_type',
         'metrics' => [
             "likes",

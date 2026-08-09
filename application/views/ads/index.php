@@ -55,6 +55,7 @@
                                     <th scope="col" class="text-center" style="width: 50px;">
                                         <input class="form-check-input" type="checkbox" id="checkAll">
                                     </th>
+                                    <th scope="col" style="width: 72px;">Thumbnail</th>
                                     <th scope="col">Published</th>
                                     <th scope="col">Identifier / Title</th>
                                     <th scope="col">Platform</th>
@@ -65,7 +66,7 @@
                             <tbody>
                                 <?php if (empty($unconnected)): ?>
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-5">
+                                        <td colspan="7" class="text-center text-muted py-5">
                                             <i class="bi bi-check-circle fs-1 d-block mb-2 text-success"></i>
                                             All ads have been connected to campaigns.
                                         </td>
@@ -76,6 +77,25 @@
                                             <td class="text-center">
                                                 <input class="form-check-input row-check" type="checkbox" name="selected_ids[]"
                                                     value="<?= $ad->id ?>">
+                                            </td>
+                                            <td class="p-1" style="width: 72px;">
+                                                <?php
+                                                $thumb_url = get_ad_thumbnail_url($ad);
+                                                $platform = strtolower($ad->platform);
+                                                $has_thumb = in_array($platform, ['facebook', 'instagram', 'youtube']);
+                                                ?>
+                                                <?php if ($has_thumb && $thumb_url): ?>
+                                                    <img src="<?= htmlspecialchars($thumb_url) ?>" alt="thumbnail" loading="lazy"
+                                                        class="rounded"
+                                                        style="width:56px;height:56px;object-fit:cover;display:block;">
+                                                <?php elseif ($has_thumb): ?>
+                                                    <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                                        style="width:56px;height:56px;" title="Thumbnail not available">
+                                                        <i class="bi bi-<?= $platform ?> fs-4"></i>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
                                                 <?php if (!empty($ad->published_at)): ?>
@@ -155,44 +175,44 @@
 </div>
 
 <script>
-$(function () {
-    const $checkAll = $('#checkAll');
-    const $rowChecks = $('.row-check');
-    const $checkedCountEl = $('#checkedCount');
-    const $actionBtns = $('.action-btn');
+    $(function () {
+        const $checkAll = $('#checkAll');
+        const $rowChecks = $('.row-check');
+        const $checkedCountEl = $('#checkedCount');
+        const $actionBtns = $('.action-btn');
 
-    function updateState() {
-        let count = 0;
-        $rowChecks.each(function () {
-            const $tr = $(this).closest('tr');
-            const $select = $tr.find('.campaign-select');
+        function updateState() {
+            let count = 0;
+            $rowChecks.each(function () {
+                const $tr = $(this).closest('tr');
+                const $select = $tr.find('.campaign-select');
 
-            if (this.checked) {
-                count++;
-                $tr.addClass('table-primary');
-                $select.prop('disabled', false).prop('required', true);
-            } else {
-                $tr.removeClass('table-primary');
-                $select.prop('disabled', true).prop('required', false);
-            }
-        });
+                if (this.checked) {
+                    count++;
+                    $tr.addClass('table-primary');
+                    $select.prop('disabled', false).prop('required', true);
+                } else {
+                    $tr.removeClass('table-primary');
+                    $select.prop('disabled', true).prop('required', false);
+                }
+            });
 
-        if ($checkedCountEl.length) $checkedCountEl.text(count);
+            if ($checkedCountEl.length) $checkedCountEl.text(count);
 
-        $actionBtns.prop('disabled', count === 0);
+            $actionBtns.prop('disabled', count === 0);
 
-        if ($checkAll.length) $checkAll.prop('checked', count > 0 && count === $rowChecks.length);
-    }
+            if ($checkAll.length) $checkAll.prop('checked', count > 0 && count === $rowChecks.length);
+        }
 
-    if ($checkAll.length) {
-        $checkAll.on('change', function () {
-            $rowChecks.prop('checked', this.checked);
-            updateState();
-        });
-    }
+        if ($checkAll.length) {
+            $checkAll.on('change', function () {
+                $rowChecks.prop('checked', this.checked);
+                updateState();
+            });
+        }
 
-    $rowChecks.on('change', updateState);
-});
+        $rowChecks.on('change', updateState);
+    });
 </script>
 
 <?php $this->load->view('templates/footer'); ?>

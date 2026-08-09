@@ -17,13 +17,17 @@ class Ad_model extends CI_Model
             $content_identifier = $this->db->escape($row['content_identifier']);
             $published_at = isset($row['published_at']) ? $this->db->escape($row['published_at']) : 'NULL';
             $source = isset($row['source']) ? $this->db->escape($row['source']) : 'NULL';
+            // thumbnail is a CDN URL from Meta API (facebook/instagram), NULL for others (e.g. youtube)
+            $thumbnail = isset($row['thumbnail']) ? $this->db->escape($row['thumbnail']) : 'NULL';
 
-            $placeholders[] = "({$title}, {$platform}, {$content_identifier}, {$published_at}, {$source})";
+            $placeholders[] = "({$title}, {$platform}, {$content_identifier}, {$published_at}, {$source}, {$thumbnail})";
         }
 
-        $sql = "INSERT INTO ad_contents (title, platform, content_identifier, published_at, source) 
+        $sql = "INSERT INTO ad_contents (title, platform, content_identifier, published_at, source, thumbnail)
                 VALUES " . implode(',', $placeholders) . "
-                ON DUPLICATE KEY UPDATE source = VALUES(source), title = VALUES(title)";
+                ON DUPLICATE KEY UPDATE
+                    source    = VALUES(source),
+                    title     = VALUES(title)";
 
         $this->db->query($sql);
 

@@ -151,7 +151,8 @@ CREATE TABLE ad_contents (
   platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
   content_identifier VARCHAR(255) UNIQUE NOT NULL,
   published_at TIMESTAMP NULL,
-  source VARCHAR(500) NULL,
+  source TEXT NULL,
+  thumbnail TEXT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (campaign_id) REFERENCES campaigns(id)
 );

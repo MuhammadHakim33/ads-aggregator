@@ -77,12 +77,17 @@ class InstagramDriver extends MetaPlatformDriver
 
         // map to ad_contents database schema
         return array_map(function ($p) {
+            // thumbnail_url is available for VIDEO/REELS, media_url for IMAGE posts
+            // Both are CDN URLs from Meta Graph API (may expire, refreshed on next cron run)
+            $thumbnail = $p['thumbnail_url'] ?? $p['media_url'] ?? null;
+
             return [
                 'title' => mb_substr($p['caption'] ?? 'no caption', 0, 200),
                 'content_identifier' => $p['id'],
                 'published_at' => isset($p['timestamp']) ? date('Y-m-d H:i:s', strtotime($p['timestamp'])) : null,
                 'source' => $p['permalink'] ?? null,
                 'platform' => 'instagram',
+                'thumbnail' => $thumbnail,
             ];
         }, $raw);
     }

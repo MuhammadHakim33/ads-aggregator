@@ -103,7 +103,7 @@ class Platform extends CI_Controller
             // get saved content identifiers with campaign date ranges
             $saved = $this->Ad_model->get_identifiers_by_platform($platform);
 
-            if (empty($saved)) {
+            if (empty($saved) && $platform != "gam") {
                 $this->Cron_log_model->finish($log_id, 'success', 0);
                 return;
             }

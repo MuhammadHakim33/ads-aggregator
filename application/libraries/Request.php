@@ -108,7 +108,7 @@ class Request
         if (is_file($cache) && time() - filemtime($cache) < 86400)
             return @file_get_contents($cache);
 
-        usleep(500000);
+        usleep(200000);
 
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -116,12 +116,17 @@ class Request
             CURLOPT_RETURNTRANSFER => TRUE,
             CURLOPT_FOLLOWLOCATION => TRUE,
             CURLOPT_MAXREDIRS => 5,
-            CURLOPT_TIMEOUT => 15,
+            CURLOPT_TIMEOUT => 20,
+            CURLOPT_ENCODING => '',
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_SSL_VERIFYPEER => TRUE,
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_CAINFO => $this->ca_bundle_path,
             CURLOPT_USERAGENT => 'Mediapartners-Google',
-            CURLOPT_HTTPHEADER => ['Accept: text/html'],
+            CURLOPT_HTTPHEADER => [
+                'Accept: text/html,application/xhtml+xml',
+                'Connection: close'
+            ],
         ]);
 
         $html = curl_exec($ch);

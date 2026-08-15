@@ -13,6 +13,8 @@ class Dashboard extends MY_Controller
         $this->load->model('Complaint_model');
         $this->load->model('Report_model');
         $this->load->model('Cron_log_model');
+        $this->load->model('Account_model');
+        $this->load->model('Platform_credential_model');
     }
 
     public function index()
@@ -120,18 +122,61 @@ class Dashboard extends MY_Controller
 
     private function superadmin()
     {
+        $platforms = ['meta', 'ga4', 'youtube', 'gam'];
+        $platform_credentials_status = [];
+        $youtube_needs_oauth = false;
+
+        foreach ($platforms as $p) {
+            $exists = (bool) $this->Platform_credential_model->is_exists($p);
+            $platform_credentials_status[$p] = $exists;
+
+            if ($p === 'youtube' && $exists) {
+                $cred = $this->Platform_credential_model->get_by_platform($p);
+                $has_refresh = !empty($cred['refresh_token']);
+                $has_access = !empty($cred['access_token']);
+                $is_expired = isset($cred['expires_at']) && time() > ($cred['expires_at'] - 60);
+
+                if (empty($cred['client_id']) || empty($cred['client_secret'])) {
+                    $youtube_needs_oauth = true;
+                } elseif (!$has_refresh && (!$has_access || $is_expired)) {
+                    $youtube_needs_oauth = true;
+                } elseif ($has_refresh && $is_expired) {
+                    $this->load->library('request');
+                    $body = [
+                        'client_id' => $cred['client_id'],
+                        'client_secret' => $cred['client_secret'],
+                        'refresh_token' => $cred['refresh_token'],
+                        'grant_type' => 'refresh_token'
+                    ];
+                    try {
+                        $response = $this->request->post_form('https://oauth2.googleapis.com/token', [], $body);
+                        if (isset($response['access_token'])) {
+                            $cred['access_token'] = $response['access_token'];
+                            if (isset($response['expires_in'])) {
+                                $cred['expires_at'] = time() + $response['expires_in'];
+                            }
+                            $this->Platform_credential_model->update('youtube', $cred);
+                        } else {
+                            $youtube_needs_oauth = true;
+                        }
+                    } catch (\Exception $e) {
+                        $youtube_needs_oauth = true;
+                    }
+                }
+            }
+        }
+
         $data = [
             'title' => 'Dashboard',
             'active_menu' => 'dashboard',
-            'total_contracts_active' => $this->Contract_model->count_active(null, null),
-            'total_campaigns_running' => $this->Campaign_model->count_running(null, null),
-            'total_unconnected_ads' => 0,
-            'total_clients_active' => $this->Client_model->count_active(),
-            'total_clients' => $this->Client_model->count_total(),
+            'total_users_active' => $this->Account_model->count_active_total(),
+            'total_unconnected_ads' => $this->Ad_model->count_unconnected(),
+            'user_by_role' => $this->Account_model->count_by_role(),
+            'platform_credentials_status' => $platform_credentials_status,
+            'youtube_needs_oauth' => $youtube_needs_oauth,
             'cron_last_per_platform' => $this->Cron_log_model->get_last_per_platform(),
             'cron_recent' => $this->Cron_log_model->get_latest(10),
         ];
-
 
         $this->render('dashboard/superadmin', $data);
     }

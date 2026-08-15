@@ -148,4 +148,31 @@ class Account_model extends CI_Model
             'reset_token_expired' => NULL
         ]);
     }
+
+    public function count_by_role()
+    {
+        $sql = "
+            SELECT
+                roles.name AS role_name,
+                COUNT(accounts.id) AS total,
+                SUM(accounts.is_active) AS active
+            FROM accounts
+            JOIN roles ON roles.id = accounts.role_id
+            GROUP BY roles.id, roles.name
+            ORDER BY roles.name ASC
+        ";
+        $rows = $this->db->query($sql)->result();
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[$row->role_name] = $row;
+        }
+        return $map;
+    }
+
+    public function count_active_total()
+    {
+        $this->db->where('is_active', 1);
+        return $this->db->count_all_results('accounts');
+    }
 }

@@ -105,8 +105,9 @@ class Dashboard extends MY_Controller
 
     private function ae()
     {
-        $user_id = $this->current_account['id'];
-        $ae_id = $user_id;
+        $ae_id = $this->current_account['id'];
+
+        $complaints = $this->Complaint_model->get_all(['ae_id' => $ae_id, 'status' => 'in_progress']);
 
         $data = [
             'title' => 'Dashboard',
@@ -114,9 +115,12 @@ class Dashboard extends MY_Controller
             'total_contracts_active' => $this->Contract_model->count_active(null, $ae_id),
             'total_campaigns_running' => $this->Campaign_model->count_running(null, $ae_id),
             'total_unconnected_ads' => $this->Ad_model->count_unconnected(),
+            'total_clients_handled' => $this->Client_model->count_active($ae_id),
+            'total_open_complaints' => count($complaints),
+            'clients' => $this->Client_model->get_all(['ae_id' => $ae_id]),
+            'expiring_contracts' => $this->Contract_model->get_expiring($ae_id, 30),
         ];
 
-        $data['total_clients_handled'] = $this->Client_model->count_active($ae_id);
         $this->render('dashboard/ae', $data);
     }
 

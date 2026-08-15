@@ -173,4 +173,51 @@ class Contract_model extends CI_Model
 
         return $contracts;
     }
+
+    public function get_expiring($ae_id = null, $days = 30)
+    {
+        $today = date('Y-m-d');
+        $limit_date = date('Y-m-d', strtotime("+{$days} days"));
+
+        $this->db->select('contracts.*, clients.company_name as client_name');
+        $this->db->from('contracts');
+        $this->db->join('clients', 'clients.id = contracts.client_id', 'inner');
+        $this->db->where('contracts.deleted_at', NULL);
+        $this->db->where('contracts.terminated_at', NULL);
+        $this->db->where('contracts.status', 'approved');
+        $this->db->where('contracts.end_date >=', $today);
+        $this->db->where('contracts.end_date <=', $limit_date);
+
+        if ($ae_id) {
+            $this->db->where('clients.ae_id', $ae_id);
+        }
+
+        $this->db->order_by('contracts.end_date', 'ASC');
+        $contracts = $this->db->get()->result();
+
+        if (empty($contracts)) {
+            return [];
+        }
+
+        $contract_ids = array_column($contracts, 'id');
+
+        $this->db->select('campaigns.*, contracts.contract_number');
+        $this->db->from('campaigns');
+        $this->db->join('contracts', 'contracts.id = campaigns.contract_id', 'inner');
+        $this->db->where('campaigns.deleted_at', NULL);
+        $this->db->where_in('campaigns.contract_id', $contract_ids);
+        $this->db->order_by('campaigns.start_date', 'ASC');
+        $campaigns = $this->db->get()->result();
+
+        $campaigns_map = [];
+        foreach ($campaigns as $c) {
+            $campaigns_map[$c->contract_id][] = $c;
+        }
+
+        foreach ($contracts as &$contract) {
+            $contract->campaigns = $campaigns_map[$contract->id] ?? [];
+        }
+
+        return $contracts;
+    }
 }

@@ -1,84 +1,112 @@
 # Ads Aggregator
 
-## Initial Setup (Required)
-Create the `.env` configuration file from `.env.example`. Make sure your database settings are configured to connect to your local MySQL instance (port 3306):
+## Instalasi
 
+Ada dua cara untuk menjalankan aplikasi ini: secara Native (tanpa Docker) atau menggunakan Docker penuh (direkomendasikan).
+
+### 1. Konfigurasi Environment (Wajib)
+Buat file konfigurasi `.env` dengan menyalin file `.env.example`:
+```bash
+cp .env.example .env
+```
+Sesuaikan kredensial di `.env`. **Penting:** Jika menggunakan Docker, ubah `DB_HOST` menjadi `db`.
 ```env
-DB_HOST=127.0.0.1
+CI_BASE_URL=http://localhost:8181/
+DB_HOST=127.0.0.1   # Ubah menjadi 'db' jika pakai Docker
 DB_NAME=aggregator
 DB_USER=user
 DB_PASSWORD=pass
 DB_ROOT_PASSWORD=root
 ```
 
-## Running the Application
+---
 
-This project uses Docker to run the database (MySQL), while the application code runs natively using PHP and Nginx/Apache on your host machine (WSL/Linux).
+### Opsi A: Menjalankan dengan Docker (Direkomendasikan)
+Cara paling instan. Sudah membundel Nginx, PHP, MySQL, dan Cron Job Scheduler.
 
-**Prerequisites:**
-- PHP (Version 7.x)
-- Composer
-- Docker & Docker Compose (Optional)
-- Webserver
+**Prerequisites:** Docker & Docker Compose terinstall.
 
-**Steps:**
-
-1. **Install PHP Dependencies:**
-   Run the following command to install the required libraries:
+**Langkah:**
+1. Pastikan `DB_HOST=db` di file `.env`.
+2. Buka terminal di folder project dan jalankan:
    ```bash
-   composer install
+   docker compose up -d --build
    ```
-
-2. **Database Migration & Seeding:**
-   (If you haven't already setup the database)
-   - Import the table structure from `migration/tables.sql` into the database.
-   - Import the dummy data from `migration/dummy.sql`.
-
-3. **Access the Application:**
-   Access the app through your local web server (e.g., Nginx) at the configured domain or port.
-   👉 **http://localhost:8080** (or your configured port)
+3. Selesai! Akses aplikasi di 👉 **http://localhost:8181**
+*(Database akan di-seed otomatis pada run pertama, dan Cron jobs sudah berjalan di background).*
 
 ---
 
-## Running Cron Jobs
-This system requires cron jobs to periodically pull data from the APIs (Facebook, Instagram, GA4, YouTube). There are two main functions for each platform:
-- `fetch`: Fetch the latest posts/content.
-- `sync`: Fetch metrics (insights) data.
+### Opsi B: Menjalankan Native (Tanpa Docker)
+Gunakan cara ini jika Anda ingin memakai web server lokal bawaan OS Anda (seperti XAMPP, MAMP, atau native Nginx).
 
-**1. Manual Run:**
-Run this command in the project's root directory:
+**Prerequisites:** PHP 7.4+, Composer, MySQL Server, Web Server (Apache/Nginx).
+
+**Langkah:**
+1. **Install Library PHP:**
+   ```bash
+   composer install
+   ```
+2. **Setup Database Manual:**
+   - Buat database baru di MySQL lokal Anda.
+   - Import struktur tabel: `migration/tables.sql`.
+   - Import data dummy: `migration/dummy.sql`.
+3. **Konfigurasi Web Server:**
+   - Arahkan *Document Root* web server lokal Anda ke folder project ini.
+   - Atur `CI_BASE_URL` di file `.env` sesuai dengan domain lokal Anda (misal: `http://localhost/ads-aggregator/`).
+4. Selesai! Akses aplikasi melalui URL lokal Anda.
+
+
+---
+
+## Menjalankan Cron Jobs
+Sistem ini membutuhkan cron jobs untuk menarik data dari API (Facebook, Instagram, GA4, YouTube) secara berkala. Terdapat dua fungsi utama untuk setiap platform:
+- `fetch`: Menarik postingan/konten terbaru.
+- `sync`: Menarik data metrik (insights).
+
+**1. Eksekusi Manual:**
+Jalankan perintah ini di direktori root project:
 ```bash
-# To run for a specific platform (e.g., facebook, instagram, youtube, ga4):
+# Menjalankan platform spesifik (contoh: facebook, instagram, youtube, ga4):
 php index.php Cron/Platform fetch facebook
 php index.php Cron/Platform sync facebook
 
-# To run for ALL platforms at once:
+# Menjalankan SEMUA platform sekaligus:
 php index.php Cron/Platform fetch all
 php index.php Cron/Platform sync all
 
-# To specify a custom time frame (format: YYYY-MM-DD):
-# Usage: php index.php Cron/Platform [action] [platform] [since] [until]
+# Menentukan rentang waktu spesifik (format: YYYY-MM-DD):
+# Penggunaan: php index.php Cron/Platform [action] [platform] [since] [until]
 php index.php Cron/Platform fetch all 2023-01-01 2023-12-31
 php index.php Cron/Platform sync facebook 2023-10-01 2023-10-31
 ```
 
-**2. Setup Server Crontab (Scheduled Automatically):**
-To run the processes automatically in the background of a server (Linux), add the configuration to your crontab (`crontab -e`):
+**2. Setup Crontab Server (Otomatis / Native):**
+Jika Anda **tidak menggunakan Docker** dan ingin proses ini berjalan otomatis di background server (Linux), tambahkan konfigurasi berikut ke crontab Anda (`crontab -e`):
 ```bash
-# Fetch posts for all platforms every hour
-# Logs are appended to logs/cron_fetch.log
+# Tarik postingan semua platform setiap jam
+# Log disimpan ke logs/cron_fetch.log
 0 * * * * cd /path/to/project && php index.php Cron/Platform fetch all >> logs/cron_fetch.log 2>&1
 
-# Sync insights for all platforms every midnight (00:00)
-# Logs are appended to logs/cron_sync.log
+# Tarik insights semua platform setiap tengah malam (00:00)
+# Log disimpan ke logs/cron_sync.log
 0 0 * * * cd /path/to/project && php index.php Cron/Platform sync all >> logs/cron_sync.log 2>&1
 ```
-*(Adjust `/path/to/project` to the actual directory where your project is located).*
+*(Sesuaikan `/path/to/project` dengan lokasi direktori project Anda).*
 
-**Log Files:**
-| File | Description |
-|---|---|
-| `logs/cron_fetch.log` | Output log from the fetch cron job |
-| `logs/cron_sync.log` | Output log from the sync cron job |
+**3. Mengubah Jadwal Cron (Khusus Pengguna Docker):**
+Jika Anda menjalankan via Docker, waktu penjadwalan dikonfigurasi melalui file `docker/cron/crontab`. 
+Untuk mengubah waktu penjadwalannya:
+1. Buka dan edit file `docker/cron/crontab`.
+2. Build ulang dan restart container cron untuk menerapkan perubahan:
+   ```bash
+   docker compose build cron
+   docker compose up -d cron
+   ```
 
-> **Tip:** To rotate logs and prevent the log files from growing too large, add `logrotate` configuration or clear manually.
+**Log Sistem:**
+- **Docker:** Log cron job otomatis ter-redirect ke Docker. Gunakan perintah:
+  `docker logs -f ads_aggregator_cron_prod`
+- **Native:** Output cron akan tersimpan ke file log lokal:
+  - `logs/cron_fetch.log` (Output fetch)
+  - `logs/cron_sync.log` (Output sync)

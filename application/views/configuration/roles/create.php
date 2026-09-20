@@ -33,8 +33,7 @@
                                         Name <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" id="name" name="name"
-                                        value="<?= set_value('name') ?>"
-                                        placeholder="e.g. superadmin, ae, manajemen, client" required autofocus>
+                                        value="<?= set_value('name') ?>" required>
                                     <?= form_error('name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <div class="d-flex gap-2 justify-content-end">

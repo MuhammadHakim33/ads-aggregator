@@ -1,0 +1,6 @@
+DB_HOST=db
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Cron jobs based on README
+0 * * * * cd /var/www/html && php index.php Cron/Platform fetch all >> /proc/1/fd/1 2>&1
+0 * * * * cd /var/www/html && php index.php Cron/Platform sync all >> /proc/1/fd/1 2>&1

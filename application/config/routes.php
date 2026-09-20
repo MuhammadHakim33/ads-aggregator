@@ -75,9 +75,15 @@ $route['campaign/detail/(:num)'] = 'campaign/detail/$1';
 $route['campaign/delete/(:num)'] = 'campaign/delete/$1';
 $route['campaign/export/(:any)/(:num)'] = 'campaign/export/$1/$2';
 $route['campaign/unconnect_ad/(:num)/(:num)'] = 'campaign/unconnect_ad/$1/$2';
+$route['campaign/configure_metrics/(:num)'] = 'campaign/configure_metrics/$1';
 $route['campaign'] = 'campaign/index';
 
 $route['ads'] = 'ads/index';
+
+$route['complaint/create'] = 'complaint/create';
+$route['complaint/detail/(:num)'] = 'complaint/detail/$1';
+$route['complaint/update_status/(:num)'] = 'complaint/update_status/$1';
+$route['complaint'] = 'complaint/index';
 
 $route['config/platforms/meta'] = 'Config/Platforms/meta';
 $route['config/platforms/ga4'] = 'Config/Platforms/ga4';
@@ -85,6 +91,9 @@ $route['config/platforms/youtube'] = 'Config/Platforms/youtube';
 $route['config/platforms/gam'] = 'Config/Platforms/gam';
 
 $route['config/platforms/save-credential/(:any)'] = 'Config/Platforms/save_credential/$1';
+
+$route['youtube_oauth/login'] = 'youtube_oauth/login';
+$route['youtube_oauth/callback'] = 'youtube_oauth/callback';
 
 $route['config/platforms/(:any)/keyword/create'] = 'Config/Platforms/create_keyword/$1';
 $route['config/platforms/(:any)/keyword/edit/(:num)'] = 'Config/Platforms/edit_keyword/$1/$2';

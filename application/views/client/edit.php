@@ -36,14 +36,6 @@
                                     <?= form_error('company_name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="pic_name" class="form-label fw-medium">
-                                        PIC Name <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" class="form-control" id="pic_name" name="pic_name"
-                                        value="<?= set_value('pic_name', $client->pic_name) ?>">
-                                    <?= form_error('pic_name', '<div class="form-text text-danger">', '</div>'); ?>
-                                </div>
-                                <div class="mb-3">
                                     <label for="ae_id" class="form-label fw-medium">
                                         Account Executive
                                     </label>
@@ -57,6 +49,7 @@
                                     </select>
                                     <?= form_error('ae_id', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
+
                                 <div class="mb-4">
                                     <label for="is_active" class="form-label fw-medium">Status</label>
                                     <select class="form-select" id="is_active" name="is_active">
@@ -66,6 +59,20 @@
                                             Inactive</option>
                                     </select>
                                     <?= form_error('is_active', '<div class="form-text text-danger">', '</div>'); ?>
+                                </div>
+
+                                <div class="card bg-light border mb-4">
+                                    <div class="card-body py-3 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="mb-0 text-muted small">
+                                                Manage contact persons and login accounts for this client.
+                                            </p>
+                                        </div>
+                                        <a href="<?= base_url('pic?client_id=' . $client->id) ?>"
+                                            class="btn btn-sm btn-outline-primary">
+                                            Manage PICs
+                                        </a>
+                                    </div>
                                 </div>
 
                                 <div class="d-flex gap-2 justify-content-end">
@@ -82,5 +89,9 @@
         </div>
     </main>
 </div>
+
+<script>
+    // No script needed
+</script>
 
 <?php $this->load->view('templates/footer'); ?>

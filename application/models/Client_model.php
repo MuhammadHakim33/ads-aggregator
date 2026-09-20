@@ -3,26 +3,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Client_model extends CI_Model
 {
-    public $table = 'clients';
-    // private $table_contents = 'ad_contents';
-
     public function get_all($filters = [])
     {
-        $this->db->select('clients.*, accounts.name as ae_name');
-        $this->db->from($this->table);
-        $this->db->join('accounts', 'accounts.id = clients.ae_id', 'left');
+        $this->db->select('clients.*, ae_acc.name as ae_name, (SELECT COUNT(*) FROM client_pics WHERE client_pics.client_id = clients.id) as pic_count');
+        $this->db->from('clients');
+        $this->db->join('accounts ae_acc', 'ae_acc.id = clients.ae_id', 'left');
         $this->db->where('clients.deleted_at', NULL);
 
         if (!empty($filters['q'])) {
             $q = $this->db->escape_like_str($filters['q']);
             $this->db->group_start();
             $this->db->like('clients.company_name', $q);
-            $this->db->or_like('clients.pic_name', $q);
+            // $this->db->or_where("EXISTS (SELECT 1 FROM client_pics WHERE client_pics.client_id = clients.id AND client_pics.name LIKE '%" . $q . "%')");
             $this->db->group_end();
         }
 
         if (isset($filters['status']) && $filters['status'] !== '') {
             $this->db->where('clients.is_active', $filters['status']);
+        }
+
+        if (!empty($filters['ae_id'])) {
+            $this->db->where('clients.ae_id', $filters['ae_id']);
         }
 
         return $this->db->get()->result();
@@ -32,12 +33,22 @@ class Client_model extends CI_Model
     {
         $this->db->where('id', $id);
         $this->db->where('deleted_at', NULL);
-        return $this->db->get($this->table)->row();
+        return $this->db->get('clients')->row();
+    }
+
+    public function get_by_account_id($account_id)
+    {
+        $this->db->select('clients.*');
+        $this->db->from('clients');
+        $this->db->join('client_pics', 'client_pics.client_id = clients.id');
+        $this->db->where('client_pics.account_id', $account_id);
+        $this->db->where('clients.deleted_at', NULL);
+        return $this->db->get()->row();
     }
 
     public function insert($data)
     {
-        $this->db->insert($this->table, $data);
+        $this->db->insert('clients', $data);
         return $this->db->insert_id();
     }
 
@@ -45,7 +56,7 @@ class Client_model extends CI_Model
     {
         $this->db->where('id', $id);
         $this->db->where('deleted_at', NULL);
-        $this->db->update($this->table, $data);
+        $this->db->update('clients', $data);
         return $this->db->affected_rows();
     }
 
@@ -56,54 +67,26 @@ class Client_model extends CI_Model
             'deleted_at' => date('Y-m-d H:i:s')
         );
         $this->db->where('id', $id);
-        $this->db->update($this->table, $data);
+        $this->db->update('clients', $data);
         return $this->db->affected_rows();
     }
 
-    // public function is_exist_by_id($id)
-    // {
-    //     $this->db->where('id', $id);
-    //     $this->db->where('deleted_at', NULL);
-    //     return $this->db->get($this->table)->num_rows();
-    // }
-
-    public function count_active()
+    public function count_active($ae_id = null)
     {
         $this->db->where('is_active', 1);
         $this->db->where('deleted_at', NULL);
-        return $this->db->count_all_results($this->table);
+        if ($ae_id) {
+            $this->db->where('ae_id', $ae_id);
+        }
+        return $this->db->count_all_results('clients');
     }
 
-    public function count_total()
+    public function count_total($ae_id = null)
     {
         $this->db->where('deleted_at', NULL);
-        return $this->db->count_all_results($this->table);
+        if ($ae_id) {
+            $this->db->where('ae_id', $ae_id);
+        }
+        return $this->db->count_all_results('clients');
     }
-
-    // public function get_clients_summary()
-    // {
-    //     $query = $this->db->query("
-    //         SELECT 
-    //             c.id, 
-    //             c.company_name, 
-    //             c.pic_name,
-    //             COUNT(a.id) as total_ads,
-    //             SUM(CASE WHEN a.is_active = 1 THEN 1 ELSE 0 END) as active_ads,
-    //             GROUP_CONCAT(DISTINCT a.platform SEPARATOR ',') as platforms
-    //         FROM clients c
-    //         LEFT JOIN {$this->table_contents} a ON c.id = a.client_id
-    //         WHERE c.deleted_at IS NULL
-    //         GROUP BY c.id
-    //         ORDER BY c.company_name ASC
-    //     ");
-
-    //     return $query->result();
-    // }
-
-    // public function assign_client($ad_content_id, $client_id)
-    // {
-    //     $this->db->where('id', $ad_content_id);
-    //     $this->db->update($this->table_contents, ['client_id' => (int) $client_id]);
-    //     return $this->db->affected_rows();
-    // }
 }

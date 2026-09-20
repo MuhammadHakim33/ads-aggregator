@@ -8,22 +8,40 @@ class Account extends MY_Controller
         parent::__construct();
         $this->load->model('Account_model');
         $this->load->model('Role_model');
+
+        // if ($this->router->fetch_method() !== 'profile') {
+        //     $this->require_role('superadmin', 'manajemen');
+        // }
     }
 
     public function index()
     {
+        $this->require_role('superadmin', 'manajemen');
+
         $filters = [
             'q' => $this->input->get('q'),
             'role_id' => $this->input->get('role_id'),
-            'status' => $this->input->get('status')
+            'status' => $this->input->get('status'),
+            'exclude_id' => $this->current_account['id']
         ];
+
+        if ($this->current_account['role'] === 'manajemen') {
+            $filters['exclude_superadmin'] = TRUE;
+        }
+
+        $roles = $this->Role_model->get_all();
+        if ($this->current_account['role'] === 'manajemen') {
+            $roles = array_filter($roles, function ($r) {
+                return $r->name !== 'superadmin';
+            });
+        }
 
         $data = [
             'title' => 'Account',
             'active_menu' => 'account',
             'filters' => $filters,
             'accounts' => $this->Account_model->get_all_with_roles($filters),
-            'roles' => $this->Role_model->get_all()
+            'roles' => $roles
         ];
 
         $this->render('account/index', $data);
@@ -114,7 +132,7 @@ class Account extends MY_Controller
                 $insert_id = $this->Account_model->insert([
                     'name' => $this->input->post('name'),
                     'email' => strtolower($this->input->post('email')),
-                    'password' => password_hash($this->input->post('password'), PASSWORD_BCRYPT),
+                    'password' => $this->input->post('password'),
                     'role_id' => $this->input->post('role_id'),
                     'is_active' => TRUE
                 ]);
@@ -129,10 +147,21 @@ class Account extends MY_Controller
             }
         }
 
+        $roles = $this->Role_model->get_all();
+        $roles = array_filter($roles, function ($r) {
+            if ($r->name === 'client') {
+                return FALSE;
+            }
+            if ($this->current_account['role'] === 'manajemen' && $r->name === 'superadmin') {
+                return FALSE;
+            }
+            return TRUE;
+        });
+
         $data = [
             'title' => 'Create Account',
             'active_menu' => 'account',
-            'roles' => $this->Role_model->get_all()
+            'roles' => $roles
         ];
 
         $this->render('account/create', $data);
@@ -144,6 +173,13 @@ class Account extends MY_Controller
         $account = $this->Account_model->get_by_id($id);
         if (!$account) {
             $this->session->set_flashdata('errors', '<p>Account not found.</p>');
+            redirect('account');
+            return;
+        }
+
+        // prevent manajemen from editing superadmin accounts
+        if ($this->current_account['role'] === 'manajemen' && $account->role_name === 'superadmin') {
+            $this->session->set_flashdata('errors', '<p>You are not allowed to edit superadmin accounts.</p>');
             redirect('account');
             return;
         }
@@ -163,7 +199,7 @@ class Account extends MY_Controller
                 // only update if password is not empty
                 $password = $this->input->post('password');
                 if ($password !== null && $password !== '') {
-                    $data['password'] = password_hash($password, PASSWORD_BCRYPT);
+                    $data['password'] = $password;
                 }
 
                 // update account
@@ -179,11 +215,22 @@ class Account extends MY_Controller
             }
         }
 
+        $roles = $this->Role_model->get_all();
+        $roles = array_filter($roles, function ($r) {
+            if ($r->name === 'client') {
+                return FALSE;
+            }
+            if ($this->current_account['role'] === 'manajemen' && $r->name === 'superadmin') {
+                return FALSE;
+            }
+            return TRUE;
+        });
+
         $data = [
             'title' => 'Edit Account',
             'active_menu' => 'account',
             'account' => $account,
-            'roles' => $this->Role_model->get_all()
+            'roles' => $roles
         ];
 
         $this->render('account/edit', $data);
@@ -205,6 +252,13 @@ class Account extends MY_Controller
             return;
         }
 
+        // prevent manajemen from deleting superadmin accounts
+        if ($this->current_account['role'] === 'manajemen' && $account->role_name === 'superadmin') {
+            $this->session->set_flashdata('errors', '<p>You are not allowed to delete superadmin accounts.</p>');
+            redirect('account');
+            return;
+        }
+
         // prevent superadmin from deleting their own account
         if ((int) $id === (int) $this->session->userdata('id')) {
             $this->session->set_flashdata('errors', '<p>You cannot delete your own account.</p>');
@@ -214,7 +268,9 @@ class Account extends MY_Controller
 
         $deleted = $this->Account_model->delete($id);
 
-        if ($deleted) {
+        if ($deleted === 'constraint_error') {
+            $this->session->set_flashdata('errors', '<p>Cannot delete this account because it is currently linked to other records (e.g. clients). Please remove the associations first.</p>');
+        } elseif ($deleted) {
             $this->session->set_flashdata('success', 'Account deleted successfully.');
         } else {
             $this->session->set_flashdata('errors', '<p>Failed to delete account. Please try again.</p>');
@@ -297,6 +353,15 @@ class Account extends MY_Controller
         if ($this->Role_model->is_exist_by_id($role_id) == 0) {
             $this->form_validation->set_message([
                 'role_check' => 'The selected Role does not exist'
+            ]);
+            return FALSE;
+        }
+
+        // prevent manajemen from assigning superadmin role
+        $role = $this->Role_model->get_by_id($role_id);
+        if ($this->current_account['role'] === 'manajemen' && $role && $role->name === 'superadmin') {
+            $this->form_validation->set_message([
+                'role_check' => 'You are not allowed to assign the superadmin role.'
             ]);
             return FALSE;
         }

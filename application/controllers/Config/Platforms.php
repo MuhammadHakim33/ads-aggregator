@@ -6,10 +6,10 @@ class Platforms extends MY_Controller
     private $credential_platforms = ['meta', 'ga4', 'youtube', 'gam'];
 
     private $platform_keyword_map = [
-        'meta' => ['facebook', 'instagram'],
+        'meta' => ['meta'],
         'ga4' => ['ga4'],
         'youtube' => ['youtube'],
-        'gam' => ['gam'],
+        'gam' => []
     ];
 
     private $keyword_types = ['html', 'keyword', 'hostname'];
@@ -212,7 +212,7 @@ class Platforms extends MY_Controller
 
             case 'meta':
                 return [
-                    'platform' => 'facebook',
+                    'platform' => 'meta',
                     'type' => 'keyword',
                     'keyword' => $keyword,
                 ];
@@ -221,6 +221,13 @@ class Platforms extends MY_Controller
                 return [
                     'platform' => 'ga4',
                     'type' => $this->input->post('type'),
+                    'keyword' => $keyword,
+                ];
+
+            case 'gam':
+                return [
+                    'platform' => 'gam',
+                    'type' => 'keyword',
                     'keyword' => $keyword,
                 ];
 

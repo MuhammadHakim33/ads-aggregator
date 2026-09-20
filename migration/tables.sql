@@ -1,12 +1,7 @@
--- =========================
--- MASTER TABEL
--- =========================
 CREATE TABLE roles (
   id INT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(50) UNIQUE NOT NULL COMMENT 'superadmin, ae, manajemen, client'
 );
-
-
 
 
 -- =========================
@@ -19,7 +14,6 @@ CREATE TABLE accounts (
   password VARCHAR(255) NOT NULL,
   role_id INT NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (role_id) REFERENCES roles(id)
 );
@@ -30,15 +24,26 @@ CREATE TABLE accounts (
 CREATE TABLE clients (
   id INT AUTO_INCREMENT PRIMARY KEY,
   company_name VARCHAR(255) NOT NULL,
-  pic_name VARCHAR(255),
   ae_id INT NULL,
-  account_id INT NULL,
   is_active BOOLEAN DEFAULT TRUE,
   deleted_at TIMESTAMP NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (ae_id) REFERENCES accounts(id),
-  FOREIGN KEY (account_id) REFERENCES accounts(id)
+
+  FOREIGN KEY (ae_id) REFERENCES accounts(id)
+);
+
+-- =========================
+-- CLIENT PICS
+-- =========================
+CREATE TABLE client_pics (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  client_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  position VARCHAR(255) NULL,
+  account_id INT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+
+  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+  FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE SET NULL
 );
 
 -- =========================
@@ -51,6 +56,10 @@ CREATE TABLE contracts (
   value DECIMAL(15,2) NOT NULL,
   start_date DATE NULL,
   end_date DATE NULL,
+  status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'approved',
+  rejection_reason TEXT NULL,
+  approved_by INT NULL,
+  approved_at TIMESTAMP NULL,
   terminated_at TIMESTAMP NULL,
   termination_reason TEXT NULL,
   document_path VARCHAR(500) NULL,
@@ -58,8 +67,38 @@ CREATE TABLE contracts (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
-  FOREIGN KEY (client_id) REFERENCES clients(id)
+  FOREIGN KEY (client_id) REFERENCES clients(id),
+  FOREIGN KEY (approved_by) REFERENCES accounts(id)
 );
+
+-- =========================
+-- PRODUCTS
+-- =========================
+CREATE TABLE products (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  category ENUM('content_marketing', 'banner_ads', 'social_media') NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  price_model ENUM('cpm', 'per_day', 'per_week', 'fixed') NOT NULL,
+  price DECIMAL(15,2) NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- CONTRACT ITEMS
+-- =========================
+CREATE TABLE contract_items (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  contract_id INT NOT NULL,
+  product_id INT NOT NULL,
+  quantity INT NOT NULL DEFAULT 1,
+  price DECIMAL(15,2) NOT NULL,
+  subtotal DECIMAL(15,2) NOT NULL,
+  
+  FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
 
 -- =========================
 -- CAMPAIGNS
@@ -71,8 +110,6 @@ CREATE TABLE campaigns (
   description TEXT NULL,
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
-  -- status ENUM('draft', 'active', 'paused', 'completed', 'cancelled') NOT NULL DEFAULT 'draft',
-  is_active BOOLEAN DEFAULT TRUE,
   deleted_at TIMESTAMP NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -80,16 +117,28 @@ CREATE TABLE campaigns (
   FOREIGN KEY (contract_id) REFERENCES contracts(id)
 );
 
+-- =========================================
+-- CAMPAIGN REPORTED METRICS
+-- =========================================
+CREATE TABLE campaign_reported_metrics (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  campaign_id INT NOT NULL,
+  platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
+  metric_name VARCHAR(100) NOT NULL,
+  
+  FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_campaign_metric (campaign_id, platform, metric_name)
+);
+
 -- =========================
 -- FILTER KEYWORDS
 -- =========================
 CREATE TABLE filter_keywords (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
+  platform ENUM('meta', 'gam', 'ga4', 'youtube') NOT NULL,
   type ENUM('html', 'keyword', 'hostname') NOT NULL,
   keyword VARCHAR(255) NOT NULL,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  is_active BOOLEAN DEFAULT TRUE
 );
 
 -- =========================
@@ -102,8 +151,9 @@ CREATE TABLE ad_contents (
   platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
   content_identifier VARCHAR(255) UNIQUE NOT NULL,
   published_at TIMESTAMP NULL,
+  source TEXT NULL,
+  thumbnail TEXT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
   FOREIGN KEY (campaign_id) REFERENCES campaigns(id)
 );
 
@@ -144,10 +194,7 @@ CREATE TABLE complaints (
 CREATE TABLE platform_credentials (
   id INT PRIMARY KEY AUTO_INCREMENT,
   platform ENUM('meta', 'gam', 'ga4', 'youtube') UNIQUE NOT NULL,
-  credential_data LONGTEXT NOT NULL,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  credential_data LONGTEXT NOT NULL
 );
 
 -- =========================
@@ -156,11 +203,11 @@ CREATE TABLE platform_credentials (
 CREATE TABLE cron_logs (
   id INT PRIMARY KEY AUTO_INCREMENT,
   job_name VARCHAR(100) NOT NULL COMMENT 'fetch, sync',
-  platform VARCHAR(50) NOT NULL COMMENT 'facebook, instagram, gam, ga4, youtube',
+  platform ENUM('facebook', 'instagram', 'gam', 'ga4', 'youtube') NOT NULL,
   status ENUM('success', 'failed', 'partial') NOT NULL,
-  rows_affected INT DEFAULT 0 COMMENT 'jumlah contents saved atau metrics upserted',
-  duration_ms INT DEFAULT 0 COMMENT 'durasi eksekusi dalam milidetik',
-  error_message TEXT NULL COMMENT 'pesan error jika status failed',
+  rows_affected INT DEFAULT 0,
+  duration_ms INT DEFAULT 0,
+  error_message TEXT NULL,
   started_at TIMESTAMP NOT NULL,
-  finished_at TIMESTAMP NOT NULL,
+  finished_at TIMESTAMP NOT NULL
 );

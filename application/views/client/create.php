@@ -35,14 +35,6 @@
                                         value="<?= set_value('company_name') ?>">
                                     <?= form_error('company_name', '<div class="form-text text-danger">', '</div>'); ?>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="pic_name" class="form-label fw-medium">
-                                        PIC Name <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" class="form-control" id="pic_name" name="pic_name"
-                                        value="<?= set_value('pic_name') ?>">
-                                    <?= form_error('pic_name', '<div class="form-text text-danger">', '</div>'); ?>
-                                </div>
                                 <div class="mb-4">
                                     <label for="ae_id" class="form-label fw-medium">
                                         Account Executive
@@ -72,5 +64,9 @@
         </div>
     </main>
 </div>
+
+<script>
+    // No script needed for account toggle anymore
+</script>
 
 <?php $this->load->view('templates/footer'); ?>

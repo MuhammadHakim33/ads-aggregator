@@ -3,11 +3,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Cron_log_model extends CI_Model
 {
-    public $table = 'cron_logs';
-
     public function start($job_name, $platform)
     {
-        $this->db->insert($this->table, [
+        $this->db->insert('cron_logs', [
             'job_name' => $job_name,
             'platform' => $platform,
             'status' => 'failed',
@@ -23,7 +21,7 @@ class Cron_log_model extends CI_Model
         $duration = $this->_elapsed_ms($id);
 
         $this->db->where('id', $id);
-        $this->db->update($this->table, [
+        $this->db->update('cron_logs', [
             'status' => $status,
             'rows_affected' => $rows_affected,
             'error_message' => $error_message,
@@ -36,25 +34,18 @@ class Cron_log_model extends CI_Model
     {
         $this->db->order_by('id', 'DESC');
         $this->db->limit($limit);
-        return $this->db->get($this->table)->result();
+        return $this->db->get('cron_logs')->result();
     }
 
-    public function get_by_platform($platform, $limit = 20)
-    {
-        $this->db->where('platform', $platform);
-        $this->db->order_by('id', 'DESC');
-        $this->db->limit($limit);
-        return $this->db->get($this->table)->result();
-    }
 
     public function get_last_per_platform()
     {
         $sql = "
             SELECT cl.*
-            FROM {$this->table} cl
+            FROM cron_logs cl
             INNER JOIN (
                 SELECT platform, job_name, MAX(id) as max_id
-                FROM {$this->table}
+                FROM cron_logs
                 GROUP BY platform, job_name
             ) latest ON cl.id = latest.max_id
             ORDER BY cl.platform, cl.job_name
@@ -70,7 +61,7 @@ class Cron_log_model extends CI_Model
 
     private function _elapsed_ms($id)
     {
-        $row = $this->db->select('started_at')->where('id', $id)->get($this->table)->row();
+        $row = $this->db->select('started_at')->where('id', $id)->get('cron_logs')->row();
         if (!$row) {
             return 0;
         }

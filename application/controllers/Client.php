@@ -6,6 +6,7 @@ class Client extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->require_role('manajemen');
         $this->load->model('Client_model');
         $this->load->model('Account_model');
     }
@@ -30,15 +31,10 @@ class Client extends MY_Controller
     public function create()
     {
         if ($this->input->method() === 'post') {
-            $this->form_validation->set_rules([
+            $rules = [
                 [
                     'field' => 'company_name',
                     'label' => 'Company Name',
-                    'rules' => 'trim|required|max_length[255]'
-                ],
-                [
-                    'field' => 'pic_name',
-                    'label' => 'PIC Name',
                     'rules' => 'trim|required|max_length[255]'
                 ],
                 [
@@ -46,22 +42,25 @@ class Client extends MY_Controller
                     'label' => 'Account Executive',
                     'rules' => 'trim|callback_ae_check'
                 ]
-            ]);
+            ];
+
+            $this->form_validation->set_rules($rules);
 
             if ($this->form_validation->run() === TRUE) {
-                $insert_id = $this->Client_model->insert([
+                $client_data = [
                     'company_name' => $this->input->post('company_name'),
-                    'pic_name' => $this->input->post('pic_name'),
                     'ae_id' => $this->input->post('ae_id') ?: null,
                     'is_active' => TRUE
-                ]);
+                ];
 
-                if ($insert_id) {
-                    $this->session->set_flashdata('success', 'Client created successfully.');
+                $client_id = $this->Client_model->insert($client_data);
+
+                if ($client_id) {
+                    $this->session->set_flashdata('success', 'Client created successfully. Please manage PICs for this client from the client list.');
                     redirect('client');
                     return;
                 } else {
-                    $this->session->set_flashdata('errors', '<p>Failed to create client. Please try again.</p>');
+                    $this->session->set_flashdata('errors', 'Failed to create client. Please try again.');
                 }
             }
         }
@@ -77,24 +76,18 @@ class Client extends MY_Controller
 
     public function edit($id)
     {
-        // Load client data
         $client = $this->Client_model->get_by_id($id);
         if (!$client) {
-            $this->session->set_flashdata('errors', '<p>Client not found.</p>');
+            $this->session->set_flashdata('errors', 'Client not found.');
             redirect('client');
             return;
         }
 
         if ($this->input->method() === 'post') {
-            $this->form_validation->set_rules([
+            $rules = [
                 [
                     'field' => 'company_name',
                     'label' => 'Company Name',
-                    'rules' => 'trim|required|max_length[255]'
-                ],
-                [
-                    'field' => 'pic_name',
-                    'label' => 'PIC Name',
                     'rules' => 'trim|required|max_length[255]'
                 ],
                 [
@@ -107,23 +100,22 @@ class Client extends MY_Controller
                     'label' => 'Status',
                     'rules' => 'in_list[0,1]'
                 ]
-            ]);
+            ];
+
+            $this->form_validation->set_rules($rules);
 
             if ($this->form_validation->run() === TRUE) {
-                $updated = $this->Client_model->update($id, [
+                $client_data = [
                     'company_name' => $this->input->post('company_name'),
-                    'pic_name' => $this->input->post('pic_name'),
                     'ae_id' => $this->input->post('ae_id') ?: null,
                     'is_active' => $this->input->post('is_active'),
-                ]);
+                ];
 
-                if ($updated) {
-                    $this->session->set_flashdata('success', 'Client updated successfully.');
-                    redirect('client');
-                    return;
-                } else {
-                    $this->session->set_flashdata('errors', '<p>Failed to update client. Please try again.</p>');
-                }
+                $this->Client_model->update($id, $client_data);
+
+                $this->session->set_flashdata('success', 'Client updated successfully.');
+                redirect('client');
+                return;
             }
         }
 
@@ -143,20 +135,32 @@ class Client extends MY_Controller
             redirect('client');
         }
 
-        // load client data using callback method
         $client = $this->Client_model->get_by_id($id);
         if (!$client) {
-            $this->session->set_flashdata('errors', '<p>Client not found.</p>');
+            $this->session->set_flashdata('errors', 'Client not found.');
             redirect('client');
             return;
         }
 
-        $deleted = $this->Client_model->delete($id);
+        $this->db->trans_start();
 
-        if ($deleted) {
-            $this->session->set_flashdata('success', 'Client deleted successfully.');
+        // get all PICs and deactivate their accounts + set PICs to inactive
+        $pics = $this->db->where('client_id', $id)->get('client_pics')->result();
+        foreach ($pics as $pic) {
+            if (!empty($pic->account_id)) {
+                $this->db->where('id', $pic->account_id)->update('accounts', ['is_active' => 0]);
+            }
+            $this->db->where('id', $pic->id)->update('client_pics', ['is_active' => 0]);
+        }
+
+        $this->Client_model->delete($id);
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === TRUE) {
+            $this->session->set_flashdata('success', 'Client and all associated PIC accounts deactivated successfully.');
         } else {
-            $this->session->set_flashdata('errors', '<p>Failed to delete client. Please try again.</p>');
+            $this->session->set_flashdata('errors', 'Failed to delete client. Please try again.');
         }
 
         redirect('client');

@@ -3,184 +3,194 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Request
 {
-    public function get($url, $params = [], $headers = [])
+    private string $ca_bundle_path;
+
+    public function __construct(string $ca_bundle_path = '')
     {
-        if (!empty($params)) {
-            $url .= '?' . http_build_query($params);
+        if (!empty($ca_bundle_path)) {
+            $this->ca_bundle_path = $ca_bundle_path;
+            return;
         }
 
-        $http_headers = ['Accept: application/json'];
-        if (!empty($headers)) {
-            $http_headers = array_merge($http_headers, $headers);
+        $php_ini_cainfo = ini_get('curl.cainfo');
+        if (!empty($php_ini_cainfo) && file_exists($php_ini_cainfo)) {
+            $this->ca_bundle_path = $php_ini_cainfo;
+            return;
         }
 
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTPHEADER => $http_headers,
-        ]);
-
-        $response   = curl_exec($ch);
-        $http_code  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
-
-        if ($curl_error) {
-            throw new \RuntimeException("cURL error: $curl_error");
-        }
-
-        $data = json_decode($response, TRUE);
-
-        if ($http_code !== 200 || isset($data['error'])) {
-            if (isset($data['error']) && is_string($data['error'])) {
-                $message = $data['error_description'] ?? $data['error'];
-            } else {
-                $message = $data['error']['message'] ?? "HTTP $http_code";
+        // auto-detect ssl certs
+        $common_paths = [
+            '/etc/ssl/certs/ca-certificates.crt',
+            '/etc/pki/tls/certs/ca-bundle.crt',
+            '/usr/local/etc/openssl/cert.pem',
+            '/etc/ssl/cert.pem',
+        ];
+        foreach ($common_paths as $path) {
+            if (file_exists($path)) {
+                $this->ca_bundle_path = $path;
+                return;
             }
-            throw new \RuntimeException("API Error: ($url) - $message");
         }
 
-        return $data;
+        // fallback
+        $fallback = APPPATH . 'third_party/cacert.pem';
+        if (file_exists($fallback)) {
+            $this->ca_bundle_path = $fallback;
+            return;
+        }
+
+        throw new \RuntimeException(
+            'CA bundle tidak ditemukan. Download dari https://curl.se/ca/cacert.pem ' .
+            'dan simpan ke application/third_party/cacert.pem'
+        );
     }
 
-    public function post($url, $params = [], $body = [])
+    public function get(string $url, array $params = [], array $headers = []): ?array
     {
         if (!empty($params)) {
             $url .= '?' . http_build_query($params);
         }
 
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
+        return $this->execute($url, [
+            CURLOPT_HTTPGET => TRUE,
+            CURLOPT_HTTPHEADER => array_merge(['Accept: application/json'], $headers),
+        ]);
+    }
+
+    public function post(string $url, array $params = [], array $body = [], array $headers = []): ?array
+    {
+        if (!empty($params)) {
+            $url .= '?' . http_build_query($params);
+        }
+
+        return $this->execute($url, [
             CURLOPT_POST => TRUE,
             CURLOPT_POSTFIELDS => json_encode($body),
-            CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+            CURLOPT_HTTPHEADER => array_merge([
+                'Accept: application/json',
+                'Content-Type: application/json',
+            ], $headers),
         ]);
-
-        $response   = curl_exec($ch);
-        $http_code  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
-
-        if ($curl_error) {
-            throw new \RuntimeException("cURL error: $curl_error");
-        }
-
-        $data = json_decode($response, TRUE);
-
-        if ($http_code !== 200 || isset($data['error'])) {
-            if (isset($data['error']) && is_string($data['error'])) {
-                $message = $data['error_description'] ?? $data['error'];
-            } else {
-                $message = $data['error']['message'] ?? "HTTP $http_code";
-            }
-            throw new \RuntimeException("API Error: ($url) - $message");
-        }
-
-        return $data;
     }
 
-    public function post_form($url, $params = [], $body = [])
+    public function post_form(string $url, array $params = [], array $body = [], array $headers = []): ?array
     {
         if (!empty($params)) {
             $url .= '?' . http_build_query($params);
         }
 
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
+        return $this->execute($url, [
             CURLOPT_POST => TRUE,
             CURLOPT_POSTFIELDS => http_build_query($body),
-            CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+            CURLOPT_HTTPHEADER => array_merge([
+                'Accept: application/json',
+                'Content-Type: application/x-www-form-urlencoded',
+            ], $headers),
         ]);
-
-        $response   = curl_exec($ch);
-        $http_code  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
-
-        if ($curl_error) {
-            throw new \RuntimeException("cURL error: $curl_error");
-        }
-
-        $data = json_decode($response, TRUE);
-
-        if ($http_code !== 200 || isset($data['error'])) {
-            if (isset($data['error']) && is_string($data['error'])) {
-                $message = $data['error_description'] ?? $data['error'];
-            } else {
-                $message = $data['error']['message'] ?? "HTTP $http_code";
-            }
-            throw new \RuntimeException("API Error: ($url) - $message");
-        }
-
-        return $data;
     }
 
-    public function report($url, $body = [], $token)
+    public function report(string $url, array $body = [], string $token = ''): ?array
     {
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
+        return $this->execute($url, [
             CURLOPT_POST => TRUE,
             CURLOPT_POSTFIELDS => json_encode($body),
-            CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPHEADER => [
                 'Authorization: Bearer ' . $token,
+                'Accept: application/json',
                 'Content-Type: application/json',
             ],
         ]);
+    }
 
-        $response   = curl_exec($ch);
-        $http_code  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    public function scrape(string $url): ?string
+    {
+        $cache = APPPATH . 'cache/scrape_' . md5($url) . '.cache';
+        if (is_file($cache) && time() - filemtime($cache) < 86400)
+            return @file_get_contents($cache);
+
+        usleep(200000);
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => TRUE,
+            CURLOPT_FOLLOWLOCATION => TRUE,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_TIMEOUT => 20,
+            CURLOPT_ENCODING => '',
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_SSL_VERIFYPEER => TRUE,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_CAINFO => $this->ca_bundle_path,
+            CURLOPT_USERAGENT => 'Mediapartners-Google',
+            CURLOPT_HTTPHEADER => [
+                'Accept: text/html,application/xhtml+xml',
+                'Connection: close'
+            ],
+        ]);
+
+        $html = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error || $http_code < 200 || $http_code >= 300 || empty($html)) {
+            if (is_file($cache))
+                return @file_get_contents($cache);
+            throw new \RuntimeException("Scrape Error ($url): HTTP $http_code - $error");
+        }
+
+        @file_put_contents($cache, $html);
+        return $html;
+    }
+
+    private function execute(string $url, array $options): ?array
+    {
+        $ch = curl_init();
+
+        curl_setopt_array($ch, $options + [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => TRUE,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_SSL_VERIFYPEER => TRUE,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_CAINFO => $this->ca_bundle_path,
+        ]);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curl_error = curl_error($ch);
         curl_close($ch);
 
         if ($curl_error) {
-            throw new \RuntimeException("cURL error: $curl_error");
+            throw new \RuntimeException("cURL error ($url): $curl_error");
+        }
+
+        if ($http_code === 204 || empty($response)) {
+            if ($http_code >= 200 && $http_code < 300) {
+                return null;
+            }
+            throw new \RuntimeException("API Error ($url): HTTP $http_code (empty response)");
         }
 
         $data = json_decode($response, TRUE);
 
-        if ($http_code !== 200 || isset($data['error'])) {
-            $message = $data['error']['message'] ?? "HTTP $http_code";
-            throw new \RuntimeException("API Error: ($url) - $message");
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException(
+                "Invalid JSON dari $url: " . substr($response, 0, 150)
+            );
+        }
+
+        if ($http_code < 200 || $http_code >= 300 || isset($data['error'])) {
+            $message = "HTTP $http_code";
+            if (isset($data['error'])) {
+                $message = is_string($data['error'])
+                    ? ($data['error_description'] ?? $data['error'])
+                    : ($data['error']['message'] ?? $message);
+            }
+            throw new \RuntimeException("API Error ($url): $message");
         }
 
         return $data;
-    }
-
-    // request html from url
-    public function scrape($url)
-    {
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL            => $url,
-            CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_FOLLOWLOCATION => TRUE,
-            CURLOPT_MAXREDIRS      => 5,
-            CURLOPT_TIMEOUT        => 15,
-            CURLOPT_SSL_VERIFYPEER => TRUE,
-            CURLOPT_USERAGENT      => 'Mozilla/5.0 (compatible; GA4Bot/1.0)',
-            CURLOPT_HTTPHEADER     => ['Accept: text/html'],
-        ]);
-
-        $html      = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error     = curl_error($ch);
-        curl_close($ch);
-
-        if ($error || $http_code !== 200 || empty($html)) {
-            return NULL;
-        }
-
-        return $html;
     }
 }

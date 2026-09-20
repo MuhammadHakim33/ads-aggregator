@@ -2,7 +2,7 @@
 
 <div class="d-flex flex-nowrap min-vh-100">
     <?php $this->load->view('templates/sidebar'); ?>
-    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
+    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column min-w-0" id="main">
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
 
@@ -66,9 +66,21 @@
                                                 <tr class="align-top">
                                                     <td class="text-nowrap pe-3 py-2"><code>service_account</code></td>
                                                     <td class="text-muted py-2">
-                                                        <strong>1. Create Service Account:</strong> Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a> → <strong>IAM &amp; Admin</strong> → <strong>Service Accounts</strong>. Click <strong>+ Create Service Account</strong>, fill in the details, and click Done. Click your new service account, go to the <strong>Keys</strong> tab, click <strong>Add Key</strong> → <strong>Create new key</strong> (JSON).<br>
-                                                        <strong>2. Grant Access:</strong> Go back to Google Ad Manager → <strong>Admin</strong> → <strong>Global settings</strong> → <strong>API access</strong>. Click <strong>Add a service account user</strong> and provide the email address of your new service account with an appropriate role.<br>
-                                                        <strong>3. Paste JSON:</strong> Open the downloaded JSON file and paste the entire content into this form.
+                                                        <strong>1. Create Service Account:</strong> Go to <a
+                                                            href="https://console.cloud.google.com"
+                                                            target="_blank">Google Cloud Console</a> → <strong>IAM &amp;
+                                                            Admin</strong> → <strong>Service Accounts</strong>. Click
+                                                        <strong>+ Create Service Account</strong>, fill in the details,
+                                                        and click Done. Click your new service account, go to the
+                                                        <strong>Keys</strong> tab, click <strong>Add Key</strong> →
+                                                        <strong>Create new key</strong> (JSON).<br>
+                                                        <strong>2. Grant Access:</strong> Go back to Google Ad Manager →
+                                                        <strong>Admin</strong> → <strong>Global settings</strong> →
+                                                        <strong>API access</strong>. Click <strong>Add a service account
+                                                            user</strong> and provide the email address of your new
+                                                        service account with an appropriate role.<br>
+                                                        <strong>3. Paste JSON:</strong> Open the downloaded JSON file
+                                                        and paste the entire content into this form.
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -97,5 +109,6 @@
         </div>
     </main>
 </div>
+
 
 <?php $this->load->view('templates/footer'); ?>

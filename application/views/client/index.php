@@ -2,7 +2,7 @@
 
 <div class="d-flex flex-nowrap min-vh-100">
     <?php $this->load->view('templates/sidebar'); ?>
-    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column" id="main" style="min-width: 0;">
+    <main class="flex-grow-1 bg-body-tertiary d-flex flex-column min-w-0" id="main">
         <?php $this->load->view('templates/topbar'); ?>
         <div class="container-fluid py-4">
 
@@ -15,7 +15,7 @@
                         <option value="0" <?= (isset($filters['status']) && $filters['status'] === '0') ? 'selected' : '' ?>>Inactive</option>
                     </select>
 
-                    <div class="input-group input-group-sm" style="width: 250px;">
+                    <div class="input-group input-group-sm w-250">
                         <span class="input-group-text bg-white border-end-0"><i
                                 class="bi bi-search text-muted"></i></span>
                         <input type="text" name="q" class="form-control border-start-0 ps-0"
@@ -56,8 +56,8 @@
                         <thead class="table-light">
                             <tr>
                                 <th scope="col">Company Name</th>
-                                <th scope="col">PIC Name</th>
                                 <th scope="col">AE</th>
+                                <th scope="col">PICs</th>
                                 <th scope="col">Status</th>
                                 <th scope="col" class="text-end"></th>
                             </tr>
@@ -66,16 +66,21 @@
                             <?php foreach ($clients as $client): ?>
                                 <tr>
                                     <td class="fw-medium"><?= ucwords($client->company_name) ?></td>
-                                    <td><?= ucwords($client->pic_name ?? '-') ?></td>
                                     <td><?= ucwords($client->ae_name ?? '') ?></td>
+                                    <td>
+                                        <a href="<?= base_url('pic?client_id=' . $client->id) ?>"
+                                            class="btn btn-xs btn-outline-primary">
+                                            <i class="bi bi-people me-1"></i> Manage PIC (<?= $client->pic_count ?>)
+                                        </a>
+                                    </td>
                                     <td>
                                         <?php if (!empty($client->is_active)): ?>
                                             <span class="badge bg-success bg-opacity-10 text-success">
-                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Active
+                                                <i class="bi bi-circle-fill me-1 fs-xxs"></i> Active
                                             </span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary bg-opacity-10 text-secondary">
-                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Inactive
+                                                <i class="bi bi-circle-fill me-1 fs-xxs"></i> Inactive
                                             </span>
                                         <?php endif; ?>
                                     </td>
@@ -86,8 +91,7 @@
                                         </a>
                                         <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Delete"
                                             data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                            data-id="<?= $client->id ?>" data-name="<?= ucwords($client->company_name) ?>"
-                                            data-pic-name="<?= ucwords($client->pic_name) ?>">
+                                            data-id="<?= $client->id ?>" data-name="<?= ucwords($client->company_name) ?>">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -102,7 +106,7 @@
                     </table>
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Showing <?= count($clients) ?> client</small>
+                    <small class="text-muted">Showing <?= count($clients) ?> clients</small>
                 </div>
             </div>
 
@@ -122,9 +126,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete <strong id="deleteClientName"></strong> <strong
-                    id="deletePicName"></strong>?
-                This action cannot be undone.
+                Are you sure you want to delete client <strong id="deleteClientName"></strong>?
+                This will also deactivate all PICs and accounts associated with this client. This action cannot be
+                undone.
             </div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -139,11 +143,10 @@
 </div>
 
 <script>
-    document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        document.getElementById('deleteClientName').textContent = btn.getAttribute('data-name');
-        document.getElementById('deletePicName').textContent = btn.getAttribute('data-pic-name');
-        document.getElementById('deleteForm').action = '<?= base_url('client/delete/') ?>' + btn.getAttribute('data-id');
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        const btn = $(event.relatedTarget);
+        $('#deleteClientName').text(btn.data('name'));
+        $('#deleteForm').attr('action', '<?= base_url('client/delete/') ?>' + btn.data('id'));
     });
 </script>
 

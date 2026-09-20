@@ -54,7 +54,7 @@ class Platform extends CI_Controller
             $conf = $this->platform_registry->config($platform);
             $driver = $this->make_driver($platform);
             // prepare filter
-            $filters = $this->build_filters($conf);
+            $filters = $this->build_filters($conf, $platform);
             // get contents
             $contents = $driver->fetch_contents($since, $until, $filters);
 
@@ -103,7 +103,7 @@ class Platform extends CI_Controller
             // get saved content identifiers with campaign date ranges
             $saved = $this->Ad_model->get_identifiers_by_platform($platform);
 
-            if (empty($saved)) {
+            if (empty($saved) && $platform != "gam") {
                 $this->Cron_log_model->finish($log_id, 'success', 0);
                 return;
             }
@@ -192,25 +192,26 @@ class Platform extends CI_Controller
         return new $class();
     }
 
-    private function build_filters($conf)
+    private function build_filters($conf, $platform)
     {
         $filters = [];
+        $kw_platform = in_array($platform, ['facebook', 'instagram']) ? 'meta' : $platform;
 
         // build keyword filter
         if (!empty($conf['filters']['keyword'])) {
-            $kws = $this->Filter_keyword_model->get_by_type('keyword');
+            $kws = $this->Filter_keyword_model->get_by_type('keyword', $kw_platform);
             $filters['keywords'] = array_column($kws, 'keyword');
         }
 
         // build hostname filter
         if (!empty($conf['filters']['hostname'])) {
-            $kws = $this->Filter_keyword_model->get_by_type('hostname');
+            $kws = $this->Filter_keyword_model->get_by_type('hostname', $kw_platform);
             $filters['hostnames'] = array_column($kws, 'keyword');
         }
 
         // build html filter
         if (!empty($conf['filters']['html'])) {
-            $kws = $this->Filter_keyword_model->get_by_type('html');
+            $kws = $this->Filter_keyword_model->get_by_type('html', $kw_platform);
             $filters['html'] = array_column($kws, 'keyword');
         }
 

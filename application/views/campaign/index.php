@@ -14,12 +14,14 @@
                         <option value="0" <?= (isset($filters['status']) && $filters['status'] === '0') ? 'selected' : '' ?>>Inactive</option>
                     </select>
 
-                    <select name="client_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                        <option value="">All Clients</option>
-                        <?php foreach ($clients as $c): ?>
-                            <option value="<?= $c->id ?>" <?= (isset($filters['client_id']) && $filters['client_id'] == $c->id) ? 'selected' : '' ?>><?= htmlspecialchars($c->company_name) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <?php if ($this->session->userdata('role') === 'manajemen'): ?>
+                        <select name="client_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                            <option value="">All Clients</option>
+                            <?php foreach ($clients as $c): ?>
+                                <option value="<?= $c->id ?>" <?= (isset($filters['client_id']) && $filters['client_id'] == $c->id) ? 'selected' : '' ?>><?= htmlspecialchars($c->company_name) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php endif; ?>
 
                     <div class="input-group input-group-sm" style="width: 250px;">
                         <span class="input-group-text bg-white border-end-0"><i
@@ -36,9 +38,11 @@
                     <?php endif; ?>
                 </form>
 
-                <a href="<?= base_url('campaign/create') ?>" class="btn btn-sm btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i> Create Campaign
-                </a>
+                <?php if ($this->session->userdata('role') === 'manajemen'): ?>
+                    <a href="<?= base_url('campaign/create') ?>" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i> Create Campaign
+                    </a>
+                <?php endif; ?>
             </div>
 
             <!-- flash alerts -->
@@ -89,16 +93,18 @@
                                             class="btn btn-sm btn-outline-primary ms-1" title="Detail">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="<?= base_url('campaign/edit/' . $campaign->id) ?>"
-                                            class="btn btn-sm btn-outline-secondary ms-1" title="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Delete"
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                            data-id="<?= $campaign->id ?>" data-name="<?= $campaign->name ?>"
-                                            data-client="<?= $campaign->client_name ?>">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        <?php if ($this->session->userdata('role') === 'manajemen'): ?>
+                                            <a href="<?= base_url('campaign/edit/' . $campaign->id) ?>"
+                                                class="btn btn-sm btn-outline-secondary ms-1" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Delete"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                data-id="<?= $campaign->id ?>" data-name="<?= $campaign->name ?>"
+                                                data-client="<?= $campaign->client_name ?>">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -148,11 +154,13 @@
 </div>
 
 <script>
-    document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        document.getElementById('deleteCampaignName').textContent = btn.getAttribute('data-name');
-        document.getElementById('deleteClientName').textContent = btn.getAttribute('data-client');
-        document.getElementById('deleteForm').action = '<?= base_url('campaign/delete/') ?>' + btn.getAttribute('data-id');
+    $(function () {
+        $('#deleteModal').on('show.bs.modal', function (event) {
+            const $btn = $(event.relatedTarget);
+            $('#deleteCampaignName').text($btn.attr('data-name'));
+            $('#deleteClientName').text($btn.attr('data-client'));
+            $('#deleteForm').attr('action', '<?= base_url('campaign/delete/') ?>' + $btn.attr('data-id'));
+        });
     });
 </script>
 

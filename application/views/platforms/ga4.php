@@ -87,7 +87,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <form method="POST" action="<?= base_url('config/platforms/save-credential/ga4') ?>">
                                 <div class="mb-3">
                                     <label for="ga4_credential_json" class="form-label fw-medium">Credential

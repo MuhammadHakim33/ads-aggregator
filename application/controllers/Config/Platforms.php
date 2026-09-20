@@ -203,6 +203,13 @@ class Platforms extends MY_Controller
                     'keyword' => $keyword,
                 ];
 
+            case 'gam':
+                return [
+                    'platform' => 'gam',
+                    'type' => 'keyword',
+                    'keyword' => $keyword,
+                ];
+
             case 'meta':
                 return [
                     'platform' => 'meta',
